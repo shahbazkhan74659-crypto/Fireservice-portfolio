@@ -1,0 +1,26 @@
+# Claude Code local settings (machine-specific permission allowlist)
+.claude/settings.local.json
+
+# Python / Django
+venv/
+__pycache__/
+*.pyc
+*.pyo
+db.sqlite3
+staticfiles/
+media/
+.env
+
+# Node / React
+node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Playwright
+e2e/node_modules/
+e2e/test-results/
+e2e/playwright-report/
+
+# OS
+.DS_Store
+Thumbs.db
