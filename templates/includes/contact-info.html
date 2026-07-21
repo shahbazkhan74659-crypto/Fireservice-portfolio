@@ -1,0 +1,13 @@
+<!-- ===== Contact info (Get in Touch) ===== -->
+<div class="contact__info">
+  <p class="eyebrow">{{ eyebrow|default:"Get in Touch" }}</p>
+  <h2>{{ heading|default:"Contact Us" }}</h2>
+  <p>{{ lead|default:"Have a question or need a quote? Reach out and our team will get back to you within one business day." }}</p>
+
+  <div class="contact__item">{% include "includes/address.html" %}</div>
+  <div class="contact__item">{% include "includes/phone.html" with number="+917359229129" display="+91 73592 29129" icon=True %}</div>
+  <div class="contact__item">{% include "includes/phone.html" with number="+917698839939" display="+91 76988 39939" icon=True %}</div>
+  <div class="contact__item">{% include "includes/email.html" with icon=True %}</div>
+
+  {% include "includes/map.html" %}
+</div>

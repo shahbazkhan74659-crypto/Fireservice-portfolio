@@ -16,6 +16,11 @@ class ClienteleView(TemplateView):
 
 
 @method_decorator(ensure_csrf_cookie, name='dispatch')
+class CertificationsView(TemplateView):
+    template_name = 'certifications.html'
+
+
+@method_decorator(ensure_csrf_cookie, name='dispatch')
 class SurveyPageView(TemplateView):
     template_name = 'survey.html'
 

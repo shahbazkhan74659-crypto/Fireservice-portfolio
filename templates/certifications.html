@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load static %}
+{% load django_vite %}
+
+{% block title %}Certifications | Iconic Techno Service{% endblock %}
+{% block meta_description %}Iconic Techno Service is ISO 9001:2015 and ISO 45001:2018 certified, GST-registered and Udyam (MSME) registered — verified compliance for every project we deliver.{% endblock %}
+
+{% block extra_head %}
+  {% vite_hmr_client %}
+  {% vite_react_refresh %}
+  {% vite_asset 'src/islands/contact-form/main.tsx' %}
+{% endblock %}
+
+{% block content %}
+
+  <!-- ===== Certifications ===== -->
+  <section class="section section--tint" id="certifications">
+    <div class="container">
+      <div class="section__head">
+        <p class="eyebrow">Certifications</p>
+        <h2>Compliant &amp; Certified</h2>
+        <p class="section__sub">Our management systems and business registrations are independently audited and verified &mdash; here's the paperwork behind the promise.</p>
+      </div>
+
+      <div class="cert-grid">
+        <div class="cert-card">
+          <a class="cert-card__img" href="{% static 'image/cert-iso-9001.jpg' %}" target="_blank" rel="noopener" aria-label="View full ISO 9001:2015 certificate">
+            <img src="{% static 'image/cert-iso-9001.jpg' %}" alt="ISO 9001:2015 Certificate of Registration issued to Iconic Techno Service">
+          </a>
+          <div class="cert-card__body">
+            <h3>ISO 9001:2015</h3>
+            <p>Quality Management Systems</p>
+            <span class="cert-card__meta">Valid till 15 Jul 2029</span>
+          </div>
+        </div>
+
+        <div class="cert-card">
+          <a class="cert-card__img" href="{% static 'image/cert-iso-45001.jpg' %}" target="_blank" rel="noopener" aria-label="View full ISO 45001:2018 certificate">
+            <img src="{% static 'image/cert-iso-45001.jpg' %}" alt="ISO 45001:2018 Certificate of Registration issued to Iconic Techno Service">
+          </a>
+          <div class="cert-card__body">
+            <h3>ISO 45001:2018</h3>
+            <p>Occupational Health &amp; Safety Management Systems</p>
+            <span class="cert-card__meta">Valid till 15 Jul 2029</span>
+          </div>
+        </div>
+
+        <div class="cert-card">
+          <a class="cert-card__img" href="{% static 'image/cert-gst-registration.jpg' %}" target="_blank" rel="noopener" aria-label="View full GST registration certificate">
+            <img src="{% static 'image/cert-gst-registration.jpg' %}" alt="GST Registration Certificate for Iconic Techno Service">
+          </a>
+          <div class="cert-card__body">
+            <h3>GST Registration</h3>
+            <p>Goods &amp; Services Tax, Government of India</p>
+            <span class="cert-card__meta">GSTIN 26AVPPB0819A1Z3</span>
+          </div>
+        </div>
+
+        <div class="cert-card">
+          <a class="cert-card__img" href="{% static 'image/cert-udyam-registration.jpg' %}" target="_blank" rel="noopener" aria-label="View full Udyam (MSME) registration certificate">
+            <img src="{% static 'image/cert-udyam-registration.jpg' %}" alt="Udyam (MSME) Registration Certificate for Iconic Techno Service">
+          </a>
+          <div class="cert-card__body">
+            <h3>Udyam Registration</h3>
+            <p>Ministry of MSME, Government of India</p>
+            <span class="cert-card__meta">UDYAM-DD-03-0011602</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CTA ===== -->
+  <section class="section section--dark">
+    <div class="container section__head">
+      <p class="eyebrow eyebrow--light">Verified Compliance</p>
+      <h2 class="text-light">Work With a Certified Partner</h2>
+      <p class="section__sub section__sub--light">Get a free, no-obligation site survey and see how our certified processes translate into a fire safety plan for your facility.</p>
+      <a href="/survey/" class="btn btn--primary btn--lg">Get Free Site Survey</a>
+    </div>
+  </section>
+
+  <!-- ===== Contact ===== -->
+  <section class="section" id="contact">
+    <div class="container contact">
+      {% include "includes/contact-info.html" %}
+      {% include "includes/contact-form.html" %}
+    </div>
+  </section>
+
+{% endblock %}

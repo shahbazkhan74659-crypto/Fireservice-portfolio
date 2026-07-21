@@ -238,6 +238,7 @@ p{margin:0 0 1em;}
 }
 .why h3{color:#fff;font-size:1.05rem;}
 .why p{color:#aab0b8;font-size:.9rem;margin:0;}
+.why__cta{text-align:center;margin-top:40px;}
 
 /* ============ Clientele intro backdrop ============ */
 .clientele-intro{position:relative;overflow:hidden;}
@@ -270,6 +271,24 @@ p{margin:0 0 1em;}
 /* ============ Certifications ============ */
 .cert-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;}
 .cert{aspect-ratio:3/4;}
+.cert-card{
+  display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+  overflow:hidden;transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+.cert-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:var(--ink-400);}
+.cert-card__img{position:relative;aspect-ratio:210/297;background:var(--tint);display:flex;align-items:center;justify-content:center;padding:10px;cursor:zoom-in;}
+.cert-card__img img{width:100%;height:100%;object-fit:contain;}
+.cert-card__img::after{
+  content:"View Full Certificate";
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 20px;
+  background:rgba(20,18,16,.55);color:#fff;font-size:.8rem;font-weight:600;
+  opacity:0;transition:opacity .2s ease;
+}
+.cert-card__img:hover::after{opacity:1;}
+.cert-card__body{padding:16px 18px;border-top:1px solid var(--line);}
+.cert-card__body h3{font-size:1rem;margin:0 0 4px;}
+.cert-card__body p{font-size:.85rem;color:var(--ink-600);margin:0 0 6px;}
+.cert-card__meta{font-size:.78rem;color:var(--ink-400);font-weight:600;}
 
 /* ============ Contact ============ */
 .contact{display:grid;grid-template-columns:1fr 1.1fr;gap:60px;align-items:start;}
