@@ -44,12 +44,27 @@ We will start the actual development in FireService!/ folder. FireService/ is a 
 
 The prototype is being rebuilt on: **Django (server-rendered templates) + MySQL (SQLite for local dev, MySQL later via env var swap) + React "islands" in TypeScript + Zod for validation + Playwright for a minimal e2e suite + pytest-django/Vitest as the bulk of test coverage.** React is not a full SPA — it's mounted only into two isolated islands: the public contact form and the client-facing Admin Hub (custom-built, not Django's default `/admin/`) where the client manages Services, Certifications, Testimonials, and Client Logos.
 
-Key structural decisions locked in for this build:
+The full original plan (data models, API surface, CSRF handling, testing strategy) was written during a planning session and saved to `C:\Users\shahb\.claude\plans\curried-greeting-wombat.md` on the user's machine. **Some structural decisions below have since evolved past what that file says** — this section is the up-to-date source of truth; treat the plan file as historical background, not current spec.
+
+Key structural decisions locked in so far:
 - Single shared venv at the repo root (`python -m venv venv`), `manage.py` at `FireService!/` root — no `backend/` wrapper folder.
-- Django project package is named `fireservice` (not the generic `config`).
-- One **global** `templates/` folder at the repo root holds every template, namespaced by app subfolder (`templates/website/...`, `templates/adminhub/...`) — not per-app `templates/` dirs.
-- Apps: `website` (public content/models), `leads` (contact submissions), `adminhub` (auth + DRF CRUD API, reuses `website`/`leads` models rather than owning its own).
+- Django project package is named `fireservice`. It stays a thin project shell (settings + root `urls.py` that just does `include('core.urls')`) — it does **not** hold its own views.
+- **`core` app owns all views and URLs for the project.** This supersedes the original plan's idea of each domain app (`website`, `leads`, `adminhub`) owning its own views/urls — domain apps will own models and business logic only; `core` is the one views/urls handler for every template. `core/views.py` currently has `HomeView`; `core/urls.py` currently has the `home` route (`/`), included from `fireservice/urls.py`.
+- One **global** `templates/` folder at the repo root holds every template (currently `base.html`, `home.html` directly in `templates/`, not yet namespaced by app — revisit namespacing once more pages exist).
+- One **global** `static/` folder at the repo root, with `css/`, `js/`, `image/`, `font/` subfolders, wired into `STATICFILES_DIRS` alongside `frontend/dist` (for the future Vite build output). This supersedes the original plan's per-app `website/static/website/...` layout.
+- **The site is being restructured from one scrolling page into separate Django pages/URLs** — Home (`/`), About (`/about/`), Services (`/services/`), Process (`/process/`), Clientele (`/clientele/`), Certifications (`/certifications/`), Contact (`/contact/`). The prototype's "Why Choose Us" section has no nav link of its own, so it stays folded into the Home page (hero + stats + why-us) rather than getting its own page.
 - Admin Hub login page is a plain Django template (session auth); only the authenticated dashboard is the React island.
 - DRF for the API surface; `django-vite` to inject Vite-built React bundles into Django templates.
 
-The full detailed plan (repo layout, data models, API surface, CSRF handling, testing strategy, and step-by-step build sequencing) was written during a planning session and saved to `C:\Users\shahb\.claude\plans\curried-greeting-wombat.md` on the user's machine — read that file for the complete scaffold plan before starting or resuming this build.
+### Implementation status
+
+Done so far (see git log on `main`, pushed to `https://github.com/shahbazkhan74659-crypto/FireService.git`):
+- `venv/` created at repo root; `requirements/{base,dev,prod}.txt` written (`mysqlclient` kept in `prod.txt` only — deliberately not installed locally since dev runs SQLite and it's a Windows build-tooling risk otherwise). Dev deps installed: Django 5.2.16, djangorestframework, django-environ, Pillow, django-vite, pytest/pytest-django/pytest-cov/factory_boy.
+- `fireservice` project scaffolded; settings split into `fireservice/settings/{base,dev,prod}.py` (`django-environ`-driven; `.env`, git-ignored, holds `SECRET_KEY`/`DEBUG`/`ALLOWED_HOSTS`/`DATABASE_URL`, currently `sqlite:///db.sqlite3`).
+- `static/css/style.css` and `static/js/site.js` ported from the prototype — CSS verbatim (design tokens, breakpoints, the load-bearing `overflow-x:hidden` all intact); JS ported minus the contact-form submit handler (that logic moves to the future contact-form React island, not into `site.js`).
+- `templates/base.html` — shared shell (topbar, header/nav, footer, back-to-top) with blocks `title`, `meta_description`, `extra_head`, `content`, `extra_scripts`. Nav/footer links currently hardcoded plain paths (`/about/`, `/services/`, etc.), **not** `{% url %}` yet — swap these once each page's URL is actually registered.
+- `templates/home.html` — extends `base.html`; contains Hero+stats and Why-Us sections ported from the prototype's markup/classes.
+- `core` app created, registered in `INSTALLED_APPS`, serving `/` via `HomeView` → `home.html`.
+- Git repo initialized in `FireService!/`, remote `origin` added, two commits pushed to `main`: "Project Planning" and "Initial development and Home page".
+
+Not started yet: the `website`/`leads`/`adminhub` apps and their models, the remaining pages (About/Services/Process/Clientele/Certifications/Contact), the contact-form and Admin Hub React islands, the `frontend/` Vite+TS workspace, Zod schemas, Playwright/Vitest test setup.
