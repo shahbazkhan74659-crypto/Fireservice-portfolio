@@ -1,0 +1,21 @@
+from django.contrib import admin
+
+from .models import ContactMessage, SurveyRequest
+
+
+@admin.register(SurveyRequest)
+class SurveyRequestAdmin(admin.ModelAdmin):
+    list_display = ('name', 'email', 'created_at')
+    list_filter = ('created_at',)
+    search_fields = ('name', 'email', 'address', 'problem', 'why_survey')
+    readonly_fields = ('created_at',)
+    ordering = ('-created_at',)
+
+
+@admin.register(ContactMessage)
+class ContactMessageAdmin(admin.ModelAdmin):
+    list_display = ('name', 'phone', 'email', 'service', 'created_at')
+    list_filter = ('service', 'created_at')
+    search_fields = ('name', 'phone', 'email', 'message')
+    readonly_fields = ('created_at',)
+    ordering = ('-created_at',)

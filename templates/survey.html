@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load django_vite %}
+
+{% block title %}Get a Free Site Survey | Iconic Techno Service{% endblock %}
+{% block meta_description %}Request a free, no-obligation fire safety site survey from Iconic Techno Service.{% endblock %}
+
+{% block extra_head %}
+  {% vite_hmr_client %}
+  {% vite_react_refresh %}
+  {% vite_asset 'src/islands/survey-form/main.tsx' %}
+{% endblock %}
+
+{% block content %}
+<section class="section" id="survey">
+  <div class="container contact">
+    <div class="contact__info">
+      <p class="eyebrow">Get in Touch</p>
+      <h2>Request Your Free Site Survey</h2>
+      <p>Tell us about the property and the issue you're facing &mdash; a certified engineer will review it and arrange a free, no-obligation site visit.</p>
+
+      <div class="contact__item">{% include "includes/address.html" %}</div>
+      <div class="contact__item">{% include "includes/phone_sanjay.html" with icon=True %}</div>
+      <div class="contact__item">{% include "includes/email.html" with icon=True %}</div>
+
+      <ul class="check-list">
+        <li>Completely free, no-obligation site assessment</li>
+        <li>Certified fire-safety engineers &mdash; not a sales visit</li>
+        <li>Clear, itemized recommendations, no pressure</li>
+      </ul>
+    </div>
+
+    <div id="survey-form-root">
+      <noscript>Please enable JavaScript to submit this form, or contact us directly using the details on this page.</noscript>
+    </div>
+  </div>
+</section>
+{% endblock %}
