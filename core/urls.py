@@ -8,6 +8,7 @@ from core.views import (
     ClienteleView,
     ContactPageView,
     HomeView,
+    ProcessView,
     SurveyPageView,
 )
 
@@ -15,6 +16,7 @@ urlpatterns = [
     path('', HomeView.as_view(), name='home'),
     path('about/', AboutView.as_view(), name='about'),
     path('clientele/', ClienteleView.as_view(), name='clientele'),
+    path('process/', ProcessView.as_view(), name='process'),
     path('brochure/', BrochureView.as_view(), name='brochure'),
     path('certifications/', CertificationsView.as_view(), name='certifications'),
     path('survey/', SurveyPageView.as_view(), name='survey'),

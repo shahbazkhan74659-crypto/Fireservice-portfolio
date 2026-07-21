@@ -15,6 +15,10 @@ class ClienteleView(TemplateView):
     template_name = 'clientele.html'
 
 
+class ProcessView(TemplateView):
+    template_name = 'process.html'
+
+
 class BrochureView(TemplateView):
     template_name = 'brochure.html'
 

@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // Scroll reveal for cards/sections
-  const revealTargets = document.querySelectorAll('.card, .process__step, .why, .about__media, .about__text, .logo-card, .cert-card');
+  const revealTargets = document.querySelectorAll('.card, .process__step, .why, .about__media, .about__text, .logo-card, .cert-card, .phase');
   revealTargets.forEach(el => el.classList.add('reveal'));
 
   const observer = new IntersectionObserver((entries) => {
