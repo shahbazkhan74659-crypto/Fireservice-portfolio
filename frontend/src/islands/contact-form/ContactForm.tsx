@@ -1,6 +1,7 @@
 import { useState, type FormEvent, type ChangeEvent } from 'react'
 import { contactMessageSchema, SERVICE_OPTIONS, type ContactMessageInput, type ContactFormErrors } from './schema'
 import { getCsrfToken } from '../../lib/csrf'
+import { readErrorMessage } from '../../lib/api'
 
 const initialValues: ContactMessageInput = {
   name: '', phone: '', email: '', service: SERVICE_OPTIONS[0].value, message: '',
@@ -51,15 +52,7 @@ export default function ContactForm() {
       })
 
       if (!res.ok) {
-        let message = 'Something went wrong. Please try again or call us directly.'
-        try {
-          const data = await res.json()
-          const first = Object.values(data)[0]
-          if (Array.isArray(first) && typeof first[0] === 'string') message = first[0]
-        } catch {
-          // keep default message
-        }
-        setServerError(message)
+        setServerError(await readErrorMessage(res))
         setState('error')
         return
       }

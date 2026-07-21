@@ -16,4 +16,4 @@ class SurveyRequestCreateView(CreateAPIView):
 class ContactMessageCreateView(CreateAPIView):
     queryset = ContactMessage.objects.all()
     serializer_class = ContactMessageSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [AllowAny]  # overrides the global IsAuthenticated default

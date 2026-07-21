@@ -1,13 +1,9 @@
 import { z } from 'zod'
+import { nameSchema, emailSchema } from '../../lib/validators'
 
 export const surveyRequestSchema = z.object({
-  name: z.string().trim()
-    .min(2, 'Please enter your full name.')
-    .max(120, 'Name is too long (max 120 characters).'),
-  email: z.string().trim()
-    .min(1, 'Email is required.')
-    .email('Enter a valid email address.')
-    .max(254, 'Email is too long.'),
+  name: nameSchema,
+  email: emailSchema,
   address: z.string().trim()
     .min(10, 'Please enter a full address so we can plan the site visit.')
     .max(500, 'Address is too long (max 500 characters).'),

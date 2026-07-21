@@ -1,6 +1,7 @@
 import { useState, type FormEvent, type ChangeEvent } from 'react'
 import { surveyRequestSchema, type SurveyRequestInput, type SurveyFormErrors } from './schema'
 import { getCsrfToken } from '../../lib/csrf'
+import { readErrorMessage } from '../../lib/api'
 
 const initialValues: SurveyRequestInput = {
   name: '', email: '', address: '', problem: '', whySurvey: '',
@@ -51,15 +52,7 @@ export default function SurveyForm() {
       })
 
       if (!res.ok) {
-        let message = 'Something went wrong. Please try again or call us directly.'
-        try {
-          const data = await res.json()
-          const first = Object.values(data)[0]
-          if (Array.isArray(first) && typeof first[0] === 'string') message = first[0]
-        } catch {
-          // keep default message
-        }
-        setServerError(message)
+        setServerError(await readErrorMessage(res))
         setState('error')
         return
       }
