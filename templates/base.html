@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{% block title %}Iconic Techno Service | Total Fire Protection for Life &amp; Property{% endblock %}</title>
 <meta name="description" content="{% block meta_description %}Iconic Techno Service designs, installs and maintains complete fire safety systems for residential, commercial, industrial and institutional clients.{% endblock %}">
+<link rel="apple-touch-icon" sizes="180x180" href="{% static 'favicon/apple-touch-icon.png' %}">
+<link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicon/favicon-32x32.png' %}">
+<link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon/favicon-16x16.png' %}">
+<link rel="icon" href="{% static 'favicon/favicon.ico' %}">
+<link rel="manifest" href="{% static 'favicon/site.webmanifest' %}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/style.css' %}">
@@ -12,6 +17,7 @@
 </head>
 <body>
 
+<div class="site-header" id="siteHeader">
 <!-- ===== Top bar ===== -->
 <div class="topbar">
   <div class="container topbar__inner">
@@ -30,13 +36,13 @@
     </a>
 
     <nav class="nav" id="nav">
-      <a href="/">Home</a>
-      <a href="/about/">About</a>
-      <a href="/services/">Services</a>
-      <a href="/process/">Process</a>
-      <a href="/clientele/">Clientele</a>
-      <a href="/certifications/">Certifications</a>
-      <a href="/contact/">Contact</a>
+      <a href="/" class="{% if request.path == '/' %}active{% endif %}">Home</a>
+      <a href="/about/" class="{% if request.path == '/about/' %}active{% endif %}">About</a>
+      <a href="/services/" class="{% if request.path == '/services/' %}active{% endif %}">Services</a>
+      <a href="/process/" class="{% if request.path == '/process/' %}active{% endif %}">Process</a>
+      <a href="/clientele/" class="{% if request.path == '/clientele/' %}active{% endif %}">Clientele</a>
+      <a href="/certifications/" class="{% if request.path == '/certifications/' %}active{% endif %}">Certifications</a>
+      <a href="/contact/" class="{% if request.path == '/contact/' %}active{% endif %}">Contact</a>
     </nav>
 
     <div class="header__actions">
@@ -48,6 +54,7 @@
     </div>
   </div>
 </header>
+</div>
 
 <main>
 {% block content %}{% endblock %}

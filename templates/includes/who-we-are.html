@@ -1,0 +1,23 @@
+{% load static %}
+<!-- ===== Who We Are ===== -->
+<section class="section section--tint">
+  <div class="container about">
+    <div class="about__media">
+      <img class="about__img" src="{% static 'image/about-fire-alarm-system.jpg' %}" alt="Fire alarm control panels and system accessories">
+      <img class="about__pic about__pic--tl" src="{% static 'image/about-fire-extinguishers.jpg' %}" alt="Range of fire extinguishers">
+      <img class="about__pic about__pic--br" src="{% static 'image/about-smoke-alarm.jpg' %}" alt="Ceiling-mounted smoke alarm">
+    </div>
+    <div class="about__text">
+      <p class="eyebrow">Who We Are</p>
+      <h2>A Single Partner for End-to-End Fire Protection</h2>
+      <p>We have demonstrated our ability to handle projects successfully across manufacturing and other sectors, adapting to varying customer needs with extensive industry knowledge and consistent delivery. Over the years we've supplied clients with fire safety products &mdash; including import substitutes and indigenously customized solutions &mdash; certified for quality, functionality and acceptability by Indian regulatory authorities.</p>
+      <ul class="check-list">
+        <li>Design, supply, installation, commissioning &amp; AMC under one roof</li>
+        <li>Products certified by Indian regulatory authorities</li>
+        <li>Direct OEM partnerships across fire detection &amp; suppression brands</li>
+        <li>PAN-India project and support capability</li>
+      </ul>
+      <a href="{{ cta_url|default:'/contact/' }}" class="btn btn--primary">{{ cta_text|default:"Talk to an Expert" }}</a>
+    </div>
+  </div>
+</section>

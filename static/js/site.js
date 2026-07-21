@@ -13,9 +13,20 @@ document.addEventListener('DOMContentLoaded', () => {
     link.addEventListener('click', () => nav.classList.remove('open'));
   });
 
-  // Header shadow on scroll
+  // Shrink site header on scroll
+  // site-header is position:fixed (removed from flow), so body needs matching
+  // padding-top kept in sync with its real height, including the shrink transition.
+  const siteHeader = document.getElementById('siteHeader');
   const header = document.getElementById('header');
+  const syncHeaderOffset = () => {
+    document.body.style.paddingTop = siteHeader.offsetHeight + 'px';
+  };
+  syncHeaderOffset();
+  window.addEventListener('resize', syncHeaderOffset);
+  siteHeader.addEventListener('transitionend', syncHeaderOffset);
+
   window.addEventListener('scroll', () => {
+    siteHeader.classList.toggle('is-scrolled', window.scrollY > 10);
     header.style.boxShadow = window.scrollY > 10 ? '0 4px 16px rgba(0,0,0,.08)' : 'none';
   });
 

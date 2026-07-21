@@ -7,6 +7,10 @@ class HomeView(TemplateView):
     template_name = 'home.html'
 
 
+class AboutView(TemplateView):
+    template_name = 'about.html'
+
+
 @method_decorator(ensure_csrf_cookie, name='dispatch')
 class SurveyPageView(TemplateView):
     template_name = 'survey.html'
