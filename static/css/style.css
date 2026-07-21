@@ -157,14 +157,20 @@ p{margin:0 0 1em;}
 .section--dark{background:var(--dark);}
 .section--flush-bottom{padding-bottom:0;}
 .text-light{color:#fff;}
+.section__sub--light{color:#c7cad0;}
 .section__head{max-width:640px;margin:0 auto 50px;text-align:center;}
 .section__head .eyebrow{display:block;}
 .section__sub{color:var(--ink-600);}
 
 /* ============ About intro (team photo backdrop) ============ */
 .about-intro{position:relative;overflow:hidden;}
-.about-intro__bg{position:absolute;inset:0;z-index:0;border:none;border-radius:0;min-height:0;align-items:flex-end;padding-bottom:20px;}
+/* Temporary stand-in background until the client provides a real team photo */
+.about-intro__bg{position:absolute;inset:0;z-index:0;background:url(../image/brochure-equipment-lineup.jpg) center/cover no-repeat;}
+.about-intro__overlay{position:absolute;inset:0;z-index:0;background:linear-gradient(180deg, rgba(16,18,21,.6) 0%, rgba(16,18,21,.78) 55%, rgba(16,18,21,.94) 100%);}
 .about-intro__content{position:relative;z-index:1;margin-bottom:140px;}
+.about-intro__content .eyebrow{color:var(--amber-500);}
+.about-intro__content h2{color:#fff;}
+.about-intro__content .section__sub{color:#e7e5e2;}
 
 /* ============ About ============ */
 .about{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;}
@@ -233,10 +239,27 @@ p{margin:0 0 1em;}
 .why h3{color:#fff;font-size:1.05rem;}
 .why p{color:#aab0b8;font-size:.9rem;margin:0;}
 
+/* ============ Clientele intro backdrop ============ */
+.clientele-intro{position:relative;overflow:hidden;}
+.clientele-intro__bg{position:absolute;inset:0;z-index:0;background:url(../image/clientele-intro-bg.jpg) center/90% no-repeat;}
+.clientele-intro__overlay{position:absolute;inset:0;z-index:0;background:linear-gradient(180deg, rgba(16,18,21,.6) 0%, rgba(16,18,21,.78) 55%, rgba(16,18,21,.94) 100%);}
+.clientele-intro__content{position:relative;z-index:1;}
+.clientele-intro__content .eyebrow{color:var(--amber-500);}
+.clientele-intro__content h2{color:#fff;}
+.clientele-intro__content .section__sub{color:#e7e5e2;}
+
 /* ============ Clientele ============ */
-.logo-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:18px;margin-bottom:50px;}
+.logo-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:18px;margin-bottom:50px;}
 .logo-slot{aspect-ratio:2/1;min-height:70px;}
 .logo-slot::before{font-size:.68rem;}
+.logo-card{
+  aspect-ratio:2/1;min-height:70px;padding:18px;
+  display:flex;align-items:center;justify-content:center;
+  background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+  transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+.logo-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:var(--ink-400);}
+.logo-card img{max-width:100%;max-height:100%;width:auto;object-fit:contain;}
 .testimonial{
   max-width:720px;margin:0 auto;text-align:center;padding:40px;border-radius:var(--radius);
   background:var(--tint);border:1px solid var(--line);
