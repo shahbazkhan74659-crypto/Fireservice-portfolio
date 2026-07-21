@@ -23,7 +23,11 @@
   <div class="container topbar__inner">
     <div class="topbar__contact">
       {% include "includes/phone.html" with number="+917359229129" display="+91 73592 29129" icon=True %}
+      {% include "includes/phone.html" with number="+917698839939" display="+91 76988 39939" icon=True %}
       {% include "includes/email.html" with icon=True %}
+    </div>
+    <div class="topbar__social">
+      {% include "includes/instagram.html" %}
     </div>
   </div>
 </div>
@@ -68,6 +72,9 @@
         {% include "includes/logo.html" with light=True %}
       </a>
       <p>Total fire protection for residential, commercial, industrial and institutional properties.</p>
+      <div class="footer__social">
+        {% include "includes/instagram.html" %}
+      </div>
     </div>
     <div class="footer__col">
       <h4>Quick Links</h4>
@@ -84,6 +91,7 @@
     <div class="footer__col">
       <h4>Contact</h4>
       <p>{% include "includes/address.html" %}</p>
+      <p>{% include "includes/phone.html" with number="+917359229129" display="+91 73592 29129" %}</p>
       <p>{% include "includes/phone.html" with number="+917698839939" display="+91 76988 39939" %}</p>
       <p>{% include "includes/email.html" %}</p>
     </div>
