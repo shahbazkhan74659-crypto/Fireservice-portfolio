@@ -189,6 +189,7 @@ p{margin:0 0 1em;}
 }
 .about__pic--tl{top:-24px;left:-24px;}
 .about__pic--br{bottom:-24px;right:-24px;}
+.about__media .map{margin-top:40px;}
 .check-list li{position:relative;padding-left:28px;margin-bottom:10px;color:var(--ink-600);}
 .check-list li::before{
   content:'';position:absolute;left:0;top:6px;width:16px;height:16px;border-radius:50%;
@@ -197,6 +198,7 @@ p{margin:0 0 1em;}
 .check-list li::after{
   content:'';position:absolute;left:5px;top:8px;width:6px;height:3px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg);
 }
+.check-list--columns{columns:2;column-gap:40px;}
 
 /* ============ Services grid ============ */
 .grid{display:grid;gap:26px;}
@@ -250,6 +252,17 @@ p{margin:0 0 1em;}
 .phase__item{background:var(--tint);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;}
 .phase__item h4{font-size:.95rem;margin:0 0 6px;color:var(--ink-900);}
 .phase__item p{font-size:.86rem;color:var(--ink-600);margin:0;}
+
+/* ============ Our Products (Services page) ============ */
+.product-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:20px;}
+.product-card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;
+  transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+.product-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:var(--ink-400);}
+.product-card__img{aspect-ratio:1/1;padding:14px;display:flex;align-items:center;justify-content:center;background:var(--tint);}
+.product-card__img img{max-width:100%;max-height:100%;object-fit:contain;}
+.product-card__caption{padding:12px 10px;text-align:center;font-size:.82rem;font-weight:600;color:var(--ink-800);border-top:1px solid var(--line);}
 
 /* ============ Why choose us ============ */
 .grid--why{grid-template-columns:repeat(3,1fr);}
@@ -375,6 +388,7 @@ p{margin:0 0 1em;}
   .grid--why{grid-template-columns:repeat(2,1fr);}
   .logo-grid{grid-template-columns:repeat(3,1fr);}
   .cert-grid{grid-template-columns:repeat(2,1fr);}
+  .product-grid{grid-template-columns:repeat(4,1fr);}
   .footer__grid{grid-template-columns:1fr 1fr;}
 }
 @media (max-width:860px){
@@ -392,12 +406,15 @@ p{margin:0 0 1em;}
   .stats__grid{grid-template-columns:repeat(2,1fr);gap:20px;}
   .stat{border-right:none;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:14px;}
   .phase__items{grid-template-columns:1fr;}
+  .product-grid{grid-template-columns:repeat(3,1fr);}
+  .check-list--columns{columns:1;}
 }
 @media (max-width:600px){
   .about__pic{width:150px;}
   .about__pic--tl{top:-16px;left:-16px;}
   .about__pic--br{bottom:-16px;right:-16px;}
   .grid--services,.grid--why,.grid--mission,.cert-grid{grid-template-columns:1fr;}
+  .product-grid{grid-template-columns:repeat(2,1fr);}
   .phase{grid-template-columns:52px 1fr;gap:16px;}
   .phase__marker{width:52px;height:52px;}
   .phase__marker svg{width:22px;height:22px;}
