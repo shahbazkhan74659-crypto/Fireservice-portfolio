@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Brochure | Iconic Techno Service{% endblock %}
+{% block meta_description %}View or download the Iconic Techno Service company brochure — products, services and capabilities.{% endblock %}
+
+{% block content %}
+
+  <!-- ===== Brochure ===== -->
+  <section class="section" id="brochure">
+    <div class="container">
+      <div class="section__head">
+        <p class="eyebrow">Brochure</p>
+        <h2>Iconic Techno Service Brochure</h2>
+        <p class="section__sub">Click below to view the full brochure, or download a copy to keep.</p>
+      </div>
+
+      <a class="brochure-icon" href="{% static 'files/its-brochure.pdf' %}" target="_blank" rel="noopener" aria-label="Open Iconic Techno Service brochure PDF">
+        <svg viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 0h55l25 25v95a10 10 0 0 1-10 10H10A10 10 0 0 1 0 120V10A10 10 0 0 1 10 0z"/>
+          <path d="M65 0v20a5 5 0 0 0 5 5h20z" fill="rgba(0,0,0,.18)"/>
+          <text x="50" y="88" text-anchor="middle" font-family="Poppins, sans-serif" font-weight="800" font-size="24" fill="#fff">PDF</text>
+        </svg>
+      </a>
+
+      <div class="brochure-download">
+        <a href="{% static 'files/its-brochure.pdf' %}" download class="btn btn--primary btn--lg">Download Brochure</a>
+      </div>
+    </div>
+  </section>
+
+{% endblock %}

@@ -290,6 +290,12 @@ p{margin:0 0 1em;}
 .cert-card__body p{font-size:.85rem;color:var(--ink-600);margin:0 0 6px;}
 .cert-card__meta{font-size:.78rem;color:var(--ink-400);font-weight:600;}
 
+/* ============ Brochure ============ */
+.brochure-icon{display:block;width:180px;margin:0 auto;color:var(--red-600);transition:transform .2s ease;}
+.brochure-icon:hover{transform:translateY(-6px);}
+.brochure-icon svg{width:100%;height:auto;fill:currentColor;filter:drop-shadow(var(--shadow-md));}
+.brochure-download{text-align:center;margin-top:32px;}
+
 /* ============ Contact ============ */
 .contact{display:grid;grid-template-columns:1fr 1.1fr;gap:60px;align-items:start;}
 .contact__item{display:flex;align-items:center;gap:12px;margin-bottom:16px;color:var(--ink-600);}
