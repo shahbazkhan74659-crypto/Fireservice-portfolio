@@ -2,7 +2,7 @@ import re
 
 from rest_framework import serializers
 
-from .models import ContactMessage, SurveyRequest
+from .models import ConsultationRequest, ContactMessage, SurveyRequest
 
 
 def validate_person_name(value):
@@ -42,6 +42,16 @@ class SurveyRequestSerializer(serializers.ModelSerializer):
         return value
 
 
+def validate_phone_number(value):
+    """Shared phone validation used by both ContactMessageSerializer and
+    ConsultationRequestSerializer — strips non-digits and requires at least
+    7 digits."""
+    digits = re.sub(r'\D', '', value)
+    if len(digits) < 7:
+        raise serializers.ValidationError('Please enter a valid phone number.')
+    return value.strip()
+
+
 class ContactMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContactMessage
@@ -51,7 +61,16 @@ class ContactMessageSerializer(serializers.ModelSerializer):
         return validate_person_name(value)
 
     def validate_phone(self, value):
-        digits = re.sub(r'\D', '', value)
-        if len(digits) < 7:
-            raise serializers.ValidationError('Please enter a valid phone number.')
-        return value.strip()
+        return validate_phone_number(value)
+
+
+class ConsultationRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ConsultationRequest
+        fields = ['name', 'phone']
+
+    def validate_name(self, value):
+        return validate_person_name(value)
+
+    def validate_phone(self, value):
+        return validate_phone_number(value)

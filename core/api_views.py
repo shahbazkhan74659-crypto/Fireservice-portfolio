@@ -1,8 +1,12 @@
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import AllowAny
 
-from leads.models import ContactMessage, SurveyRequest
-from leads.serializers import ContactMessageSerializer, SurveyRequestSerializer
+from leads.models import ConsultationRequest, ContactMessage, SurveyRequest
+from leads.serializers import (
+    ConsultationRequestSerializer,
+    ContactMessageSerializer,
+    SurveyRequestSerializer,
+)
 
 
 class SurveyRequestCreateView(CreateAPIView):
@@ -16,4 +20,10 @@ class SurveyRequestCreateView(CreateAPIView):
 class ContactMessageCreateView(CreateAPIView):
     queryset = ContactMessage.objects.all()
     serializer_class = ContactMessageSerializer
+    permission_classes = [AllowAny]  # overrides the global IsAuthenticated default
+
+
+class ConsultationRequestCreateView(CreateAPIView):
+    queryset = ConsultationRequest.objects.all()
+    serializer_class = ConsultationRequestSerializer
     permission_classes = [AllowAny]  # overrides the global IsAuthenticated default

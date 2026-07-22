@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import ContactMessage, SurveyRequest
+from .models import ConsultationRequest, ContactMessage, SurveyRequest
 
 
 @admin.register(SurveyRequest)
@@ -17,5 +17,14 @@ class ContactMessageAdmin(admin.ModelAdmin):
     list_display = ('name', 'phone', 'email', 'service', 'created_at')
     list_filter = ('service', 'created_at')
     search_fields = ('name', 'phone', 'email', 'message')
+    readonly_fields = ('created_at',)
+    ordering = ('-created_at',)
+
+
+@admin.register(ConsultationRequest)
+class ConsultationRequestAdmin(admin.ModelAdmin):
+    list_display = ('name', 'phone', 'created_at')
+    list_filter = ('created_at',)
+    search_fields = ('name', 'phone')
     readonly_fields = ('created_at',)
     ordering = ('-created_at',)

@@ -42,3 +42,15 @@ class ContactMessage(models.Model):
 
     def __str__(self):
         return f'{self.name} ({self.email}) — {self.created_at:%Y-%m-%d}'
+
+
+class ConsultationRequest(models.Model):
+    name = models.CharField(max_length=120)
+    phone = models.CharField(max_length=20)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.name} ({self.phone}) — {self.created_at:%Y-%m-%d}'

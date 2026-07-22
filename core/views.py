@@ -40,3 +40,8 @@ class SurveyPageView(TemplateView):
 @method_decorator(ensure_csrf_cookie, name='dispatch')
 class ContactPageView(TemplateView):
     template_name = 'contact.html'
+
+
+@method_decorator(ensure_csrf_cookie, name='dispatch')
+class ConsultationView(TemplateView):
+    template_name = 'consultation.html'

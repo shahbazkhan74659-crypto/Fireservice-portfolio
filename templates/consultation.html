@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load django_vite %}
+
+{% block title %}Free Consultation | Iconic Techno Service{% endblock %}
+{% block meta_description %}Book a free fire safety consultation with Iconic Techno Service.{% endblock %}
+
+{% block extra_head %}
+  {% vite_hmr_client %}
+  {% vite_react_refresh %}
+  {% vite_asset 'src/islands/consultation-form/main.tsx' %}
+{% endblock %}
+
+{% block content %}
+  <section class="section consultation-intro">
+    <div class="consultation-intro__bg"></div>
+    <div class="consultation-intro__overlay"></div>
+    <div class="container section__head consultation-intro__content">
+      <h2>Consultation from our Expert</h2>
+      <p class="section__sub">Get a free, no-obligation consultation with our fire safety specialists to assess your site's needs and recommend the right protection plan.</p>
+    </div>
+  </section>
+
+  <div class="stats">
+    <div class="container stats__grid stats__grid--2">
+      <div class="stat"><span class="stat__num" data-count="10">0</span><span class="stat__suffix">+</span><span class="stat__label">Years Experience</span></div>
+      <div class="stat"><span class="stat__num" data-count="8">0</span><span class="stat__label">Services Offered</span></div>
+    </div>
+  </div>
+
+  <section class="section" id="consultation-call">
+    <div class="container contact">
+      <div class="contact__info">
+        <p class="eyebrow">Prefer to Call?</p>
+        <h2>Talk to Us Directly</h2>
+        <p>Reach out on either number below, or request a callback and our expert will call you.</p>
+        <div class="contact__item">{% include "includes/phone.html" with number="+917359229129" display="+91 73592 29129" icon=True %}</div>
+        <div class="contact__item">{% include "includes/phone.html" with number="+917698839939" display="+91 76988 39939" icon=True %}</div>
+      </div>
+      <div id="consultation-form-root">
+        <noscript>Please enable JavaScript to submit this form, or call us directly using the number on this page.</noscript>
+      </div>
+    </div>
+  </section>
+{% endblock %}

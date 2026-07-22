@@ -1,11 +1,16 @@
 from django.urls import path
 
-from core.api_views import ContactMessageCreateView, SurveyRequestCreateView
+from core.api_views import (
+    ConsultationRequestCreateView,
+    ContactMessageCreateView,
+    SurveyRequestCreateView,
+)
 from core.views import (
     AboutView,
     BrochureView,
     CertificationsView,
     ClienteleView,
+    ConsultationView,
     ContactPageView,
     HomeView,
     ProcessView,
@@ -25,4 +30,6 @@ urlpatterns = [
     path('api/survey/', SurveyRequestCreateView.as_view(), name='api-survey'),
     path('contact/', ContactPageView.as_view(), name='contact'),
     path('api/contact/', ContactMessageCreateView.as_view(), name='api-contact'),
+    path('consultation/', ConsultationView.as_view(), name='consultation'),
+    path('api/consultation/', ConsultationRequestCreateView.as_view(), name='api-consultation'),
 ]
