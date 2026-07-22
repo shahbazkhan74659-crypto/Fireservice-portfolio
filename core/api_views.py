@@ -1,3 +1,8 @@
+import json
+
+from django.contrib.auth import authenticate, login
+from django.http import JsonResponse
+from django.views import View
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import AllowAny
 
@@ -27,3 +32,30 @@ class ConsultationRequestCreateView(CreateAPIView):
     queryset = ConsultationRequest.objects.all()
     serializer_class = ConsultationRequestSerializer
     permission_classes = [AllowAny]  # overrides the global IsAuthenticated default
+
+
+class AdminHubLoginAPIView(View):
+    """Plain Django view, not DRF, on purpose: DRF's APIView marks itself
+    csrf_exempt and SessionAuthentication.enforce_csrf() only runs once a
+    user is already attached to the request, so a DRF view here would
+    silently skip CSRF checking on the one request (an anonymous login POST)
+    where that check actually matters. A plain View still goes through
+    CsrfViewMiddleware normally."""
+
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({'detail': ['Invalid request.']}, status=400)
+
+        username = (data.get('username') or '').strip()
+        password = data.get('password') or ''
+        if not username or not password:
+            return JsonResponse({'detail': ['Username and password are required.']}, status=400)
+
+        user = authenticate(request, username=username, password=password)
+        if user is None:
+            return JsonResponse({'detail': ['Invalid username or password.']}, status=401)
+
+        login(request, user)
+        return JsonResponse({'detail': ['Logged in.']})

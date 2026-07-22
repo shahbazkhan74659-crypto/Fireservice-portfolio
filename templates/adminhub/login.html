@@ -1,0 +1,29 @@
+{% load static django_vite %}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin Login | Iconic Techno Service</title>
+<link rel="apple-touch-icon" sizes="180x180" href="{% static 'favicon/apple-touch-icon.png' %}">
+<link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicon/favicon-32x32.png' %}">
+<link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon/favicon-16x16.png' %}">
+<link rel="icon" href="{% static 'favicon/favicon.ico' %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+{% vite_hmr_client %}
+{% vite_react_refresh %}
+{% vite_asset 'src/islands/admin-hub-login/main.tsx' %}
+</head>
+<body class="auth-page">
+
+<div class="auth-card">
+  <a href="/" class="auth-card__logo">{% include "includes/logo.html" %}</a>
+  <div id="admin-hub-login-root">
+    <noscript>Please enable JavaScript to log in.</noscript>
+  </div>
+</div>
+
+</body>
+</html>

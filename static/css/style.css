@@ -404,6 +404,19 @@ a.instagram-icon:hover{color:var(--red-700);}
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease, transform .6s ease;}
 .reveal.in{opacity:1;transform:translateY(0);}
 
+/* ============ Admin Hub / Auth ============ */
+.auth-page{align-items:center;justify-content:center;background:var(--tint);padding:24px;}
+.auth-card{width:100%;max-width:420px;}
+.auth-card__logo{display:block;text-align:center;margin-bottom:28px;}
+.auth-card__logo .logo__img{height:44px;margin:0 auto;}
+
+.adminhub-header{background:#fff;border-bottom:1px solid var(--line);}
+.adminhub-header__inner{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;}
+.adminhub-header__title{font-family:var(--ff-display);font-weight:700;font-size:1rem;color:var(--ink-900);margin-left:4px;}
+.adminhub-header__actions{display:flex;align-items:center;gap:16px;}
+.adminhub-header__user{font-weight:600;font-size:.9rem;color:var(--ink-600);}
+.adminhub-header__actions form{margin:0;}
+
 /* ============ Responsive ============ */
 @media (max-width:1024px){
   .grid--services{grid-template-columns:repeat(2,1fr);}

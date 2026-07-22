@@ -1,12 +1,16 @@
+from django.contrib.auth.views import LogoutView
 from django.urls import path
 
 from core.api_views import (
+    AdminHubLoginAPIView,
     ConsultationRequestCreateView,
     ContactMessageCreateView,
     SurveyRequestCreateView,
 )
 from core.views import (
     AboutView,
+    AdminHubHomeView,
+    AdminHubLoginView,
     BrochureView,
     CertificationsView,
     ClienteleView,
@@ -32,4 +36,8 @@ urlpatterns = [
     path('api/contact/', ContactMessageCreateView.as_view(), name='api-contact'),
     path('consultation/', ConsultationView.as_view(), name='consultation'),
     path('api/consultation/', ConsultationRequestCreateView.as_view(), name='api-consultation'),
+    path('admin-hub/', AdminHubLoginView.as_view(), name='adminhub-login'),
+    path('api/admin-hub/login/', AdminHubLoginAPIView.as_view(), name='api-adminhub-login'),
+    path('admin-hub/home/', AdminHubHomeView.as_view(), name='adminhub-home'),
+    path('admin-hub/logout/', LogoutView.as_view(next_page='adminhub-login'), name='adminhub-logout'),
 ]

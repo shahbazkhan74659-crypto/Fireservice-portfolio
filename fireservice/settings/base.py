@@ -139,5 +139,5 @@ REST_FRAMEWORK = {
 # read it and set X-CSRFToken on POST/PUT/PATCH/DELETE fetch calls.
 CSRF_COOKIE_HTTPONLY = False
 
-LOGIN_URL = '/adminhub/login/'
-LOGIN_REDIRECT_URL = '/adminhub/'
+LOGIN_URL = '/admin-hub/'
+LOGIN_REDIRECT_URL = '/admin-hub/home/'

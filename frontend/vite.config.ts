@@ -24,6 +24,7 @@ export default defineConfig({
         'survey-form': resolve(__dirname, 'src/islands/survey-form/main.tsx'),
         'contact-form': resolve(__dirname, 'src/islands/contact-form/main.tsx'),
         'consultation-form': resolve(__dirname, 'src/islands/consultation-form/main.tsx'),
+        'admin-hub-login': resolve(__dirname, 'src/islands/admin-hub-login/main.tsx'),
       },
     },
   },
