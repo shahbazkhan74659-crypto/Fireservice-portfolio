@@ -19,10 +19,15 @@
 
 <header class="adminhub-header">
   <div class="container adminhub-header__inner">
-    <a href="{% url 'adminhub-home' %}" class="logo">
-      {% include "includes/logo.html" %}
-      <span class="adminhub-header__title">Admin Hub</span>
-    </a>
+    <div class="adminhub-header__brand">
+      <a href="{% url 'adminhub-home' %}" class="logo">
+        {% include "includes/logo.html" %}
+      </a>
+      <nav class="nav">
+        <a href="{% url 'adminhub-home' %}" class="{% if request.resolver_match.url_name == 'adminhub-home' %}active{% endif %}">Home</a>
+        <a href="{% url 'adminhub-clientele' %}" class="{% if request.resolver_match.url_name == 'adminhub-clientele' %}active{% endif %}">Clientele</a>
+      </nav>
+    </div>
     <div class="adminhub-header__actions">
       <span class="adminhub-header__user">{{ request.user.username }}</span>
       <form method="post" action="{% url 'adminhub-logout' %}">

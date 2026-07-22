@@ -5,23 +5,7 @@
 
 {% block content %}
 
-  <!-- ===== Clientele ===== -->
-  <section class="section section--flush-bottom clientele-intro">
-    <div class="clientele-intro__bg"></div>
-    <div class="clientele-intro__overlay"></div>
-    <div class="container section__head clientele-intro__content">
-      <p class="eyebrow">Clientele</p>
-      <h2>Trusted by Organizations Across Industries</h2>
-      <p class="section__sub">From oil &amp; gas majors and national banks to manufacturers, retailers and real estate developers, our fire &amp; life-safety systems protect sites for organizations of every scale.</p>
-    </div>
-  </section>
-
-  <div class="stats">
-    <div class="container stats__grid stats__grid--2">
-      <div class="stat"><span class="stat__num" data-count="10">0</span><span class="stat__suffix">+</span><span class="stat__label">Years Experience</span></div>
-      <div class="stat"><span class="stat__num" data-count="25">0</span><span class="stat__label">Total Clients</span></div>
-    </div>
-  </div>
+  {% include "includes/clientele-intro.html" %}
 
   {% include "includes/client-logos.html" %}
 

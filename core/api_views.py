@@ -1,9 +1,11 @@
 import json
 
 from django.contrib.auth import authenticate, login
+from django.db.models import Max
 from django.http import JsonResponse
 from django.views import View
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import AllowAny
 
 from leads.models import ConsultationRequest, ContactMessage, SurveyRequest
@@ -12,6 +14,8 @@ from leads.serializers import (
     ContactMessageSerializer,
     SurveyRequestSerializer,
 )
+from website.models import ClientLogo, MissionVisionItem
+from website.serializers import ClientLogoSerializer, MissionVisionItemSerializer
 
 
 class SurveyRequestCreateView(CreateAPIView):
@@ -59,3 +63,32 @@ class AdminHubLoginAPIView(View):
 
         login(request, user)
         return JsonResponse({'detail': ['Logged in.']})
+
+
+class MissionVisionItemListView(ListAPIView):
+    # No permission_classes override — the project-wide IsAuthenticated +
+    # SessionAuthentication default is exactly what's wanted here (admin-hub
+    # only), unlike the public lead-capture endpoints above which opt out of it.
+    queryset = MissionVisionItem.objects.all()
+    serializer_class = MissionVisionItemSerializer
+
+
+class MissionVisionItemDetailView(RetrieveUpdateDestroyAPIView):
+    queryset = MissionVisionItem.objects.all()
+    serializer_class = MissionVisionItemSerializer
+
+
+class ClientLogoListCreateView(ListCreateAPIView):
+    queryset = ClientLogo.objects.all()
+    serializer_class = ClientLogoSerializer
+    parser_classes = [MultiPartParser, FormParser]  # uploads arrive as multipart, not JSON
+
+    def perform_create(self, serializer):
+        next_order = (ClientLogo.objects.aggregate(Max('order'))['order__max'] or 0) + 1
+        serializer.save(order=next_order)
+
+
+class ClientLogoDetailView(RetrieveUpdateDestroyAPIView):
+    queryset = ClientLogo.objects.all()
+    serializer_class = ClientLogoSerializer
+    parser_classes = [MultiPartParser, FormParser]

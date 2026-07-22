@@ -1,0 +1,21 @@
+{% extends "adminhub/base.html" %}
+{% load django_vite %}
+
+{% block title %}Clientele | Admin Hub | Iconic Techno Service{% endblock %}
+
+{% block extra_head %}
+  {% vite_hmr_client %}
+  {% vite_react_refresh %}
+  {% vite_asset 'src/islands/admin-client-logos/main.tsx' %}
+{% endblock %}
+
+{% block content %}
+{% include "includes/clientele-intro.html" with no_bg=True static_stats=True %}
+<section class="section">
+  <div class="container">
+    <div id="admin-client-logos-root">
+      <noscript>Please enable JavaScript to manage client logos.</noscript>
+    </div>
+  </div>
+</section>
+{% endblock %}

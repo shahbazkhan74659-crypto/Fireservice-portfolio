@@ -1,4 +1,4 @@
-{% load static %}
+{% load website_extras %}
 <!-- ===== Client logos ===== -->
 <section class="section">
   <div class="container">
@@ -8,32 +8,13 @@
       <h2>{{ heading_title }}</h2>
     </div>
     {% endif %}
+    {% get_client_logos as client_logos %}
     <div class="logo-grid">
-      <div class="logo-card"><img src="{% static 'image/client-ongc.png' %}" alt="ONGC"></div>
-      <div class="logo-card"><img src="{% static 'image/client-cisf.png' %}" alt="CISF"></div>
-      <div class="logo-card"><img src="{% static 'image/client-shell.png' %}" alt="Shell"></div>
-      <div class="logo-card"><img src="{% static 'image/client-jll.png' %}" alt="JLL"></div>
-      <div class="logo-card"><img src="{% static 'image/client-raymond.png' %}" alt="Raymond"></div>
-      <div class="logo-card"><img src="{% static 'image/client-cinepolis.png' %}" alt="Cinepolis"></div>
-      <div class="logo-card"><img src="{% static 'image/client-goodwill-developers.png' %}" alt="Goodwill Developers"></div>
-      <div class="logo-card"><img src="{% static 'image/client-hdfc-bank.png' %}" alt="HDFC Bank"></div>
-      <div class="logo-card"><img src="{% static 'image/client-crown-worldwide.png' %}" alt="Crown Worldwide Group"></div>
-      <div class="logo-card"><img src="{% static 'image/client-devkrupa-enterprises.png' %}" alt="Devkrupa Enterprises"></div>
-      <div class="logo-card"><img src="{% static 'image/client-petronas.png' %}" alt="Petronas"></div>
-      <div class="logo-card"><img src="{% static 'image/client-neptune.png' %}" alt="Neptune"></div>
-      <div class="logo-card"><img src="{% static 'image/client-basf.png' %}" alt="BASF"></div>
-      <div class="logo-card"><img src="{% static 'image/client-paytm.png' %}" alt="Paytm"></div>
-      <div class="logo-card"><img src="{% static 'image/client-inorbit.png' %}" alt="Inorbit"></div>
-      <div class="logo-card"><img src="{% static 'image/client-aon.png' %}" alt="Aon"></div>
-      <div class="logo-card"><img src="{% static 'image/client-ball.png' %}" alt="Ball Corporation"></div>
-      <div class="logo-card"><img src="{% static 'image/client-oetiker.png' %}" alt="Oetiker"></div>
-      <div class="logo-card"><img src="{% static 'image/client-pnb.png' %}" alt="Punjab National Bank"></div>
-      <div class="logo-card"><img src="{% static 'image/client-pidilite.png' %}" alt="Pidilite"></div>
-      <div class="logo-card"><img src="{% static 'image/client-bharat-gas.png' %}" alt="Bharat Gas"></div>
-      <div class="logo-card"><img src="{% static 'image/client-bharat-petroleum.png' %}" alt="Bharat Petroleum"></div>
-      <div class="logo-card"><img src="{% static 'image/client-kesar-group.png' %}" alt="Kesar Group"></div>
-      <div class="logo-card"><img src="{% static 'image/client-g-square.png' %}" alt="G Square"></div>
-      <div class="logo-card"><img src="{% static 'image/client-scottish-chemical-industries.png' %}" alt="Scottish Chemical Industries"></div>
+      {% for logo in client_logos %}
+      <div class="logo-card">
+        <img src="{{ logo.image.url }}" alt="{{ logo.name }}">
+      </div>
+      {% endfor %}
     </div>
   </div>
 </section>

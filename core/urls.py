@@ -3,12 +3,17 @@ from django.urls import path
 
 from core.api_views import (
     AdminHubLoginAPIView,
+    ClientLogoDetailView,
+    ClientLogoListCreateView,
     ConsultationRequestCreateView,
     ContactMessageCreateView,
+    MissionVisionItemDetailView,
+    MissionVisionItemListView,
     SurveyRequestCreateView,
 )
 from core.views import (
     AboutView,
+    AdminHubClienteleView,
     AdminHubHomeView,
     AdminHubLoginView,
     BrochureView,
@@ -39,5 +44,10 @@ urlpatterns = [
     path('admin-hub/', AdminHubLoginView.as_view(), name='adminhub-login'),
     path('api/admin-hub/login/', AdminHubLoginAPIView.as_view(), name='api-adminhub-login'),
     path('admin-hub/home/', AdminHubHomeView.as_view(), name='adminhub-home'),
+    path('admin-hub/clientele/', AdminHubClienteleView.as_view(), name='adminhub-clientele'),
     path('admin-hub/logout/', LogoutView.as_view(next_page='adminhub-login'), name='adminhub-logout'),
+    path('api/admin-hub/mission-vision/', MissionVisionItemListView.as_view(), name='api-adminhub-mission-vision-list'),
+    path('api/admin-hub/mission-vision/<int:pk>/', MissionVisionItemDetailView.as_view(), name='api-adminhub-mission-vision-detail'),
+    path('api/admin-hub/client-logos/', ClientLogoListCreateView.as_view(), name='api-adminhub-client-logos-list'),
+    path('api/admin-hub/client-logos/<int:pk>/', ClientLogoDetailView.as_view(), name='api-adminhub-client-logos-detail'),
 ]

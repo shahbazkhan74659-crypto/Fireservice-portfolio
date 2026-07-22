@@ -25,6 +25,8 @@ export default defineConfig({
         'contact-form': resolve(__dirname, 'src/islands/contact-form/main.tsx'),
         'consultation-form': resolve(__dirname, 'src/islands/consultation-form/main.tsx'),
         'admin-hub-login': resolve(__dirname, 'src/islands/admin-hub-login/main.tsx'),
+        'admin-mission-vision': resolve(__dirname, 'src/islands/admin-mission-vision/main.tsx'),
+        'admin-client-logos': resolve(__dirname, 'src/islands/admin-client-logos/main.tsx'),
       },
     },
   },

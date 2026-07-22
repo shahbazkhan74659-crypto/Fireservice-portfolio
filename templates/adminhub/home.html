@@ -1,6 +1,13 @@
 {% extends "adminhub/base.html" %}
+{% load django_vite %}
 
 {% block title %}Admin Home | Iconic Techno Service{% endblock %}
+
+{% block extra_head %}
+  {% vite_hmr_client %}
+  {% vite_react_refresh %}
+  {% vite_asset 'src/islands/admin-mission-vision/main.tsx' %}
+{% endblock %}
 
 {% block content %}
 <section class="section">
@@ -8,6 +15,18 @@
     <p class="eyebrow">Admin Hub</p>
     <h2>Welcome, {{ request.user.username }}</h2>
     <p class="section__sub">This is a placeholder dashboard. Services, Certifications, Testimonials, and Client Logo management will be built here next.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section__head">
+      <p class="eyebrow">What Drives Us</p>
+      <h2>Mission &amp; Vision</h2>
+    </div>
+    <div id="admin-mission-vision-root">
+      <noscript>Please enable JavaScript to manage Mission &amp; Vision content.</noscript>
+    </div>
   </div>
 </section>
 {% endblock %}

@@ -34,6 +34,7 @@ INSTALLED_APPS = [
 
     'core',
     'leads',
+    'website',
 ]
 
 MIDDLEWARE = [

@@ -1,0 +1,21 @@
+{% load website_extras %}
+{% get_client_logos as client_logos %}
+<!-- ===== Clientele intro ===== -->
+<section class="section section--flush-bottom clientele-intro{% if no_bg %} clientele-intro--no-bg{% endif %}">
+  {% if not no_bg %}
+  <div class="clientele-intro__bg"></div>
+  <div class="clientele-intro__overlay"></div>
+  {% endif %}
+  <div class="container section__head clientele-intro__content">
+    <p class="eyebrow">Clientele</p>
+    <h2>Trusted by Organizations Across Industries</h2>
+    <p class="section__sub">From oil &amp; gas majors and national banks to manufacturers, retailers and real estate developers, our fire &amp; life-safety systems protect sites for organizations of every scale.</p>
+  </div>
+</section>
+
+<div class="stats">
+  <div class="container stats__grid stats__grid--2">
+    <div class="stat">{% if static_stats %}<span class="stat__num">10</span>{% else %}<span class="stat__num" data-count="10">0</span>{% endif %}<span class="stat__suffix">+</span><span class="stat__label">Years Experience</span></div>
+    <div class="stat">{% if static_stats %}<span class="stat__num">{{ client_logos|length }}</span>{% else %}<span class="stat__num" data-count="{{ client_logos|length }}">0</span>{% endif %}<span class="stat__label">Total Clients</span></div>
+  </div>
+</div>
