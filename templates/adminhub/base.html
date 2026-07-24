@@ -25,6 +25,7 @@
       </a>
       <nav class="nav">
         <a href="{% url 'adminhub-home' %}" class="{% if request.resolver_match.url_name == 'adminhub-home' %}active{% endif %}">Home</a>
+        <a href="{% url 'adminhub-leads' %}" class="{% if request.resolver_match.url_name == 'adminhub-leads' %}active{% endif %}">Leads</a>
         <a href="{% url 'adminhub-clientele' %}" class="{% if request.resolver_match.url_name == 'adminhub-clientele' %}active{% endif %}">Clientele</a>
         <a href="{% url 'adminhub-services' %}" class="{% if request.resolver_match.url_name == 'adminhub-services' %}active{% endif %}">Services</a>
         <a href="{% url 'adminhub-certifications' %}" class="{% if request.resolver_match.url_name == 'adminhub-certifications' %}active{% endif %}">Certifications</a>

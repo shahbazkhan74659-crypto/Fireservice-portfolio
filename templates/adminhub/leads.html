@@ -1,0 +1,220 @@
+{% extends "adminhub/base.html" %}
+
+{% block title %}Leads | Admin Hub | Iconic Techno Service{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <p class="eyebrow">Admin Hub</p>
+    <h2>Leads</h2>
+    <p class="section__sub">Every survey request, contact message, and consultation request received through the public site, newest first.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section__head">
+      <h2>Survey Requests</h2>
+    </div>
+    <div class="cert-table-wrap">
+      <table class="cert-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Contact</th>
+            <th>Address</th>
+            <th>Problem</th>
+            <th>Received</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for lead in survey_requests %}
+          <tr id="lead-surveyrequest-{{ lead.pk }}">
+            <td class="cert-table__name">{{ lead.name }}</td>
+            <td>{{ lead.email }}</td>
+            <td class="cert-table__desc">{{ lead.address|truncatechars:60 }}</td>
+            <td class="cert-table__desc">{{ lead.problem|truncatechars:60 }}</td>
+            <td class="cert-table__meta">{{ lead.created_at|timesince }} ago</td>
+            <td class="cert-table__action">
+              <button type="button" class="btn btn--outline lead-view-btn"
+                      data-type="Survey Request"
+                      data-name="{{ lead.name }}"
+                      data-email="{{ lead.email }}"
+                      data-address="{{ lead.address }}"
+                      data-problem="{{ lead.problem }}"
+                      data-why="{{ lead.why_survey }}"
+                      data-received="{{ lead.created_at|date:'M j, Y, g:i A' }}"
+                      data-admin-url="/admin/leads/surveyrequest/{{ lead.pk }}/change/">View</button>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" class="cert-table__desc">No survey requests yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section__head">
+      <h2>Contact Messages</h2>
+    </div>
+    <div class="cert-table-wrap">
+      <table class="cert-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Contact</th>
+            <th>Service</th>
+            <th>Message</th>
+            <th>Received</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for lead in contact_messages %}
+          <tr id="lead-contactmessage-{{ lead.pk }}">
+            <td class="cert-table__name">{{ lead.name }}</td>
+            <td>{{ lead.phone }}<br>{{ lead.email }}</td>
+            <td class="cert-table__meta">{{ lead.get_service_display }}</td>
+            <td class="cert-table__desc">{{ lead.message|truncatechars:60|default:"—" }}</td>
+            <td class="cert-table__meta">{{ lead.created_at|timesince }} ago</td>
+            <td class="cert-table__action">
+              <button type="button" class="btn btn--outline lead-view-btn"
+                      data-type="Contact Message"
+                      data-name="{{ lead.name }}"
+                      data-phone="{{ lead.phone }}"
+                      data-email="{{ lead.email }}"
+                      data-service="{{ lead.get_service_display }}"
+                      data-message="{{ lead.message }}"
+                      data-received="{{ lead.created_at|date:'M j, Y, g:i A' }}"
+                      data-admin-url="/admin/leads/contactmessage/{{ lead.pk }}/change/">View</button>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" class="cert-table__desc">No contact messages yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section__head">
+      <h2>Consultation Requests</h2>
+    </div>
+    <div class="cert-table-wrap">
+      <table class="cert-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Received</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for lead in consultation_requests %}
+          <tr id="lead-consultationrequest-{{ lead.pk }}">
+            <td class="cert-table__name">{{ lead.name }}</td>
+            <td>{{ lead.phone }}</td>
+            <td class="cert-table__meta">{{ lead.created_at|timesince }} ago</td>
+            <td class="cert-table__action">
+              <button type="button" class="btn btn--outline lead-view-btn"
+                      data-type="Consultation Request"
+                      data-name="{{ lead.name }}"
+                      data-phone="{{ lead.phone }}"
+                      data-received="{{ lead.created_at|date:'M j, Y, g:i A' }}"
+                      data-admin-url="/admin/leads/consultationrequest/{{ lead.pk }}/change/">View</button>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="cert-table__desc">No consultation requests yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<div class="modal-overlay" id="leadModalOverlay" hidden>
+  <div class="modal modal--lead" role="dialog" aria-modal="true" aria-labelledby="leadModalTitle">
+    <button type="button" class="modal__close" id="leadModalClose" aria-label="Close">&times;</button>
+    <p class="lead-modal__type" id="leadModalType"></p>
+    <h3 class="modal__title" id="leadModalTitle"></h3>
+    <div class="lead-modal__fields" id="leadModalFields"></div>
+    <div class="lead-modal__footer">
+      <a href="#" id="leadModalAdminLink" class="btn btn--outline" target="_blank" rel="noopener">Open in Django Admin</a>
+      <button type="button" class="btn btn--primary" id="leadModalCloseBtn">Close</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var overlay = document.getElementById('leadModalOverlay');
+  var typeEl = document.getElementById('leadModalType');
+  var titleEl = document.getElementById('leadModalTitle');
+  var fieldsEl = document.getElementById('leadModalFields');
+  var adminLink = document.getElementById('leadModalAdminLink');
+
+  var FIELD_LABELS = {
+    email: 'Email',
+    phone: 'Phone',
+    address: 'Address',
+    service: 'Service Interested In',
+    problem: "What's the Problem?",
+    why: 'Why Should We Survey?',
+    message: 'Message',
+    received: 'Received'
+  };
+  var FIELD_ORDER = ['email', 'phone', 'address', 'service', 'problem', 'why', 'message', 'received'];
+
+  function openModal(btn) {
+    typeEl.textContent = btn.dataset.type || '';
+    titleEl.textContent = btn.dataset.name || '';
+    fieldsEl.textContent = '';
+    FIELD_ORDER.forEach(function (key) {
+      var value = btn.dataset[key];
+      if (!value) return;
+      var row = document.createElement('div');
+      row.className = 'lead-modal__field';
+      var label = document.createElement('span');
+      label.className = 'lead-modal__label';
+      label.textContent = FIELD_LABELS[key];
+      var val = document.createElement('p');
+      val.className = 'lead-modal__value';
+      val.textContent = value;
+      row.appendChild(label);
+      row.appendChild(val);
+      fieldsEl.appendChild(row);
+    });
+    adminLink.href = btn.dataset.adminUrl || '#';
+    overlay.hidden = false;
+  }
+
+  function closeModal() {
+    overlay.hidden = true;
+  }
+
+  document.querySelectorAll('.lead-view-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () { openModal(btn); });
+  });
+  document.getElementById('leadModalClose').addEventListener('click', closeModal);
+  document.getElementById('leadModalCloseBtn').addEventListener('click', closeModal);
+  overlay.addEventListener('click', function (e) {
+    if (e.target === overlay) closeModal();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !overlay.hidden) closeModal();
+  });
+});
+</script>
+{% endblock %}

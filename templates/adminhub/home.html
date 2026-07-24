@@ -3,11 +3,154 @@
 {% block title %}Admin Home | Iconic Techno Service{% endblock %}
 
 {% block content %}
+<div class="command-center">
+  <div class="command-center__header">
+    <div class="command-center__brand">
+      {% include "includes/logo.html" with light=True %}
+      <div class="command-center__brand-text">
+        <span class="command-center__title">Admin Hub</span>
+        <span class="command-center__subtitle">Dashboard Overview</span>
+      </div>
+    </div>
+    <p class="command-center__greeting">Welcome, {{ request.user.username }}</p>
+  </div>
+
+  <div class="command-center__meters">
+    {% for meter in lead_meters %}
+    <div class="cc-meter-card">
+      <div class="cc-meter" style="--pct:{{ meter.pct }}">
+        <div class="cc-meter__value">{{ meter.count }}</div>
+      </div>
+      <p class="cc-meter-card__label">{{ meter.label }}</p>
+      <p class="cc-meter-card__sub">{{ meter.pct }}% of leads</p>
+    </div>
+    {% endfor %}
+    <div class="cc-meter-card">
+      <div class="cc-meter" style="--pct:{{ content_completeness_pct }}">
+        <div class="cc-meter__value">{{ content_completeness_pct }}<span class="cc-meter__unit">%</span></div>
+      </div>
+      <p class="cc-meter-card__label">Content Completeness</p>
+      <p class="cc-meter-card__sub">{{ content_types_populated }} of {{ content_types_total }} types populated</p>
+    </div>
+  </div>
+
+  <div class="command-center__main">
+    <div class="cc-panel cc-panel--chart">
+      <div class="cc-panel__head">
+        <h3>Leads Received — Last 30 Days</h3>
+      </div>
+      <div class="cc-linechart-wrap">
+        <svg class="cc-linechart" viewBox="0 0 {{ chart_w }} {{ chart_h }}" preserveAspectRatio="none" aria-hidden="true">
+          <line class="cc-linechart__grid" x1="0" y1="{{ chart_h }}" x2="{{ chart_w }}" y2="{{ chart_h }}"></line>
+          <path class="cc-linechart__area" d="{{ lead_trend_area_path }}"></path>
+          <path class="cc-linechart__line" d="{{ lead_trend_path }}"></path>
+          {% for pt in lead_trend_points %}
+          <circle class="cc-linechart__dot" cx="{{ pt.x }}" cy="{{ pt.y }}"></circle>
+          <circle class="cc-linechart__hit" cx="{{ pt.x }}" cy="{{ pt.y }}" r="12"
+                  data-date="{{ pt.date|date:'M j' }}" data-count="{{ pt.count }}"></circle>
+          {% endfor %}
+        </svg>
+        {% for pt in lead_trend_points %}
+        {% if pt.peak %}
+        <div class="cc-linechart__peak-label" style="left:{{ pt.x_pct }}%;top:{{ pt.y_pct }}%;">{{ pt.date|date:'M j' }}</div>
+        {% endif %}
+        {% endfor %}
+      </div>
+      <div class="cc-tooltip" id="ccTrendTooltip" hidden></div>
+    </div>
+
+    <div class="cc-panel cc-panel--activity">
+      <div class="cc-panel__head">
+        <h3>Recent Activity</h3>
+      </div>
+      <ul class="cc-activity">
+        {% for item in recent_activity %}
+        <li class="cc-activity__row">
+          <a href="{{ item.leads_url }}" class="cc-activity__link">
+            <span class="cc-activity__type">{{ item.type }}</span>
+            <span class="cc-activity__name">{{ item.name }}</span>
+            <span class="cc-activity__time">{{ item.created_at|timesince }} ago</span>
+          </a>
+        </li>
+        {% empty %}
+        <li class="cc-activity__empty">No leads yet.</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="cc-panel cc-panel--counter">
+      <div class="cc-panel__head">
+        <h3>Total Leads</h3>
+      </div>
+      <div class="cc-hero">{{ total_leads }}</div>
+      <p class="cc-hero__sub">{{ leads_last_7_days }} in the last 7 days</p>
+    </div>
+  </div>
+</div>
+
 <section class="section">
   <div class="container">
-    <p class="eyebrow">Admin Hub</p>
-    <h2>Welcome, {{ request.user.username }}</h2>
-    <p class="section__sub">Certifications and Testimonials management will be built here next.</p>
+    <div class="section__head">
+      <h2>Leads — Daily Breakdown (Last 30 Days)</h2>
+    </div>
+    <div class="cert-table-wrap">
+      <table class="cert-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Survey Requests</th>
+            <th>Contact Messages</th>
+            <th>Consultation Requests</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for day in daily_breakdown %}
+          <tr>
+            <td class="cert-table__meta">{{ day.date|date:'M j, Y' }}</td>
+            <td>{{ day.survey }}</td>
+            <td>{{ day.contact }}</td>
+            <td>{{ day.consultation }}</td>
+            <td class="cert-table__name">{{ day.total }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
 </section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var tooltip = document.getElementById('ccTrendTooltip');
+  var chart = document.querySelector('.cc-linechart');
+  if (!tooltip || !chart) return;
+
+  document.querySelectorAll('.cc-linechart__hit').forEach(function (hit) {
+    hit.addEventListener('pointerenter', function (e) {
+      var date = hit.getAttribute('data-date');
+      var count = hit.getAttribute('data-count');
+      tooltip.textContent = '';
+      var value = document.createElement('strong');
+      value.textContent = count + (count === '1' ? ' lead' : ' leads');
+      var label = document.createElement('span');
+      label.textContent = date;
+      tooltip.appendChild(value);
+      tooltip.appendChild(document.createElement('br'));
+      tooltip.appendChild(label);
+      tooltip.hidden = false;
+    });
+    hit.addEventListener('pointermove', function (e) {
+      var rect = chart.getBoundingClientRect();
+      tooltip.style.left = (e.clientX - rect.left + 12) + 'px';
+      tooltip.style.top = (e.clientY - rect.top - 12) + 'px';
+    });
+    hit.addEventListener('pointerleave', function () {
+      tooltip.hidden = true;
+    });
+  });
+});
+</script>
 {% endblock %}
