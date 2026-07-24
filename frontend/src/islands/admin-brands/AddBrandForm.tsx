@@ -1,5 +1,5 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react'
-import { addClientLogoSchema, type AddClientLogoErrors, type AddClientLogoInput, type ClientLogo } from './schema'
+import { addBrandSchema, type AddBrandErrors, type AddBrandInput, type Brand } from './schema'
 import { getCsrfToken } from '../../lib/csrf'
 import { readErrorMessage } from '../../lib/api'
 import Modal from '../../lib/Modal'
@@ -7,14 +7,14 @@ import Modal from '../../lib/Modal'
 type SubmitState = 'idle' | 'submitting'
 
 interface Props {
-  onAdded: (logo: ClientLogo) => void
+  onAdded: (brand: Brand) => void
 }
 
-export default function AddClientLogoForm({ onAdded }: Props) {
+export default function AddBrandForm({ onAdded }: Props) {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [file, setFile] = useState<File | null>(null)
-  const [errors, setErrors] = useState<AddClientLogoErrors>({})
+  const [errors, setErrors] = useState<AddBrandErrors>({})
   const [state, setState] = useState<SubmitState>('idle')
   const [serverError, setServerError] = useState<string | null>(null)
 
@@ -39,11 +39,11 @@ export default function AddClientLogoForm({ onAdded }: Props) {
     setServerError(null)
 
     const values = { name, image: file }
-    const result = addClientLogoSchema.safeParse(values)
+    const result = addBrandSchema.safeParse(values)
     if (!result.success) {
-      const fieldErrors: AddClientLogoErrors = {}
+      const fieldErrors: AddBrandErrors = {}
       for (const issue of result.error.issues) {
-        const key = issue.path[0] as keyof AddClientLogoInput
+        const key = issue.path[0] as keyof AddBrandInput
         if (!fieldErrors[key]) fieldErrors[key] = issue.message
       }
       setErrors(fieldErrors)
@@ -57,7 +57,7 @@ export default function AddClientLogoForm({ onAdded }: Props) {
     formData.append('image', result.data.image)
 
     try {
-      const res = await fetch('/api/admin-hub/client-logos/', {
+      const res = await fetch('/api/admin-hub/brands/', {
         method: 'POST',
         headers: { 'X-CSRFToken': getCsrfToken() },
         credentials: 'same-origin',
@@ -68,7 +68,7 @@ export default function AddClientLogoForm({ onAdded }: Props) {
         setState('idle')
         return
       }
-      const created: ClientLogo = await res.json()
+      const created: Brand = await res.json()
       onAdded(created)
       reset()
       setOpen(false)
@@ -85,12 +85,12 @@ export default function AddClientLogoForm({ onAdded }: Props) {
         <button type="button" className="btn btn--primary" onClick={() => setOpen(true)}>+ Add</button>
       </div>
 
-      <Modal open={open} onClose={closeModal} title="Add Client Logo">
+      <Modal open={open} onClose={closeModal} title="Add Brand">
         <form className="logo-add-form" onSubmit={handleSubmit} noValidate>
           <div className="field">
-            <label htmlFor="new-logo-name">Name</label>
+            <label htmlFor="new-brand-name">Name</label>
             <input
-              id="new-logo-name"
+              id="new-brand-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -99,9 +99,9 @@ export default function AddClientLogoForm({ onAdded }: Props) {
             {errors.name && <p className="form-note">{errors.name}</p>}
           </div>
           <div className="field">
-            <label htmlFor="new-logo-file">Logo Image</label>
+            <label htmlFor="new-brand-file">Brand Logo Image</label>
             <input
-              id="new-logo-file"
+              id="new-brand-file"
               type="file"
               accept="image/*"
               onChange={handleFileChange}
@@ -115,7 +115,7 @@ export default function AddClientLogoForm({ onAdded }: Props) {
 
           <div className="logo-card__admin-actions">
             <button type="submit" className="btn btn--primary" disabled={state === 'submitting'}>
-              {state === 'submitting' ? 'Adding…' : 'Add Logo'}
+              {state === 'submitting' ? 'Adding…' : 'Add Brand'}
             </button>
             <button type="button" className="btn btn--outline" onClick={closeModal} disabled={state === 'submitting'}>
               Cancel

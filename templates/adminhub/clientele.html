@@ -6,6 +6,7 @@
 {% block extra_head %}
   {% vite_hmr_client %}
   {% vite_react_refresh %}
+  {% vite_asset 'src/islands/admin-brands/main.tsx' %}
   {% vite_asset 'src/islands/admin-client-logos/main.tsx' %}
 {% endblock %}
 
@@ -13,6 +14,21 @@
 {% include "includes/clientele-intro.html" with no_bg=True static_stats=True %}
 <section class="section">
   <div class="container">
+    <div class="section__head">
+      <p class="eyebrow">Available Brands</p>
+      <h2>Brands We Work With</h2>
+    </div>
+    <div id="admin-brands-root">
+      <noscript>Please enable JavaScript to manage brands.</noscript>
+    </div>
+  </div>
+</section>
+<section class="section">
+  <div class="container">
+    <div class="section__head">
+      <p class="eyebrow">Our Clients</p>
+      <h2>Client Logos</h2>
+    </div>
     <div id="admin-client-logos-root">
       <noscript>Please enable JavaScript to manage client logos.</noscript>
     </div>

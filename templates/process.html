@@ -6,14 +6,20 @@
 {% block content %}
 
   <!-- ===== Process intro ===== -->
-  <section class="section" id="process">
-    <div class="container">
-      <div class="section__head">
-        <p class="eyebrow">Our Process</p>
-        <h2>Our Project Execution Process</h2>
-        <p class="section__sub">Every project moves through the same seven phases &mdash; from first inquiry to handover and ongoing maintenance &mdash; so nothing gets missed along the way.</p>
-      </div>
+  <section class="section process-intro" id="process">
+    <div class="process-intro__bg placeholder-img" data-placeholder="Photo: engineers reviewing project plans on site"></div>
+    <div class="process-intro__overlay"></div>
+    <div class="container section__head process-intro__content">
+      <p class="eyebrow">Our Process</p>
+      <h2>Our Project Execution Process</h2>
+      <p class="section__sub">Every project moves through the same seven phases &mdash; from first inquiry to handover and ongoing maintenance &mdash; so nothing gets missed along the way.</p>
+    </div>
+  </section>
 
+  {% include "includes/consultationstats.html" %}
+
+  <section class="section">
+    <div class="container">
       <div class="phase-list">
         <div class="phase">
           <div class="phase__marker">
@@ -200,14 +206,6 @@
     </div>
   </section>
 
-  <!-- ===== CTA ===== -->
-  <section class="section section--dark">
-    <div class="container section__head">
-      <p class="eyebrow eyebrow--light">Start Your Project</p>
-      <h2 class="text-light">Ready to Begin Phase One?</h2>
-      <p class="section__sub section__sub--light">Get a free, no-obligation site survey and see how our proven process applies to your facility.</p>
-      <a href="/survey/" class="btn btn--primary btn--lg">Get Free Site Survey</a>
-    </div>
-  </section>
+  {% include "includes/survey-cta.html" with cta_eyebrow="Start Your Project" cta_heading="Ready to Begin Phase One?" cta_lead="Get a free, no-obligation site survey and see how our proven process applies to your facility." %}
 
 {% endblock %}

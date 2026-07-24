@@ -15,15 +15,10 @@
       <p class="section__sub">Iconic Techno Service is an innovation-driven company dedicated to fire safety &mdash; engaged in training, product support and system design, backed by engineering expertise, efficient operations and consistent quality.</p>
     </div>
 
-    <div class="stats">
-      <div class="container stats__grid stats__grid--2">
-        <div class="stat"><span class="stat__num" data-count="10">0</span><span class="stat__suffix">+</span><span class="stat__label">Years Experience</span></div>
-        <div class="stat"><span class="stat__num" data-count="14">0</span><span class="stat__label">Team Members</span></div>
-      </div>
-    </div>
+    {% include "includes/aboutstats.html" %}
   </section>
 
-  {% include "includes/who-we-are.html" %}
+  {% include "includes/who-we-are.html" with cta_url="/consultation/" %}
 
   {% include "includes/mission-vision.html" %}
 

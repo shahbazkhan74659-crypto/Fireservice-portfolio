@@ -14,8 +14,8 @@ from leads.serializers import (
     ContactMessageSerializer,
     SurveyRequestSerializer,
 )
-from website.models import ClientLogo, MissionVisionItem
-from website.serializers import ClientLogoSerializer, MissionVisionItemSerializer
+from website.models import Brand, ClientLogo, MissionVisionItem
+from website.serializers import BrandSerializer, ClientLogoSerializer, MissionVisionItemSerializer
 
 
 class SurveyRequestCreateView(CreateAPIView):
@@ -91,4 +91,20 @@ class ClientLogoListCreateView(ListCreateAPIView):
 class ClientLogoDetailView(RetrieveUpdateDestroyAPIView):
     queryset = ClientLogo.objects.all()
     serializer_class = ClientLogoSerializer
+    parser_classes = [MultiPartParser, FormParser]
+
+
+class BrandListCreateView(ListCreateAPIView):
+    queryset = Brand.objects.all()
+    serializer_class = BrandSerializer
+    parser_classes = [MultiPartParser, FormParser]  # uploads arrive as multipart, not JSON
+
+    def perform_create(self, serializer):
+        next_order = (Brand.objects.aggregate(Max('order'))['order__max'] or 0) + 1
+        serializer.save(order=next_order)
+
+
+class BrandDetailView(RetrieveUpdateDestroyAPIView):
+    queryset = Brand.objects.all()
+    serializer_class = BrandSerializer
     parser_classes = [MultiPartParser, FormParser]

@@ -74,3 +74,9 @@ class AdminHubClienteleView(LoginRequiredMixin, TemplateView):
     # ensure_csrf_cookie needed — this page hosts the Client Logo management
     # React island, which POSTs/PATCHes/DELETEs with an X-CSRFToken header.
     template_name = 'adminhub/clientele.html'
+
+
+class AdminHubCounterView(LoginRequiredMixin, TemplateView):
+    # Bare placeholder, same as AdminHubHomeView originally was — no form/
+    # island yet, so no ensure_csrf_cookie needed until one is added.
+    template_name = 'adminhub/counter.html'

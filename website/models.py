@@ -49,3 +49,33 @@ def delete_client_logo_file_on_replace(sender, instance, **kwargs):
         return
     if old_image and old_image != instance.image:
         old_image.delete(save=False)
+
+
+class Brand(models.Model):
+    name = models.CharField(max_length=120)
+    image = models.ImageField(upload_to='brands/')
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['order', 'id']
+
+    def __str__(self):
+        return self.name
+
+
+@receiver(post_delete, sender=Brand)
+def delete_brand_file_on_delete(sender, instance, **kwargs):
+    if instance.image:
+        instance.image.delete(save=False)
+
+
+@receiver(pre_save, sender=Brand)
+def delete_brand_file_on_replace(sender, instance, **kwargs):
+    if not instance.pk:
+        return
+    try:
+        old_image = Brand.objects.get(pk=instance.pk).image
+    except Brand.DoesNotExist:
+        return
+    if old_image and old_image != instance.image:
+        old_image.delete(save=False)

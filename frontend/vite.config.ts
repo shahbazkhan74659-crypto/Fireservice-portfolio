@@ -27,6 +27,7 @@ export default defineConfig({
         'admin-hub-login': resolve(__dirname, 'src/islands/admin-hub-login/main.tsx'),
         'admin-mission-vision': resolve(__dirname, 'src/islands/admin-mission-vision/main.tsx'),
         'admin-client-logos': resolve(__dirname, 'src/islands/admin-client-logos/main.tsx'),
+        'admin-brands': resolve(__dirname, 'src/islands/admin-brands/main.tsx'),
       },
     },
   },

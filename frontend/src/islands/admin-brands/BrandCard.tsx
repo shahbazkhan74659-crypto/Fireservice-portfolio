@@ -1,9 +1,9 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react'
 import {
-  editClientLogoSchema,
-  type ClientLogo,
-  type EditClientLogoInput,
-  type EditClientLogoErrors,
+  editBrandSchema,
+  type Brand,
+  type EditBrandInput,
+  type EditBrandErrors,
 } from './schema'
 import { getCsrfToken } from '../../lib/csrf'
 import { readErrorMessage } from '../../lib/api'
@@ -14,21 +14,21 @@ type Dialog = 'none' | 'edit' | 'delete'
 type SaveState = 'idle' | 'saving' | 'deleting'
 
 interface Props {
-  logo: ClientLogo
-  onUpdated: (logo: ClientLogo) => void
+  brand: Brand
+  onUpdated: (brand: Brand) => void
   onDeleted: (id: number) => void
 }
 
-export default function ClientLogoCard({ logo, onUpdated, onDeleted }: Props) {
+export default function BrandCard({ brand, onUpdated, onDeleted }: Props) {
   const [dialog, setDialog] = useState<Dialog>('none')
-  const [name, setName] = useState(logo.name)
+  const [name, setName] = useState(brand.name)
   const [file, setFile] = useState<File | null>(null)
-  const [errors, setErrors] = useState<EditClientLogoErrors>({})
+  const [errors, setErrors] = useState<EditBrandErrors>({})
   const [saveState, setSaveState] = useState<SaveState>('idle')
   const [serverError, setServerError] = useState<string | null>(null)
 
   function startEdit() {
-    setName(logo.name)
+    setName(brand.name)
     setFile(null)
     setErrors({})
     setServerError(null)
@@ -48,12 +48,12 @@ export default function ClientLogoCard({ logo, onUpdated, onDeleted }: Props) {
     e.preventDefault()
     setServerError(null)
 
-    const values: EditClientLogoInput = { name, image: file ?? undefined }
-    const result = editClientLogoSchema.safeParse(values)
+    const values: EditBrandInput = { name, image: file ?? undefined }
+    const result = editBrandSchema.safeParse(values)
     if (!result.success) {
-      const fieldErrors: EditClientLogoErrors = {}
+      const fieldErrors: EditBrandErrors = {}
       for (const issue of result.error.issues) {
-        const key = issue.path[0] as keyof EditClientLogoInput
+        const key = issue.path[0] as keyof EditBrandInput
         if (!fieldErrors[key]) fieldErrors[key] = issue.message
       }
       setErrors(fieldErrors)
@@ -67,7 +67,7 @@ export default function ClientLogoCard({ logo, onUpdated, onDeleted }: Props) {
     if (result.data.image) formData.append('image', result.data.image)
 
     try {
-      const res = await fetch(`/api/admin-hub/client-logos/${logo.id}/`, {
+      const res = await fetch(`/api/admin-hub/brands/${brand.id}/`, {
         method: 'PATCH',
         headers: { 'X-CSRFToken': getCsrfToken() },
         credentials: 'same-origin',
@@ -78,7 +78,7 @@ export default function ClientLogoCard({ logo, onUpdated, onDeleted }: Props) {
         setSaveState('idle')
         return
       }
-      const updated: ClientLogo = await res.json()
+      const updated: Brand = await res.json()
       onUpdated(updated)
       setSaveState('idle')
       setDialog('none')
@@ -92,7 +92,7 @@ export default function ClientLogoCard({ logo, onUpdated, onDeleted }: Props) {
     setSaveState('deleting')
     setServerError(null)
     try {
-      const res = await fetch(`/api/admin-hub/client-logos/${logo.id}/`, {
+      const res = await fetch(`/api/admin-hub/brands/${brand.id}/`, {
         method: 'DELETE',
         headers: { 'X-CSRFToken': getCsrfToken() },
         credentials: 'same-origin',
@@ -102,7 +102,7 @@ export default function ClientLogoCard({ logo, onUpdated, onDeleted }: Props) {
         setSaveState('idle')
         return
       }
-      onDeleted(logo.id)
+      onDeleted(brand.id)
     } catch {
       setServerError('Network error. Check your connection and try again.')
       setSaveState('idle')
@@ -111,7 +111,7 @@ export default function ClientLogoCard({ logo, onUpdated, onDeleted }: Props) {
 
   return (
     <div className="logo-card logo-card--admin">
-      <img src={logo.image} alt={logo.name} />
+      <img src={brand.image} alt={brand.name} />
 
       <div className="logo-card__admin-actions">
         <button type="button" className="btn btn--outline btn--icon" onClick={startEdit} aria-label="Edit">
@@ -122,12 +122,12 @@ export default function ClientLogoCard({ logo, onUpdated, onDeleted }: Props) {
         </button>
       </div>
 
-      <Modal open={dialog === 'edit'} onClose={closeDialog} title="Edit Client Logo">
+      <Modal open={dialog === 'edit'} onClose={closeDialog} title="Edit Brand">
         <form onSubmit={handleSave} noValidate>
           <div className="field">
-            <label htmlFor={`logo-name-${logo.id}`}>Name</label>
+            <label htmlFor={`brand-name-${brand.id}`}>Name</label>
             <input
-              id={`logo-name-${logo.id}`}
+              id={`brand-name-${brand.id}`}
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -136,9 +136,9 @@ export default function ClientLogoCard({ logo, onUpdated, onDeleted }: Props) {
             {errors.name && <p className="form-note">{errors.name}</p>}
           </div>
           <div className="field">
-            <label htmlFor={`logo-file-${logo.id}`}>Replace Image (optional)</label>
+            <label htmlFor={`brand-file-${brand.id}`}>Replace Image (optional)</label>
             <input
-              id={`logo-file-${logo.id}`}
+              id={`brand-file-${brand.id}`}
               type="file"
               accept="image/*"
               onChange={handleFileChange}
@@ -161,8 +161,8 @@ export default function ClientLogoCard({ logo, onUpdated, onDeleted }: Props) {
         </form>
       </Modal>
 
-      <Modal open={dialog === 'delete'} onClose={closeDialog} title="Delete Client Logo">
-        <p className="modal__body">Delete &quot;{logo.name}&quot;? This can&apos;t be undone.</p>
+      <Modal open={dialog === 'delete'} onClose={closeDialog} title="Delete Brand">
+        <p className="modal__body">Delete &quot;{brand.name}&quot;? This can&apos;t be undone.</p>
 
         {serverError && <p className="form-note">{serverError}</p>}
 

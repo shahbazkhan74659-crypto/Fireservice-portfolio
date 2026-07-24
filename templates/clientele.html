@@ -7,16 +7,10 @@
 
   {% include "includes/clientele-intro.html" %}
 
-  {% include "includes/client-logos.html" %}
+  {% include "includes/brands.html" %}
 
-  <!-- ===== CTA ===== -->
-  <section class="section section--dark">
-    <div class="container section__head">
-      <p class="eyebrow eyebrow--light">Join Our Clientele</p>
-      <h2 class="text-light">Ready to Protect Your Site?</h2>
-      <p class="section__sub section__sub--light">Get a free, no-obligation site survey and see how we can build a fire safety plan tailored to your facility.</p>
-      <a href="/survey/" class="btn btn--primary btn--lg">Get Free Site Survey</a>
-    </div>
-  </section>
+  {% include "includes/client-logos.html" with heading_eyebrow="Our Clients" heading_title="Organizations We've Worked With" %}
+
+  {% include "includes/survey-cta.html" with cta_eyebrow="Join Our Clientele" cta_heading="Ready to Protect Your Site?" cta_lead="Get a free, no-obligation site survey and see how we can build a fire safety plan tailored to your facility." %}
 
 {% endblock %}

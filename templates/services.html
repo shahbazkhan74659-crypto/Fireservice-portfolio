@@ -7,14 +7,20 @@
 {% block content %}
 
   <!-- ===== Intro ===== -->
-  <section class="section" id="services">
-    <div class="container">
-      <div class="section__head">
-        <p class="eyebrow">Our Services</p>
-        <h2>Complete Fire &amp; Life-Safety Solutions</h2>
-        <p class="section__sub">One partner for detection, suppression, extinguishers, safety equipment and electrical work &mdash; sales, installation and ongoing service, all under one roof.</p>
-      </div>
+  <section class="section services-intro" id="services">
+    <div class="services-intro__bg placeholder-img" data-placeholder="Photo: technician servicing fire safety equipment"></div>
+    <div class="services-intro__overlay"></div>
+    <div class="container section__head services-intro__content">
+      <p class="eyebrow">Our Services</p>
+      <h2>Complete Fire &amp; Life-Safety Solutions</h2>
+      <p class="section__sub">One partner for detection, suppression, extinguishers, safety equipment and electrical work &mdash; sales, installation and ongoing service, all under one roof.</p>
+    </div>
+  </section>
 
+  {% include "includes/consultationstats.html" %}
+
+  <section class="section">
+    <div class="container">
       <div class="grid grid--services">
         <div class="card">
           <div class="card__icon"><svg viewBox="0 0 24 24"><path d="M12 2 4 6v6c0 5 3.4 9.4 8 10 4.6-.6 8-5 8-10V6l-8-4zm0 4.2 5 2.5v3.3c0 3.6-2.3 6.9-5 7.8-2.7-.9-5-4.2-5-7.8V8.7l5-2.5z"/><path d="M11 8h2v5h-2zM11 15h2v2h-2z"/></svg></div>
@@ -93,120 +99,12 @@
     </div>
   </section>
 
-  <!-- ===== Our Products ===== -->
-  <section class="section">
-    <div class="container">
-      <div class="section__head">
-        <p class="eyebrow">Our Products</p>
-        <h2>Everything You Need, In One Place</h2>
-        <p class="section__sub">A wide range of certified fire safety products, sourced and serviced under one roof.</p>
-      </div>
+  {% include "includes/products.html" %}
 
-      <div class="product-grid">
-        <div class="product-card">
-          <div class="product-card__img"><img src="{% static 'image/product-fire-alarm-system.jpg' %}" alt="Fire Alarm System"></div>
-          <p class="product-card__caption">Fire Alarm System</p>
-        </div>
-        <div class="product-card">
-          <div class="product-card__img"><img src="{% static 'image/product-manual-call-point.jpg' %}" alt="Manual Call Point"></div>
-          <p class="product-card__caption">Manual Call Point</p>
-        </div>
-        <div class="product-card">
-          <div class="product-card__img"><img src="{% static 'image/product-fire-signage.jpg' %}" alt="Fire Signage"></div>
-          <p class="product-card__caption">Fire Signage</p>
-        </div>
-        <div class="product-card">
-          <div class="product-card__img"><img src="{% static 'image/product-fire-sprinklers.jpg' %}" alt="Fire Sprinklers"></div>
-          <p class="product-card__caption">Fire Sprinklers</p>
-        </div>
-        <div class="product-card">
-          <div class="product-card__img"><img src="{% static 'image/product-scba-set.jpg' %}" alt="SCBA Sets"></div>
-          <p class="product-card__caption">SCBA Sets</p>
-        </div>
-        <div class="product-card">
-          <div class="product-card__img"><img src="{% static 'image/product-ppe.jpg' %}" alt="PPE Products"></div>
-          <p class="product-card__caption">PPE Products</p>
-        </div>
-        <div class="product-card">
-          <div class="product-card__img"><img src="{% static 'image/product-fire-extinguishers.jpg' %}" alt="All Types of Fire Extinguishers"></div>
-          <p class="product-card__caption">All Types of Fire Extinguishers</p>
-        </div>
-        <div class="product-card">
-          <div class="product-card__img"><img src="{% static 'image/product-smoke-alarm.jpg' %}" alt="Smoke Alarms"></div>
-          <p class="product-card__caption">Smoke Alarms</p>
-        </div>
-        <div class="product-card">
-          <div class="product-card__img"><img src="{% static 'image/product-fire-hydrants.jpg' %}" alt="Fire Hydrants"></div>
-          <p class="product-card__caption">Fire Hydrants</p>
-        </div>
-        <div class="product-card">
-          <div class="product-card__img"><img src="{% static 'image/product-hose-box.jpg' %}" alt="Hose Box"></div>
-          <p class="product-card__caption">Hose Box</p>
-        </div>
-        <div class="product-card">
-          <div class="product-card__img"><img src="{% static 'image/product-fire-blankets.jpg' %}" alt="Fire Blankets"></div>
-          <p class="product-card__caption">Fire Blankets</p>
-        </div>
-        <div class="product-card">
-          <div class="product-card__img"><img src="{% static 'image/product-valves.jpg' %}" alt="All Types of Valves"></div>
-          <p class="product-card__caption">All Types of Valves</p>
-        </div>
-        <div class="product-card">
-          <div class="product-card__img"><img src="{% static 'image/product-hose-reel-drum.jpg' %}" alt="Hose Reel Drum"></div>
-          <p class="product-card__caption">Hose Reel Drum</p>
-        </div>
-        <div class="product-card">
-          <div class="product-card__img"><img src="{% static 'image/product-nozzles.jpg' %}" alt="All Types of Nozzles"></div>
-          <p class="product-card__caption">All Types of Nozzles</p>
-        </div>
-        <div class="product-card">
-          <div class="product-card__img"><img src="{% static 'image/product-fire-ball.jpg' %}" alt="Fire Ball"></div>
-          <p class="product-card__caption">Fire Ball</p>
-        </div>
-        <div class="product-card">
-          <div class="product-card__img"><img src="{% static 'image/product-water-foam-monitor.jpg' %}" alt="Water Foam Monitor"></div>
-          <p class="product-card__caption">Water Foam Monitor</p>
-        </div>
-        <div class="product-card">
-          <div class="product-card__img"><img src="{% static 'image/product-fire-extinguisher-stand.jpg' %}" alt="Fire Extinguisher Stand"></div>
-          <p class="product-card__caption">Fire Extinguisher Stand</p>
-        </div>
-        <div class="product-card">
-          <div class="product-card__img"><img src="{% static 'image/product-spill-kit.jpg' %}" alt="Spill Kit"></div>
-          <p class="product-card__caption">Spill Kit</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== Available Brands ===== -->
-  <section class="section section--tint">
-    <div class="container">
-      <div class="section__head">
-        <p class="eyebrow">Available Brands</p>
-        <h2>Brands We Work With</h2>
-      </div>
-
-      <div class="logo-grid">
-        <div class="logo-card"><img src="{% static 'image/brand-apollo.png' %}" alt="Apollo"></div>
-        <div class="logo-card"><img src="{% static 'image/brand-logos-honeywell-group.png' %}" alt="System Sensor, Gamewell FCI, Fire-Lite Alarms, Honeywell, Notifier, Silent Knight"></div>
-        <div class="logo-card"><img src="{% static 'image/brand-mitras.png' %}" alt="Mitras"></div>
-        <div class="logo-card"><img src="{% static 'image/brand-newage.png' %}" alt="NewAge Group of Companies"></div>
-        <div class="logo-card"><img src="{% static 'image/brand-ravel.png' %}" alt="Ravel"></div>
-      </div>
-    </div>
-  </section>
+  {% include "includes/brands.html" %}
 
   {% include "includes/client-logos.html" with heading_eyebrow="Our Clients" heading_title="Trusted By Organizations Across Industries" %}
 
-  <!-- ===== CTA ===== -->
-  <section class="section section--dark">
-    <div class="container section__head">
-      <p class="eyebrow eyebrow--light">Get Started</p>
-      <h2 class="text-light">Let's Protect Your Site</h2>
-      <p class="section__sub section__sub--light">Get a free, no-obligation site survey and see which of these services your facility needs.</p>
-      <a href="/survey/" class="btn btn--primary btn--lg">Get Free Site Survey</a>
-    </div>
-  </section>
+  {% include "includes/survey-cta.html" %}
 
 {% endblock %}

@@ -3,6 +3,8 @@ from django.urls import path
 
 from core.api_views import (
     AdminHubLoginAPIView,
+    BrandDetailView,
+    BrandListCreateView,
     ClientLogoDetailView,
     ClientLogoListCreateView,
     ConsultationRequestCreateView,
@@ -14,6 +16,7 @@ from core.api_views import (
 from core.views import (
     AboutView,
     AdminHubClienteleView,
+    AdminHubCounterView,
     AdminHubHomeView,
     AdminHubLoginView,
     BrochureView,
@@ -45,9 +48,12 @@ urlpatterns = [
     path('api/admin-hub/login/', AdminHubLoginAPIView.as_view(), name='api-adminhub-login'),
     path('admin-hub/home/', AdminHubHomeView.as_view(), name='adminhub-home'),
     path('admin-hub/clientele/', AdminHubClienteleView.as_view(), name='adminhub-clientele'),
+    path('admin-hub/counter/', AdminHubCounterView.as_view(), name='adminhub-counter'),
     path('admin-hub/logout/', LogoutView.as_view(next_page='adminhub-login'), name='adminhub-logout'),
     path('api/admin-hub/mission-vision/', MissionVisionItemListView.as_view(), name='api-adminhub-mission-vision-list'),
     path('api/admin-hub/mission-vision/<int:pk>/', MissionVisionItemDetailView.as_view(), name='api-adminhub-mission-vision-detail'),
     path('api/admin-hub/client-logos/', ClientLogoListCreateView.as_view(), name='api-adminhub-client-logos-list'),
     path('api/admin-hub/client-logos/<int:pk>/', ClientLogoDetailView.as_view(), name='api-adminhub-client-logos-detail'),
+    path('api/admin-hub/brands/', BrandListCreateView.as_view(), name='api-adminhub-brands-list'),
+    path('api/admin-hub/brands/<int:pk>/', BrandDetailView.as_view(), name='api-adminhub-brands-detail'),
 ]
