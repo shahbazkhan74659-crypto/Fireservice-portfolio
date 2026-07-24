@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Brand, ClientLogo, FireRiskAssessmentItem, MissionVisionItem, Service
+from .models import Brand, Certification, ClientLogo, FireRiskAssessmentItem, MissionVisionItem, Product, Service
 
 
 @admin.register(MissionVisionItem)
@@ -30,4 +30,16 @@ class ServiceAdmin(admin.ModelAdmin):
 @admin.register(FireRiskAssessmentItem)
 class FireRiskAssessmentItemAdmin(admin.ModelAdmin):
     list_display = ('text', 'order')
+    ordering = ('order', 'id')
+
+
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ('name', 'order')
+    ordering = ('order', 'id')
+
+
+@admin.register(Certification)
+class CertificationAdmin(admin.ModelAdmin):
+    list_display = ('name', 'description', 'meta', 'order')
     ordering = ('order', 'id')

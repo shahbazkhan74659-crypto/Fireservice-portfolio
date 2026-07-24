@@ -1,4 +1,4 @@
-{% load static %}
+{% load website_extras %}
 <!-- ===== Our Products ===== -->
 <section class="section">
   <div class="container">
@@ -8,79 +8,14 @@
       <p class="section__sub">A wide range of certified fire safety products, sourced and serviced under one roof.</p>
     </div>
 
+    {% get_products as products %}
     <div class="product-grid">
+      {% for product in products %}
       <div class="product-card">
-        <div class="product-card__img"><img src="{% static 'image/product-fire-alarm-system.jpg' %}" alt="Fire Alarm System"></div>
-        <p class="product-card__caption">Fire Alarm System</p>
+        <div class="product-card__img"><img src="{{ product.image.url }}" alt="{{ product.name }}"></div>
+        <p class="product-card__caption">{{ product.name }}</p>
       </div>
-      <div class="product-card">
-        <div class="product-card__img"><img src="{% static 'image/product-manual-call-point.jpg' %}" alt="Manual Call Point"></div>
-        <p class="product-card__caption">Manual Call Point</p>
-      </div>
-      <div class="product-card">
-        <div class="product-card__img"><img src="{% static 'image/product-fire-signage.jpg' %}" alt="Fire Signage"></div>
-        <p class="product-card__caption">Fire Signage</p>
-      </div>
-      <div class="product-card">
-        <div class="product-card__img"><img src="{% static 'image/product-fire-sprinklers.jpg' %}" alt="Fire Sprinklers"></div>
-        <p class="product-card__caption">Fire Sprinklers</p>
-      </div>
-      <div class="product-card">
-        <div class="product-card__img"><img src="{% static 'image/product-scba-set.jpg' %}" alt="SCBA Sets"></div>
-        <p class="product-card__caption">SCBA Sets</p>
-      </div>
-      <div class="product-card">
-        <div class="product-card__img"><img src="{% static 'image/product-ppe.jpg' %}" alt="PPE Products"></div>
-        <p class="product-card__caption">PPE Products</p>
-      </div>
-      <div class="product-card">
-        <div class="product-card__img"><img src="{% static 'image/product-fire-extinguishers.jpg' %}" alt="All Types of Fire Extinguishers"></div>
-        <p class="product-card__caption">All Types of Fire Extinguishers</p>
-      </div>
-      <div class="product-card">
-        <div class="product-card__img"><img src="{% static 'image/product-smoke-alarm.jpg' %}" alt="Smoke Alarms"></div>
-        <p class="product-card__caption">Smoke Alarms</p>
-      </div>
-      <div class="product-card">
-        <div class="product-card__img"><img src="{% static 'image/product-fire-hydrants.jpg' %}" alt="Fire Hydrants"></div>
-        <p class="product-card__caption">Fire Hydrants</p>
-      </div>
-      <div class="product-card">
-        <div class="product-card__img"><img src="{% static 'image/product-hose-box.jpg' %}" alt="Hose Box"></div>
-        <p class="product-card__caption">Hose Box</p>
-      </div>
-      <div class="product-card">
-        <div class="product-card__img"><img src="{% static 'image/product-fire-blankets.jpg' %}" alt="Fire Blankets"></div>
-        <p class="product-card__caption">Fire Blankets</p>
-      </div>
-      <div class="product-card">
-        <div class="product-card__img"><img src="{% static 'image/product-valves.jpg' %}" alt="All Types of Valves"></div>
-        <p class="product-card__caption">All Types of Valves</p>
-      </div>
-      <div class="product-card">
-        <div class="product-card__img"><img src="{% static 'image/product-hose-reel-drum.jpg' %}" alt="Hose Reel Drum"></div>
-        <p class="product-card__caption">Hose Reel Drum</p>
-      </div>
-      <div class="product-card">
-        <div class="product-card__img"><img src="{% static 'image/product-nozzles.jpg' %}" alt="All Types of Nozzles"></div>
-        <p class="product-card__caption">All Types of Nozzles</p>
-      </div>
-      <div class="product-card">
-        <div class="product-card__img"><img src="{% static 'image/product-fire-ball.jpg' %}" alt="Fire Ball"></div>
-        <p class="product-card__caption">Fire Ball</p>
-      </div>
-      <div class="product-card">
-        <div class="product-card__img"><img src="{% static 'image/product-water-foam-monitor.jpg' %}" alt="Water Foam Monitor"></div>
-        <p class="product-card__caption">Water Foam Monitor</p>
-      </div>
-      <div class="product-card">
-        <div class="product-card__img"><img src="{% static 'image/product-fire-extinguisher-stand.jpg' %}" alt="Fire Extinguisher Stand"></div>
-        <p class="product-card__caption">Fire Extinguisher Stand</p>
-      </div>
-      <div class="product-card">
-        <div class="product-card__img"><img src="{% static 'image/product-spill-kit.jpg' %}" alt="Spill Kit"></div>
-        <p class="product-card__caption">Spill Kit</p>
-      </div>
+      {% endfor %}
     </div>
   </div>
 </section>

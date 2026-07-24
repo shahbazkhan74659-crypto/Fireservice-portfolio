@@ -4,7 +4,13 @@ from django.contrib.auth import authenticate, login
 from django.db.models import Max
 from django.http import JsonResponse
 from django.views import View
-from rest_framework.generics import CreateAPIView, ListAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import (
+    CreateAPIView,
+    DestroyAPIView,
+    ListAPIView,
+    ListCreateAPIView,
+    RetrieveUpdateDestroyAPIView,
+)
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import AllowAny
 
@@ -14,12 +20,14 @@ from leads.serializers import (
     ContactMessageSerializer,
     SurveyRequestSerializer,
 )
-from website.models import Brand, ClientLogo, FireRiskAssessmentItem, MissionVisionItem, Service
+from website.models import Brand, Certification, ClientLogo, FireRiskAssessmentItem, MissionVisionItem, Product, Service
 from website.serializers import (
     BrandSerializer,
+    CertificationSerializer,
     ClientLogoSerializer,
     FireRiskAssessmentItemSerializer,
     MissionVisionItemSerializer,
+    ProductSerializer,
     ServiceSerializer,
 )
 
@@ -130,6 +138,40 @@ class ServiceDetailView(RetrieveUpdateDestroyAPIView):
     queryset = Service.objects.all()
     serializer_class = ServiceSerializer
     parser_classes = [MultiPartParser, FormParser]
+
+
+class ProductListCreateView(ListCreateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    parser_classes = [MultiPartParser, FormParser]  # uploads arrive as multipart, not JSON
+
+    def perform_create(self, serializer):
+        next_order = (Product.objects.aggregate(Max('order'))['order__max'] or 0) + 1
+        serializer.save(order=next_order)
+
+
+class ProductDetailView(RetrieveUpdateDestroyAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    parser_classes = [MultiPartParser, FormParser]
+
+
+class CertificationListCreateView(ListCreateAPIView):
+    queryset = Certification.objects.all()
+    serializer_class = CertificationSerializer
+    parser_classes = [MultiPartParser, FormParser]  # uploads arrive as multipart, not JSON
+
+    def perform_create(self, serializer):
+        next_order = (Certification.objects.aggregate(Max('order'))['order__max'] or 0) + 1
+        serializer.save(order=next_order)
+
+
+class CertificationDeleteView(DestroyAPIView):
+    # DestroyAPIView only, not RetrieveUpdateDestroyAPIView — Certifications
+    # deliberately have no Edit (per explicit product decision), so PATCH/PUT
+    # aren't exposed at all rather than being wired up and unused.
+    queryset = Certification.objects.all()
+    serializer_class = CertificationSerializer
 
 
 class FireRiskAssessmentItemListCreateView(ListCreateAPIView):

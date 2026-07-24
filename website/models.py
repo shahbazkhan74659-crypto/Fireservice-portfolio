@@ -112,6 +112,56 @@ def delete_service_icon_on_replace(sender, instance, **kwargs):
         old_icon.delete(save=False)
 
 
+class Product(models.Model):
+    name = models.CharField(max_length=120)
+    image = models.ImageField(upload_to='products/')
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['order', 'id']
+
+    def __str__(self):
+        return self.name
+
+
+@receiver(post_delete, sender=Product)
+def delete_product_file_on_delete(sender, instance, **kwargs):
+    if instance.image:
+        instance.image.delete(save=False)
+
+
+@receiver(pre_save, sender=Product)
+def delete_product_file_on_replace(sender, instance, **kwargs):
+    if not instance.pk:
+        return
+    try:
+        old_image = Product.objects.get(pk=instance.pk).image
+    except Product.DoesNotExist:
+        return
+    if old_image and old_image != instance.image:
+        old_image.delete(save=False)
+
+
+class Certification(models.Model):
+    name = models.CharField(max_length=120)
+    description = models.CharField(max_length=200)
+    meta = models.CharField(max_length=200)
+    image = models.ImageField(upload_to='certifications/')
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['order', 'id']
+
+    def __str__(self):
+        return self.name
+
+
+@receiver(post_delete, sender=Certification)
+def delete_certification_file_on_delete(sender, instance, **kwargs):
+    if instance.image:
+        instance.image.delete(save=False)
+
+
 class FireRiskAssessmentItem(models.Model):
     text = models.CharField(max_length=200)
     order = models.PositiveIntegerField(default=0)

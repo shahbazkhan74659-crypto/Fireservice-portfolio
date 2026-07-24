@@ -86,3 +86,18 @@ class AdminHubCounterView(LoginRequiredMixin, TemplateView):
     # Bare placeholder, same as AdminHubHomeView originally was — no form/
     # island yet, so no ensure_csrf_cookie needed until one is added.
     template_name = 'adminhub/counter.html'
+
+
+@method_decorator(ensure_csrf_cookie, name='dispatch')
+class AdminHubServicesView(LoginRequiredMixin, TemplateView):
+    # ensure_csrf_cookie needed — this page hosts the Services and Fire Risk
+    # Assessment management React islands, which POST/PATCH/DELETE with an
+    # X-CSRFToken header.
+    template_name = 'adminhub/services.html'
+
+
+@method_decorator(ensure_csrf_cookie, name='dispatch')
+class AdminHubCertificationsView(LoginRequiredMixin, TemplateView):
+    # ensure_csrf_cookie needed — this page hosts the Certifications
+    # management React island, which POSTs/DELETEs with an X-CSRFToken header.
+    template_name = 'adminhub/certifications.html'

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Brand, ClientLogo, FireRiskAssessmentItem, MissionVisionItem, Service
+from .models import Brand, Certification, ClientLogo, FireRiskAssessmentItem, MissionVisionItem, Product, Service
 
 MAX_LOGO_SIZE_BYTES = 5 * 1024 * 1024  # 5MB
 ACCEPTED_ICON_CONTENT_TYPES = {'image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'}
@@ -85,6 +85,36 @@ class ServiceSerializer(serializers.ModelSerializer):
         return value
 
 
+class CertificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Certification
+        fields = ['id', 'name', 'description', 'meta', 'image', 'order']
+        read_only_fields = ['order']  # server-assigned on create — see perform_create
+
+    def validate_name(self, value):
+        value = value.strip()
+        if len(value) < 2:
+            raise serializers.ValidationError('Name is required.')
+        return value
+
+    def validate_description(self, value):
+        value = value.strip()
+        if len(value) < 2:
+            raise serializers.ValidationError('Description is required.')
+        return value
+
+    def validate_meta(self, value):
+        value = value.strip()
+        if len(value) < 2:
+            raise serializers.ValidationError('This field is required.')
+        return value
+
+    def validate_image(self, value):
+        if value.size > MAX_LOGO_SIZE_BYTES:
+            raise serializers.ValidationError('Image is too large (max 5MB).')
+        return value
+
+
 class FireRiskAssessmentItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = FireRiskAssessmentItem
@@ -101,6 +131,24 @@ class FireRiskAssessmentItemSerializer(serializers.ModelSerializer):
 class BrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
+        fields = ['id', 'name', 'image', 'order']
+        read_only_fields = ['order']  # server-assigned on create — see perform_create
+
+    def validate_name(self, value):
+        value = value.strip()
+        if len(value) < 2:
+            raise serializers.ValidationError('Name is required.')
+        return value
+
+    def validate_image(self, value):
+        if value.size > MAX_LOGO_SIZE_BYTES:
+            raise serializers.ValidationError('Image is too large (max 5MB).')
+        return value
+
+
+class ProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
         fields = ['id', 'name', 'image', 'order']
         read_only_fields = ['order']  # server-assigned on create — see perform_create
 
