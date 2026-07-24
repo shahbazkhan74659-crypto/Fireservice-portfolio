@@ -79,3 +79,45 @@ def delete_brand_file_on_replace(sender, instance, **kwargs):
         return
     if old_image and old_image != instance.image:
         old_image.delete(save=False)
+
+
+class Service(models.Model):
+    name = models.CharField(max_length=120)
+    description = models.TextField()
+    icon = models.ImageField(upload_to='services/')
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['order', 'id']
+
+    def __str__(self):
+        return self.name
+
+
+@receiver(post_delete, sender=Service)
+def delete_service_icon_on_delete(sender, instance, **kwargs):
+    if instance.icon:
+        instance.icon.delete(save=False)
+
+
+@receiver(pre_save, sender=Service)
+def delete_service_icon_on_replace(sender, instance, **kwargs):
+    if not instance.pk:
+        return
+    try:
+        old_icon = Service.objects.get(pk=instance.pk).icon
+    except Service.DoesNotExist:
+        return
+    if old_icon and old_icon != instance.icon:
+        old_icon.delete(save=False)
+
+
+class FireRiskAssessmentItem(models.Model):
+    text = models.CharField(max_length=200)
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['order', 'id']
+
+    def __str__(self):
+        return self.text

@@ -9,8 +9,12 @@ from core.api_views import (
     ClientLogoListCreateView,
     ConsultationRequestCreateView,
     ContactMessageCreateView,
+    FireRiskAssessmentItemDetailView,
+    FireRiskAssessmentItemListCreateView,
     MissionVisionItemDetailView,
     MissionVisionItemListView,
+    ServiceDetailView,
+    ServiceListCreateView,
     SurveyRequestCreateView,
 )
 from core.views import (
@@ -56,4 +60,8 @@ urlpatterns = [
     path('api/admin-hub/client-logos/<int:pk>/', ClientLogoDetailView.as_view(), name='api-adminhub-client-logos-detail'),
     path('api/admin-hub/brands/', BrandListCreateView.as_view(), name='api-adminhub-brands-list'),
     path('api/admin-hub/brands/<int:pk>/', BrandDetailView.as_view(), name='api-adminhub-brands-detail'),
+    path('api/admin-hub/services/', ServiceListCreateView.as_view(), name='api-adminhub-services-list'),
+    path('api/admin-hub/services/<int:pk>/', ServiceDetailView.as_view(), name='api-adminhub-services-detail'),
+    path('api/admin-hub/fire-risk-items/', FireRiskAssessmentItemListCreateView.as_view(), name='api-adminhub-fire-risk-items-list'),
+    path('api/admin-hub/fire-risk-items/<int:pk>/', FireRiskAssessmentItemDetailView.as_view(), name='api-adminhub-fire-risk-items-detail'),
 ]

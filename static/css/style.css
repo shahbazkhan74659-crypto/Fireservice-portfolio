@@ -236,6 +236,8 @@ a.instagram-icon:hover{color:var(--red-700);}
   display:flex;align-items:center;justify-content:center;
 }
 .card__icon svg{width:26px;height:26px;fill:none;stroke:#fff;stroke-width:1.6;}
+.card__icon img{width:26px;height:26px;object-fit:contain;}
+.card .logo-card__admin-actions{margin-top:16px;}
 .card h3{font-size:1.05rem;}
 .card p{color:var(--ink-600);font-size:.92rem;margin:0;}
 
@@ -449,6 +451,7 @@ a.instagram-icon:hover{color:var(--red-700);}
 .admin-mv-point{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
 .admin-mv-point input{flex:1;}
 .admin-mv-point .btn{flex-shrink:0;}
+.admin-mv-point__text{flex:1;color:var(--ink-600);}
 
 .client-logos__admin-actions{display:flex;justify-content:flex-end;gap:12px;margin-bottom:32px;}
 .client-logos__admin-actions .btn{padding:10px 20px;font-size:.85rem;}

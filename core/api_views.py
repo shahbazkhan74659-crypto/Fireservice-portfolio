@@ -14,8 +14,14 @@ from leads.serializers import (
     ContactMessageSerializer,
     SurveyRequestSerializer,
 )
-from website.models import Brand, ClientLogo, MissionVisionItem
-from website.serializers import BrandSerializer, ClientLogoSerializer, MissionVisionItemSerializer
+from website.models import Brand, ClientLogo, FireRiskAssessmentItem, MissionVisionItem, Service
+from website.serializers import (
+    BrandSerializer,
+    ClientLogoSerializer,
+    FireRiskAssessmentItemSerializer,
+    MissionVisionItemSerializer,
+    ServiceSerializer,
+)
 
 
 class SurveyRequestCreateView(CreateAPIView):
@@ -108,3 +114,35 @@ class BrandDetailView(RetrieveUpdateDestroyAPIView):
     queryset = Brand.objects.all()
     serializer_class = BrandSerializer
     parser_classes = [MultiPartParser, FormParser]
+
+
+class ServiceListCreateView(ListCreateAPIView):
+    queryset = Service.objects.all()
+    serializer_class = ServiceSerializer
+    parser_classes = [MultiPartParser, FormParser]  # uploads arrive as multipart, not JSON
+
+    def perform_create(self, serializer):
+        next_order = (Service.objects.aggregate(Max('order'))['order__max'] or 0) + 1
+        serializer.save(order=next_order)
+
+
+class ServiceDetailView(RetrieveUpdateDestroyAPIView):
+    queryset = Service.objects.all()
+    serializer_class = ServiceSerializer
+    parser_classes = [MultiPartParser, FormParser]
+
+
+class FireRiskAssessmentItemListCreateView(ListCreateAPIView):
+    # Plain text, no file upload — default JSON parser is fine here, unlike
+    # the image-backed models above.
+    queryset = FireRiskAssessmentItem.objects.all()
+    serializer_class = FireRiskAssessmentItemSerializer
+
+    def perform_create(self, serializer):
+        next_order = (FireRiskAssessmentItem.objects.aggregate(Max('order'))['order__max'] or 0) + 1
+        serializer.save(order=next_order)
+
+
+class FireRiskAssessmentItemDetailView(RetrieveUpdateDestroyAPIView):
+    queryset = FireRiskAssessmentItem.objects.all()
+    serializer_class = FireRiskAssessmentItemSerializer

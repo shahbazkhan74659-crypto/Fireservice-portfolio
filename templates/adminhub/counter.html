@@ -1,13 +1,52 @@
 {% extends "adminhub/base.html" %}
+{% load website_extras %}
 
 {% block title %}Counter | Admin Hub | Iconic Techno Service{% endblock %}
 
 {% block content %}
+{% get_client_logos as client_logos %}
+{% get_brands as brands %}
 <section class="section">
   <div class="container">
     <p class="eyebrow">Admin Hub</p>
     <h2>Counter</h2>
-    <p class="section__sub">This is a placeholder page. Content and management logic will be built here next.</p>
+    <p class="section__sub">A preview of every stats counter used across the site.</p>
   </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section__head">
+      <h2>Home</h2>
+    </div>
+  </div>
+  {% include "includes/homestats.html" with static_stats=True %}
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section__head">
+      <h2>About</h2>
+    </div>
+  </div>
+  {% include "includes/aboutstats.html" with static_stats=True %}
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section__head">
+      <h2>Consultation / Process / Services</h2>
+    </div>
+  </div>
+  {% include "includes/consultationstats.html" with static_stats=True %}
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section__head">
+      <h2>Clientele</h2>
+    </div>
+  </div>
+  {% include "includes/clientelestats.html" with static_stats=True %}
 </section>
 {% endblock %}

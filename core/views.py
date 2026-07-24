@@ -3,7 +3,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import TemplateView
 
-from website.models import MissionVisionItem
+from website.models import FireRiskAssessmentItem, MissionVisionItem, Service
 
 
 class HomeView(TemplateView):
@@ -29,6 +29,12 @@ class ProcessView(TemplateView):
 
 class ServicesView(TemplateView):
     template_name = 'services.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['services'] = Service.objects.all()
+        context['fire_risk_items'] = FireRiskAssessmentItem.objects.all()
+        return context
 
 
 class BrochureView(TemplateView):

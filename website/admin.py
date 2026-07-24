@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Brand, ClientLogo, MissionVisionItem
+from .models import Brand, ClientLogo, FireRiskAssessmentItem, MissionVisionItem, Service
 
 
 @admin.register(MissionVisionItem)
@@ -18,4 +18,16 @@ class ClientLogoAdmin(admin.ModelAdmin):
 @admin.register(Brand)
 class BrandAdmin(admin.ModelAdmin):
     list_display = ('name', 'order')
+    ordering = ('order', 'id')
+
+
+@admin.register(Service)
+class ServiceAdmin(admin.ModelAdmin):
+    list_display = ('name', 'order')
+    ordering = ('order', 'id')
+
+
+@admin.register(FireRiskAssessmentItem)
+class FireRiskAssessmentItemAdmin(admin.ModelAdmin):
+    list_display = ('text', 'order')
     ordering = ('order', 'id')

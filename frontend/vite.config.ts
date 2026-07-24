@@ -28,6 +28,8 @@ export default defineConfig({
         'admin-mission-vision': resolve(__dirname, 'src/islands/admin-mission-vision/main.tsx'),
         'admin-client-logos': resolve(__dirname, 'src/islands/admin-client-logos/main.tsx'),
         'admin-brands': resolve(__dirname, 'src/islands/admin-brands/main.tsx'),
+        'admin-services': resolve(__dirname, 'src/islands/admin-services/main.tsx'),
+        'admin-fire-risk-items': resolve(__dirname, 'src/islands/admin-fire-risk-items/main.tsx'),
       },
     },
   },

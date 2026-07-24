@@ -7,6 +7,8 @@
   {% vite_hmr_client %}
   {% vite_react_refresh %}
   {% vite_asset 'src/islands/admin-mission-vision/main.tsx' %}
+  {% vite_asset 'src/islands/admin-services/main.tsx' %}
+  {% vite_asset 'src/islands/admin-fire-risk-items/main.tsx' %}
 {% endblock %}
 
 {% block content %}
@@ -26,6 +28,30 @@
     </div>
     <div id="admin-mission-vision-root">
       <noscript>Please enable JavaScript to manage Mission &amp; Vision content.</noscript>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section__head">
+      <p class="eyebrow">Our Services</p>
+      <h2>Services</h2>
+    </div>
+    <div id="admin-services-root">
+      <noscript>Please enable JavaScript to manage services.</noscript>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section__head">
+      <p class="eyebrow">Fire Risk Assessment</p>
+      <h2>Checklist Items</h2>
+    </div>
+    <div id="admin-fire-risk-items-root">
+      <noscript>Please enable JavaScript to manage checklist items.</noscript>
     </div>
   </div>
 </section>

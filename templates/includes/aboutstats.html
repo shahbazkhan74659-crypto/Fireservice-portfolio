@@ -1,6 +1,6 @@
 <div class="stats">
   <div class="container stats__grid stats__grid--2">
-    <div class="stat"><span class="stat__num" data-count="{{ stat1_count|default:"10" }}">0</span>{% if stat1_suffix|default:"+" %}<span class="stat__suffix">{{ stat1_suffix|default:"+" }}</span>{% endif %}<span class="stat__label">{{ stat1_label|default:"Years Experience" }}</span></div>
-    <div class="stat"><span class="stat__num" data-count="{{ stat2_count|default:"14" }}">0</span>{% if stat2_suffix %}<span class="stat__suffix">{{ stat2_suffix }}</span>{% endif %}<span class="stat__label">{{ stat2_label|default:"Team Members" }}</span></div>
+    <div class="stat">{% if static_stats %}<span class="stat__num">{{ stat1_count|default:"10" }}</span>{% else %}<span class="stat__num" data-count="{{ stat1_count|default:"10" }}">0</span>{% endif %}{% if stat1_suffix|default:"+" %}<span class="stat__suffix">{{ stat1_suffix|default:"+" }}</span>{% endif %}<span class="stat__label">{{ stat1_label|default:"Years Experience" }}</span></div>
+    <div class="stat">{% if static_stats %}<span class="stat__num">{{ stat2_count|default:"14" }}</span>{% else %}<span class="stat__num" data-count="{{ stat2_count|default:"14" }}">0</span>{% endif %}{% if stat2_suffix %}<span class="stat__suffix">{{ stat2_suffix }}</span>{% endif %}<span class="stat__label">{{ stat2_label|default:"Team Members" }}</span></div>
   </div>
 </div>

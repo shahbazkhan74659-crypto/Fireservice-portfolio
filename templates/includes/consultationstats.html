@@ -1,6 +1,6 @@
 <div class="stats">
   <div class="container stats__grid stats__grid--2">
-    <div class="stat"><span class="stat__num" data-count="10">0</span><span class="stat__suffix">+</span><span class="stat__label">Years Experience</span></div>
-    <div class="stat"><span class="stat__num" data-count="8">0</span><span class="stat__label">Services Offered</span></div>
+    <div class="stat">{% if static_stats %}<span class="stat__num">10</span>{% else %}<span class="stat__num" data-count="10">0</span>{% endif %}<span class="stat__suffix">+</span><span class="stat__label">Years Experience</span></div>
+    <div class="stat">{% if static_stats %}<span class="stat__num">8</span>{% else %}<span class="stat__num" data-count="8">0</span>{% endif %}<span class="stat__label">Services Offered</span></div>
   </div>
 </div>

@@ -1,0 +1,7 @@
+<div class="stats">
+  <div class="container stats__grid stats__grid--3">
+    <div class="stat">{% if static_stats %}<span class="stat__num">10</span>{% else %}<span class="stat__num" data-count="10">0</span>{% endif %}<span class="stat__suffix">+</span><span class="stat__label">Years Experience</span></div>
+    <div class="stat">{% if static_stats %}<span class="stat__num">{{ client_logos|length }}</span>{% else %}<span class="stat__num" data-count="{{ client_logos|length }}">0</span>{% endif %}<span class="stat__label">Total Clients</span></div>
+    <div class="stat">{% if static_stats %}<span class="stat__num">{{ brands|length }}</span>{% else %}<span class="stat__num" data-count="{{ brands|length }}">0</span>{% endif %}<span class="stat__label">Brands</span></div>
+  </div>
+</div>
