@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { editStatValueSchema, type SiteSetting, type SiteSettingField } from './schema'
+import { editStatValueSchemaFor, SITE_SETTING_FIELD_MAX, type SiteSetting, type SiteSettingField } from './schema'
 import { getCsrfToken } from '../../lib/csrf'
 import { readErrorMessage, NETWORK_ERROR_MESSAGE } from '../../lib/api'
 import Modal from '../../lib/Modal'
@@ -37,7 +37,7 @@ export default function EditableStat({ field, label, suffix = '+', initialValue 
     e.preventDefault()
     setServerError(null)
 
-    const result = editStatValueSchema.safeParse({ value: input })
+    const result = editStatValueSchemaFor(field).safeParse({ value: input })
     if (!result.success) {
       setError(result.error.issues[0]?.message ?? 'Invalid value.')
       return
@@ -90,7 +90,7 @@ export default function EditableStat({ field, label, suffix = '+', initialValue 
               id={`site-setting-${field}`}
               type="number"
               min={0}
-              max={999999}
+              max={SITE_SETTING_FIELD_MAX[field]}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               disabled={saveState === 'saving'}

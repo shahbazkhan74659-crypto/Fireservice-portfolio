@@ -24,6 +24,19 @@ def validate_image_size(value, max_bytes=MAX_LOGO_SIZE_BYTES):
     return value
 
 
+def validate_image_size_and_type(value, max_bytes=MAX_LOGO_SIZE_BYTES):
+    """Shared validation for image-backed fields that must also accept SVG
+    uploads — mirrors ServiceSerializer.validate_icon's size + content-type
+    checks, since DRF's ModelSerializer-inferred ImageField validates via
+    Pillow, which can't open SVG (a vector/XML format, not a raster one)."""
+    if value.size > max_bytes:
+        raise serializers.ValidationError(f'Image is too large (max {max_bytes // (1024 * 1024)}MB).')
+    content_type = getattr(value, 'content_type', None)
+    if content_type not in ACCEPTED_ICON_CONTENT_TYPES:
+        raise serializers.ValidationError('Unsupported image type. Use PNG, JPEG, WebP or SVG.')
+    return value
+
+
 class MissionVisionItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = MissionVisionItem
@@ -51,6 +64,11 @@ class MissionVisionItemSerializer(serializers.ModelSerializer):
 
 
 class ClientLogoSerializer(serializers.ModelSerializer):
+    # Declared explicitly as FileField (not the ModelSerializer-inferred
+    # ImageField) so SVG uploads (allowed by the frontend schema) aren't
+    # rejected by Pillow — see validate_image_size_and_type() above.
+    image = serializers.FileField()
+
     class Meta:
         model = ClientLogo
         fields = ['id', 'name', 'image', 'order']
@@ -60,7 +78,7 @@ class ClientLogoSerializer(serializers.ModelSerializer):
         return validate_entity_name(value)
 
     def validate_image(self, value):
-        return validate_image_size(value)
+        return validate_image_size_and_type(value)
 
 
 class ServiceSerializer(serializers.ModelSerializer):
@@ -148,6 +166,11 @@ class FireRiskAssessmentItemSerializer(serializers.ModelSerializer):
 
 
 class BrandSerializer(serializers.ModelSerializer):
+    # Declared explicitly as FileField (not the ModelSerializer-inferred
+    # ImageField) so SVG uploads (allowed by the frontend schema) aren't
+    # rejected by Pillow — see validate_image_size_and_type() above.
+    image = serializers.FileField()
+
     class Meta:
         model = Brand
         fields = ['id', 'name', 'image', 'order']
@@ -157,10 +180,15 @@ class BrandSerializer(serializers.ModelSerializer):
         return validate_entity_name(value)
 
     def validate_image(self, value):
-        return validate_image_size(value)
+        return validate_image_size_and_type(value)
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    # Declared explicitly as FileField (not the ModelSerializer-inferred
+    # ImageField) so SVG uploads (allowed by the frontend schema) aren't
+    # rejected by Pillow — see validate_image_size_and_type() above.
+    image = serializers.FileField()
+
     class Meta:
         model = Product
         fields = ['id', 'name', 'image', 'order']
@@ -170,4 +198,4 @@ class ProductSerializer(serializers.ModelSerializer):
         return validate_entity_name(value)
 
     def validate_image(self, value):
-        return validate_image_size(value)
+        return validate_image_size_and_type(value)

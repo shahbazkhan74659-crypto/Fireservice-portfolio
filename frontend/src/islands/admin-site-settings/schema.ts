@@ -1,14 +1,5 @@
 import { z } from 'zod'
 
-export const editStatValueSchema = z.object({
-  value: z.coerce.number({ error: 'Enter a number.' })
-    .int('Must be a whole number.')
-    .min(0, 'Must be zero or greater.')
-    .max(999999, 'Too large.'),
-})
-export type EditStatValueInput = z.infer<typeof editStatValueSchema>
-export type EditStatValueErrors = Partial<Record<keyof EditStatValueInput, string>>
-
 export interface SiteSetting {
   years_experience: number
   clients_served: number
@@ -18,3 +9,27 @@ export interface SiteSetting {
 }
 
 export type SiteSettingField = keyof SiteSetting
+
+// Mirrors website/serializers.py's SiteSettingSerializer.Meta.extra_kwargs
+// per-field max_value caps exactly, so an out-of-range value is caught here
+// with an inline message instead of round-tripping to the server first.
+export const SITE_SETTING_FIELD_MAX: Record<SiteSettingField, number> = {
+  years_experience: 999,
+  clients_served: 999999,
+  installations: 999999,
+  emergency_support: 999,
+  team_members: 9999,
+}
+
+export function editStatValueSchemaFor(field: SiteSettingField) {
+  const max = SITE_SETTING_FIELD_MAX[field]
+  return z.object({
+    value: z.coerce.number({ error: 'Enter a number.' })
+      .int('Must be a whole number.')
+      .min(0, 'Must be zero or greater.')
+      .max(max, `Too large (max ${max}).`),
+  })
+}
+
+export type EditStatValueInput = z.infer<ReturnType<typeof editStatValueSchemaFor>>
+export type EditStatValueErrors = Partial<Record<keyof EditStatValueInput, string>>

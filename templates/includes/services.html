@@ -1,15 +1,15 @@
+{% load website_extras %}
 <h4>Sales &amp; Services</h4>
+{% get_services as services_list %}
 <div class="footer__services-grid">
   <div>
-    <a href="/services/">Fire Detection System</a>
-    <a href="/services/">Co2 Gas Flooding</a>
-    <a href="/services/">CCTV &amp; PA System</a>
-    <a href="/services/">HVWS / MVMS System</a>
+    {% for service in services_list|slice:":4" %}
+    <a href="/services/">{{ service.name }}</a>
+    {% endfor %}
   </div>
   <div>
-    <a href="/services/">All Type Fire Extinguisher</a>
-    <a href="/services/">Safety Equipment</a>
-    <a href="/services/">Fire Pump House</a>
-    <a href="/services/">All Type Electricals Work</a>
+    {% for service in services_list|slice:"4:" %}
+    <a href="/services/">{{ service.name }}</a>
+    {% endfor %}
   </div>
 </div>

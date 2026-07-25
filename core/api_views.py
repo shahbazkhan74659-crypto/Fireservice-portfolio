@@ -1,6 +1,7 @@
 import json
 
 from django.contrib.auth import authenticate, login
+from django.db import transaction
 from django.db.models import Max
 from django.http import JsonResponse
 from django.views import View
@@ -100,8 +101,13 @@ class ClientLogoListCreateView(ListCreateAPIView):
     parser_classes = [MultiPartParser, FormParser]  # uploads arrive as multipart, not JSON
 
     def perform_create(self, serializer):
-        next_order = (ClientLogo.objects.aggregate(Max('order'))['order__max'] or 0) + 1
-        serializer.save(order=next_order)
+        # transaction.atomic() + select_for_update() closes the read-then-write
+        # TOCTOU race between concurrent creates computing the same next_order —
+        # works on both SQLite (no-op lock, but the file-level write lock
+        # serializes writers anyway) and MySQL (a real row lock).
+        with transaction.atomic():
+            next_order = (ClientLogo.objects.select_for_update().aggregate(Max('order'))['order__max'] or 0) + 1
+            serializer.save(order=next_order)
 
 
 class ClientLogoDetailView(RetrieveUpdateDestroyAPIView):
@@ -116,8 +122,9 @@ class BrandListCreateView(ListCreateAPIView):
     parser_classes = [MultiPartParser, FormParser]  # uploads arrive as multipart, not JSON
 
     def perform_create(self, serializer):
-        next_order = (Brand.objects.aggregate(Max('order'))['order__max'] or 0) + 1
-        serializer.save(order=next_order)
+        with transaction.atomic():
+            next_order = (Brand.objects.select_for_update().aggregate(Max('order'))['order__max'] or 0) + 1
+            serializer.save(order=next_order)
 
 
 class BrandDetailView(RetrieveUpdateDestroyAPIView):
@@ -132,8 +139,9 @@ class ServiceListCreateView(ListCreateAPIView):
     parser_classes = [MultiPartParser, FormParser]  # uploads arrive as multipart, not JSON
 
     def perform_create(self, serializer):
-        next_order = (Service.objects.aggregate(Max('order'))['order__max'] or 0) + 1
-        serializer.save(order=next_order)
+        with transaction.atomic():
+            next_order = (Service.objects.select_for_update().aggregate(Max('order'))['order__max'] or 0) + 1
+            serializer.save(order=next_order)
 
 
 class ServiceDetailView(RetrieveUpdateDestroyAPIView):
@@ -148,8 +156,9 @@ class ProductListCreateView(ListCreateAPIView):
     parser_classes = [MultiPartParser, FormParser]  # uploads arrive as multipart, not JSON
 
     def perform_create(self, serializer):
-        next_order = (Product.objects.aggregate(Max('order'))['order__max'] or 0) + 1
-        serializer.save(order=next_order)
+        with transaction.atomic():
+            next_order = (Product.objects.select_for_update().aggregate(Max('order'))['order__max'] or 0) + 1
+            serializer.save(order=next_order)
 
 
 class ProductDetailView(RetrieveUpdateDestroyAPIView):
@@ -164,8 +173,9 @@ class CertificationListCreateView(ListCreateAPIView):
     parser_classes = [MultiPartParser, FormParser]  # uploads arrive as multipart, not JSON
 
     def perform_create(self, serializer):
-        next_order = (Certification.objects.aggregate(Max('order'))['order__max'] or 0) + 1
-        serializer.save(order=next_order)
+        with transaction.atomic():
+            next_order = (Certification.objects.select_for_update().aggregate(Max('order'))['order__max'] or 0) + 1
+            serializer.save(order=next_order)
 
 
 class CertificationDeleteView(DestroyAPIView):
@@ -183,8 +193,9 @@ class FireRiskAssessmentItemListCreateView(ListCreateAPIView):
     serializer_class = FireRiskAssessmentItemSerializer
 
     def perform_create(self, serializer):
-        next_order = (FireRiskAssessmentItem.objects.aggregate(Max('order'))['order__max'] or 0) + 1
-        serializer.save(order=next_order)
+        with transaction.atomic():
+            next_order = (FireRiskAssessmentItem.objects.select_for_update().aggregate(Max('order'))['order__max'] or 0) + 1
+            serializer.save(order=next_order)
 
 
 class FireRiskAssessmentItemDetailView(RetrieveUpdateDestroyAPIView):

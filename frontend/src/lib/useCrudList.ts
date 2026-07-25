@@ -25,6 +25,8 @@ export function useCrudList<T extends { id: number }>(endpoint: string): UseCrud
   useEffect(() => {
     let cancelled = false
 
+    setLoadState('loading')
+
     fetch(endpoint, { credentials: 'same-origin' })
       .then((res) => {
         if (!res.ok) throw new Error('Failed to load')
