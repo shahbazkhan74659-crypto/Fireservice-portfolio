@@ -14,7 +14,7 @@ from rest_framework.generics import (
     RetrieveUpdateDestroyAPIView,
 )
 from rest_framework.parsers import FormParser, MultiPartParser
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAdminUser
 
 from leads.models import ConsultationRequest, ContactMessage, SurveyRequest
 from leads.serializers import (
@@ -75,7 +75,12 @@ class AdminHubLoginAPIView(View):
             return JsonResponse({'detail': ['Username and password are required.']}, status=400)
 
         user = authenticate(request, username=username, password=password)
-        if user is None:
+        # Reject non-staff accounts the same way as a wrong password: same
+        # status code, same message, no login() call. This is deliberately
+        # indistinguishable from bad credentials so a login attempt can't be
+        # used to enumerate which usernames exist but merely lack Admin Hub
+        # access.
+        if user is None or not user.is_staff:
             return JsonResponse({'detail': ['Invalid username or password.']}, status=401)
 
         login(request, user)
@@ -83,22 +88,25 @@ class AdminHubLoginAPIView(View):
 
 
 class MissionVisionItemListView(ListAPIView):
-    # No permission_classes override — the project-wide IsAuthenticated +
-    # SessionAuthentication default is exactly what's wanted here (admin-hub
-    # only), unlike the public lead-capture endpoints above which opt out of it.
+    # Explicit IsAdminUser (checks request.user.is_staff) rather than relying
+    # on the project-wide IsAuthenticated default — any authenticated but
+    # non-staff account must not reach Admin Hub content management.
     queryset = MissionVisionItem.objects.all()
     serializer_class = MissionVisionItemSerializer
+    permission_classes = [IsAdminUser]
 
 
 class MissionVisionItemDetailView(RetrieveUpdateDestroyAPIView):
     queryset = MissionVisionItem.objects.all()
     serializer_class = MissionVisionItemSerializer
+    permission_classes = [IsAdminUser]
 
 
 class ClientLogoListCreateView(ListCreateAPIView):
     queryset = ClientLogo.objects.all()
     serializer_class = ClientLogoSerializer
     parser_classes = [MultiPartParser, FormParser]  # uploads arrive as multipart, not JSON
+    permission_classes = [IsAdminUser]
 
     def perform_create(self, serializer):
         # transaction.atomic() + select_for_update() closes the read-then-write
@@ -114,12 +122,14 @@ class ClientLogoDetailView(RetrieveUpdateDestroyAPIView):
     queryset = ClientLogo.objects.all()
     serializer_class = ClientLogoSerializer
     parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [IsAdminUser]
 
 
 class BrandListCreateView(ListCreateAPIView):
     queryset = Brand.objects.all()
     serializer_class = BrandSerializer
     parser_classes = [MultiPartParser, FormParser]  # uploads arrive as multipart, not JSON
+    permission_classes = [IsAdminUser]
 
     def perform_create(self, serializer):
         with transaction.atomic():
@@ -131,12 +141,14 @@ class BrandDetailView(RetrieveUpdateDestroyAPIView):
     queryset = Brand.objects.all()
     serializer_class = BrandSerializer
     parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [IsAdminUser]
 
 
 class ServiceListCreateView(ListCreateAPIView):
     queryset = Service.objects.all()
     serializer_class = ServiceSerializer
     parser_classes = [MultiPartParser, FormParser]  # uploads arrive as multipart, not JSON
+    permission_classes = [IsAdminUser]
 
     def perform_create(self, serializer):
         with transaction.atomic():
@@ -148,12 +160,14 @@ class ServiceDetailView(RetrieveUpdateDestroyAPIView):
     queryset = Service.objects.all()
     serializer_class = ServiceSerializer
     parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [IsAdminUser]
 
 
 class ProductListCreateView(ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     parser_classes = [MultiPartParser, FormParser]  # uploads arrive as multipart, not JSON
+    permission_classes = [IsAdminUser]
 
     def perform_create(self, serializer):
         with transaction.atomic():
@@ -165,12 +179,14 @@ class ProductDetailView(RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [IsAdminUser]
 
 
 class CertificationListCreateView(ListCreateAPIView):
     queryset = Certification.objects.all()
     serializer_class = CertificationSerializer
     parser_classes = [MultiPartParser, FormParser]  # uploads arrive as multipart, not JSON
+    permission_classes = [IsAdminUser]
 
     def perform_create(self, serializer):
         with transaction.atomic():
@@ -184,6 +200,7 @@ class CertificationDeleteView(DestroyAPIView):
     # aren't exposed at all rather than being wired up and unused.
     queryset = Certification.objects.all()
     serializer_class = CertificationSerializer
+    permission_classes = [IsAdminUser]
 
 
 class FireRiskAssessmentItemListCreateView(ListCreateAPIView):
@@ -191,6 +208,7 @@ class FireRiskAssessmentItemListCreateView(ListCreateAPIView):
     # the image-backed models above.
     queryset = FireRiskAssessmentItem.objects.all()
     serializer_class = FireRiskAssessmentItemSerializer
+    permission_classes = [IsAdminUser]
 
     def perform_create(self, serializer):
         with transaction.atomic():
@@ -201,6 +219,7 @@ class FireRiskAssessmentItemListCreateView(ListCreateAPIView):
 class FireRiskAssessmentItemDetailView(RetrieveUpdateDestroyAPIView):
     queryset = FireRiskAssessmentItem.objects.all()
     serializer_class = FireRiskAssessmentItemSerializer
+    permission_classes = [IsAdminUser]
 
 
 class SiteSettingDetailView(RetrieveUpdateAPIView):
@@ -208,6 +227,7 @@ class SiteSettingDetailView(RetrieveUpdateAPIView):
     # pk=1 row (creating it on first access) rather than looking up a pk
     # from the URL, so there's nothing to list or create.
     serializer_class = SiteSettingSerializer
+    permission_classes = [IsAdminUser]
 
     def get_object(self):
         return SiteSetting.load()

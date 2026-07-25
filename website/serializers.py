@@ -1,9 +1,95 @@
+import re
+import xml.etree.ElementTree as ET
+
+from PIL import Image, UnidentifiedImageError
 from rest_framework import serializers
 
 from .models import Brand, Certification, ClientLogo, FireRiskAssessmentItem, MissionVisionItem, Product, Service, SiteSetting
 
 MAX_LOGO_SIZE_BYTES = 5 * 1024 * 1024  # 5MB
 ACCEPTED_ICON_CONTENT_TYPES = {'image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'}
+SVG_CONTENT_TYPE = 'image/svg+xml'
+
+# Maps each accepted *raster* content-type to the Pillow-reported format(s) a
+# genuine file of that type should decode as. Used so a real JPEG relabeled
+# with Content-Type: image/png (or vice versa) is caught too, not just
+# outright non-images — Content-Type is entirely client-supplied and must
+# never be trusted on its own (see Django's own UploadedFile docs).
+RASTER_CONTENT_TYPE_FORMATS = {
+    'image/png': {'PNG'},
+    'image/jpeg': {'JPEG'},
+    'image/webp': {'WEBP'},
+}
+
+# Namespace-agnostic: an SVG's <script> or onload= is dangerous regardless of
+# which XML namespace prefix (if any) it's declared under, so these checks
+# operate on the local (unprefixed) tag/attribute name only.
+_DANGEROUS_TAG_LOCALNAMES = {'script'}
+_JAVASCRIPT_URI_RE = re.compile(r'^\s*javascript\s*:', re.IGNORECASE)
+
+
+def _local_name(tag):
+    """Strip a `{namespace}localname`-style ElementTree tag/attribute key
+    down to just the local name, e.g. `{http://www.w3.org/2000/svg}script`
+    -> `script`, `{http://www.w3.org/1999/xlink}href` -> `href`."""
+    return tag.rsplit('}', 1)[-1] if '}' in tag else tag
+
+
+def _svg_bytes_are_safe(raw_bytes):
+    """Real content inspection for SVG uploads. Pillow can't validate SVG at
+    all (it's XML, not a raster format), so a malicious upload could
+    otherwise slip through as long as it declares
+    Content-Type: image/svg+xml. Parses the bytes as XML — a real SVG must be
+    well-formed XML, so anything that fails to parse is rejected (fail
+    closed, not fail open) — then rejects any <script> element, any on*
+    event-handler attribute, or a javascript: URI in an href/xlink:href
+    attribute."""
+    try:
+        root = ET.fromstring(raw_bytes)
+    except ET.ParseError:
+        return False
+
+    for element in root.iter():
+        if _local_name(element.tag).lower() in _DANGEROUS_TAG_LOCALNAMES:
+            return False
+        for attr_name, attr_value in element.attrib.items():
+            local_attr = _local_name(attr_name).lower()
+            if local_attr.startswith('on'):
+                return False
+            if local_attr == 'href' and _JAVASCRIPT_URI_RE.match(attr_value or ''):
+                return False
+    return True
+
+
+def _raster_bytes_are_valid(file_obj, content_type):
+    """Actually decode the uploaded bytes with Pillow rather than trusting
+    the claimed Content-Type header. Image.verify() checks the file is a
+    genuine, undamaged image of the format Pillow detects; a second, fresh
+    open is needed afterward to read img.format, since verify() leaves the
+    Image object unusable for further access. Always leaves file_obj's
+    position reset to 0 afterward, since Django's storage backend still
+    needs to read the full file to actually save it."""
+    file_obj.seek(0)
+    try:
+        with Image.open(file_obj) as img:
+            img.verify()
+    except (UnidentifiedImageError, OSError, ValueError, SyntaxError):
+        return False
+    finally:
+        file_obj.seek(0)
+
+    try:
+        with Image.open(file_obj) as img:
+            detected_format = img.format
+    except (UnidentifiedImageError, OSError, ValueError, SyntaxError):
+        return False
+    finally:
+        file_obj.seek(0)
+
+    expected_formats = RASTER_CONTENT_TYPE_FORMATS.get(content_type)
+    if expected_formats and detected_format not in expected_formats:
+        return False
+    return True
 
 
 def validate_entity_name(value):
@@ -26,14 +112,38 @@ def validate_image_size(value, max_bytes=MAX_LOGO_SIZE_BYTES):
 
 def validate_image_size_and_type(value, max_bytes=MAX_LOGO_SIZE_BYTES):
     """Shared validation for image-backed fields that must also accept SVG
-    uploads — mirrors ServiceSerializer.validate_icon's size + content-type
-    checks, since DRF's ModelSerializer-inferred ImageField validates via
-    Pillow, which can't open SVG (a vector/XML format, not a raster one)."""
+    uploads, since DRF's ModelSerializer-inferred ImageField validates via
+    Pillow, which can't open SVG (a vector/XML format, not a raster one).
+
+    The declared Content-Type header is only used to pick *which* real check
+    to run — raster types are decoded and verified with Pillow, SVG is
+    parsed as XML and inspected for dangerous content — it is never trusted
+    on its own to decide whether the upload is accepted. A file that lies
+    about its Content-Type (e.g. real HTML/script served as
+    image/svg+xml, or a JPEG relabeled as image/png) is rejected either by
+    the wrong-branch check failing or by the format-family cross-check
+    inside _raster_bytes_are_valid."""
     if value.size > max_bytes:
         raise serializers.ValidationError(f'Image is too large (max {max_bytes // (1024 * 1024)}MB).')
     content_type = getattr(value, 'content_type', None)
     if content_type not in ACCEPTED_ICON_CONTENT_TYPES:
         raise serializers.ValidationError('Unsupported image type. Use PNG, JPEG, WebP or SVG.')
+
+    if content_type == SVG_CONTENT_TYPE:
+        value.seek(0)
+        raw_bytes = value.read()
+        value.seek(0)
+        if not _svg_bytes_are_safe(raw_bytes):
+            raise serializers.ValidationError(
+                'This SVG file could not be verified as safe (it may contain a script or '
+                'event handler, or is not well-formed XML) and was rejected.'
+            )
+    else:
+        if not _raster_bytes_are_valid(value, content_type):
+            raise serializers.ValidationError(
+                'This file does not appear to be a valid image of the declared type.'
+            )
+
     return value
 
 
@@ -105,12 +215,7 @@ class ServiceSerializer(serializers.ModelSerializer):
         return value
 
     def validate_icon(self, value):
-        if value.size > MAX_LOGO_SIZE_BYTES:
-            raise serializers.ValidationError('Image is too large (max 5MB).')
-        content_type = getattr(value, 'content_type', None)
-        if content_type not in ACCEPTED_ICON_CONTENT_TYPES:
-            raise serializers.ValidationError('Unsupported image type. Use PNG, JPEG, WebP or SVG.')
-        return value
+        return validate_image_size_and_type(value)
 
 
 class CertificationSerializer(serializers.ModelSerializer):

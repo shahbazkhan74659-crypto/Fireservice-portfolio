@@ -1,6 +1,6 @@
 -r base.txt
 
-pytest
-pytest-django
-pytest-cov
-factory_boy
+pytest==9.1.1
+pytest-django==4.12.0
+pytest-cov==7.1.0
+factory_boy==3.3.3

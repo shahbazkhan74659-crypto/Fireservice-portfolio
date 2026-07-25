@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Count
 from django.db.models.functions import TruncDate
 from django.utils import timezone
@@ -33,6 +33,19 @@ CONTENT_MODELS = (
 
 TREND_DAYS = 30
 CHART_W, CHART_H = 720, 160
+
+
+class StaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
+    """Gate for every authenticated Admin Hub page: being logged in isn't
+    enough — the account must also be is_staff. Without this, any regular
+    (non-staff) User account that successfully authenticates would get full
+    Admin Hub access, since LoginRequiredMixin alone only checks
+    is_authenticated. UserPassesTestMixin redirects a logged-in-but-not-staff
+    visitor to LOGIN_URL just like an anonymous one, rather than a 403 that
+    would confirm the account exists and merely lacks permission."""
+
+    def test_func(self):
+        return bool(self.request.user and self.request.user.is_staff)
 
 
 class HomeView(TemplateView):
@@ -96,9 +109,10 @@ class AdminHubLoginView(TemplateView):
 
 
 @method_decorator(ensure_csrf_cookie, name='dispatch')
-class AdminHubHomeView(LoginRequiredMixin, TemplateView):
-    # LoginRequiredMixin redirects to settings.LOGIN_URL ('/admin-hub/') with
-    # a ?next= param when the visitor isn't authenticated. ensure_csrf_cookie
+class AdminHubHomeView(StaffRequiredMixin, TemplateView):
+    # StaffRequiredMixin redirects to settings.LOGIN_URL ('/admin-hub/') with
+    # a ?next= param when the visitor isn't authenticated or isn't staff.
+    # ensure_csrf_cookie
     # is kept even though this page no longer hosts a form island itself,
     # since it's the first page hit after login and the cookie is cheap
     # insurance for whichever admin page the user clicks into next.
@@ -233,7 +247,7 @@ class AdminHubHomeView(LoginRequiredMixin, TemplateView):
         return context
 
 
-class AdminHubLeadsView(LoginRequiredMixin, TemplateView):
+class AdminHubLeadsView(StaffRequiredMixin, TemplateView):
     # Bare list view — no form/island, so no ensure_csrf_cookie needed.
     template_name = 'adminhub/leads.html'
 
@@ -246,14 +260,14 @@ class AdminHubLeadsView(LoginRequiredMixin, TemplateView):
 
 
 @method_decorator(ensure_csrf_cookie, name='dispatch')
-class AdminHubClienteleView(LoginRequiredMixin, TemplateView):
+class AdminHubClienteleView(StaffRequiredMixin, TemplateView):
     # ensure_csrf_cookie needed — this page hosts the Client Logo management
     # React island, which POSTs/PATCHes/DELETEs with an X-CSRFToken header.
     template_name = 'adminhub/clientele.html'
 
 
 @method_decorator(ensure_csrf_cookie, name='dispatch')
-class AdminHubServicesView(LoginRequiredMixin, TemplateView):
+class AdminHubServicesView(StaffRequiredMixin, TemplateView):
     # ensure_csrf_cookie needed — this page hosts the Services and Fire Risk
     # Assessment management React islands, which POST/PATCH/DELETE with an
     # X-CSRFToken header.
@@ -261,7 +275,7 @@ class AdminHubServicesView(LoginRequiredMixin, TemplateView):
 
 
 @method_decorator(ensure_csrf_cookie, name='dispatch')
-class AdminHubCertificationsView(LoginRequiredMixin, TemplateView):
+class AdminHubCertificationsView(StaffRequiredMixin, TemplateView):
     # ensure_csrf_cookie needed — this page hosts the Certifications
     # management React island, which POSTs/DELETEs with an X-CSRFToken header.
     template_name = 'adminhub/certifications.html'
