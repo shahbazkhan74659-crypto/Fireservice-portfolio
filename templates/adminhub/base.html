@@ -1,7 +1,8 @@
 {% load static %}<!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="no-js">
 <head>
 <meta charset="UTF-8">
+<script>document.documentElement.className='js';</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
 <title>{% block title %}Admin Hub | Iconic Techno Service{% endblock %}</title>
@@ -29,7 +30,6 @@
         <a href="{% url 'adminhub-clientele' %}" class="{% if request.resolver_match.url_name == 'adminhub-clientele' %}active{% endif %}">Clientele</a>
         <a href="{% url 'adminhub-services' %}" class="{% if request.resolver_match.url_name == 'adminhub-services' %}active{% endif %}">Services</a>
         <a href="{% url 'adminhub-certifications' %}" class="{% if request.resolver_match.url_name == 'adminhub-certifications' %}active{% endif %}">Certifications</a>
-        <a href="{% url 'adminhub-counter' %}" class="{% if request.resolver_match.url_name == 'adminhub-counter' %}active{% endif %}">Counter</a>
       </nav>
     </div>
     <div class="adminhub-header__actions">
@@ -46,6 +46,8 @@
 {% block content %}{% endblock %}
 </main>
 
+<script src="{% static 'js/adminhub.js' %}"></script>
+<script src="{% static 'js/page-transitions.js' %}"></script>
 {% block extra_scripts %}{% endblock %}
 </body>
 </html>

@@ -9,6 +9,7 @@ from rest_framework.generics import (
     DestroyAPIView,
     ListAPIView,
     ListCreateAPIView,
+    RetrieveUpdateAPIView,
     RetrieveUpdateDestroyAPIView,
 )
 from rest_framework.parsers import FormParser, MultiPartParser
@@ -20,7 +21,7 @@ from leads.serializers import (
     ContactMessageSerializer,
     SurveyRequestSerializer,
 )
-from website.models import Brand, Certification, ClientLogo, FireRiskAssessmentItem, MissionVisionItem, Product, Service
+from website.models import Brand, Certification, ClientLogo, FireRiskAssessmentItem, MissionVisionItem, Product, Service, SiteSetting
 from website.serializers import (
     BrandSerializer,
     CertificationSerializer,
@@ -29,6 +30,7 @@ from website.serializers import (
     MissionVisionItemSerializer,
     ProductSerializer,
     ServiceSerializer,
+    SiteSettingSerializer,
 )
 
 
@@ -188,3 +190,13 @@ class FireRiskAssessmentItemListCreateView(ListCreateAPIView):
 class FireRiskAssessmentItemDetailView(RetrieveUpdateDestroyAPIView):
     queryset = FireRiskAssessmentItem.objects.all()
     serializer_class = FireRiskAssessmentItemSerializer
+
+
+class SiteSettingDetailView(RetrieveUpdateAPIView):
+    # Singleton, not list/create — get_object always resolves to the one
+    # pk=1 row (creating it on first access) rather than looking up a pk
+    # from the URL, so there's nothing to list or create.
+    serializer_class = SiteSettingSerializer
+
+    def get_object(self):
+        return SiteSetting.load()

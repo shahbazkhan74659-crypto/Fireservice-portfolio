@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import AddServiceForm from './AddServiceForm'
 import ServiceCard from './ServiceCard'
+import Skeleton from '../../lib/Skeleton'
 import type { Service } from './schema'
 
 type LoadState = 'loading' | 'loaded' | 'error'
@@ -44,7 +45,18 @@ export default function ServiceManager() {
   }
 
   if (loadState === 'loading') {
-    return <p className="section__sub">Loading services…</p>
+    return (
+      <div className="grid grid--services" aria-hidden="true">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div className="card" key={i}>
+            <Skeleton style={{ width: 52, height: 52, borderRadius: 12, marginBottom: 18 }} />
+            <Skeleton className="skeleton-text" style={{ width: '70%', height: 20, marginBottom: 12 }} />
+            <Skeleton className="skeleton-text" style={{ width: '100%' }} />
+            <Skeleton className="skeleton-text" style={{ width: '85%' }} />
+          </div>
+        ))}
+      </div>
+    )
   }
 
   if (loadState === 'error') {

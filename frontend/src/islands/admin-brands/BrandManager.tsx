@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import AddBrandForm from './AddBrandForm'
 import BrandCard from './BrandCard'
+import Skeleton from '../../lib/Skeleton'
 import type { Brand } from './schema'
 
 type LoadState = 'loading' | 'loaded' | 'error'
@@ -44,7 +45,19 @@ export default function BrandManager() {
   }
 
   if (loadState === 'loading') {
-    return <p className="section__sub">Loading brands…</p>
+    return (
+      <div className="logo-grid" aria-hidden="true">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div className="logo-card logo-card--admin" key={i}>
+            <Skeleton style={{ width: '100%', height: 50 }} />
+            <div className="logo-card__admin-actions">
+              <Skeleton style={{ width: 38, height: 38, borderRadius: 10 }} />
+              <Skeleton style={{ width: 38, height: 38, borderRadius: 10 }} />
+            </div>
+          </div>
+        ))}
+      </div>
+    )
   }
 
   if (loadState === 'error') {

@@ -19,13 +19,13 @@ from core.api_views import (
     ProductListCreateView,
     ServiceDetailView,
     ServiceListCreateView,
+    SiteSettingDetailView,
     SurveyRequestCreateView,
 )
 from core.views import (
     AboutView,
     AdminHubCertificationsView,
     AdminHubClienteleView,
-    AdminHubCounterView,
     AdminHubHomeView,
     AdminHubLeadsView,
     AdminHubLoginView,
@@ -60,7 +60,6 @@ urlpatterns = [
     path('admin-hub/home/', AdminHubHomeView.as_view(), name='adminhub-home'),
     path('admin-hub/leads/', AdminHubLeadsView.as_view(), name='adminhub-leads'),
     path('admin-hub/clientele/', AdminHubClienteleView.as_view(), name='adminhub-clientele'),
-    path('admin-hub/counter/', AdminHubCounterView.as_view(), name='adminhub-counter'),
     path('admin-hub/services/', AdminHubServicesView.as_view(), name='adminhub-services'),
     path('admin-hub/certifications/', AdminHubCertificationsView.as_view(), name='adminhub-certifications'),
     path('admin-hub/logout/', LogoutView.as_view(next_page='adminhub-login'), name='adminhub-logout'),
@@ -78,4 +77,5 @@ urlpatterns = [
     path('api/admin-hub/products/<int:pk>/', ProductDetailView.as_view(), name='api-adminhub-products-detail'),
     path('api/admin-hub/certifications/', CertificationListCreateView.as_view(), name='api-adminhub-certifications-list'),
     path('api/admin-hub/certifications/<int:pk>/', CertificationDeleteView.as_view(), name='api-adminhub-certifications-detail'),
+    path('api/admin-hub/site-settings/', SiteSettingDetailView.as_view(), name='api-adminhub-site-settings-detail'),
 ]

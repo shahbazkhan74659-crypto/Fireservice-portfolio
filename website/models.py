@@ -162,6 +162,41 @@ def delete_certification_file_on_delete(sender, instance, **kwargs):
         instance.image.delete(save=False)
 
 
+class SiteSetting(models.Model):
+    # Singleton row (always pk=1) for small sitewide values that don't need
+    # their own model+list UI — currently the "10+ Years Experience" figure
+    # shown in every stats bar (Home/About/Consultation/Clientele) and the
+    # Home page's Clients Served / Installations / Emergency Support hero
+    # stats, and the About page's "Team Members" stat.
+    years_experience = models.PositiveIntegerField(default=10)
+    clients_served = models.PositiveIntegerField(default=0)
+    installations = models.PositiveIntegerField(default=0)
+    emergency_support = models.PositiveIntegerField(default=0)
+    team_members = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        # Without this, Django's default CamelCase-to-words split renders as
+        # all-lowercase "site setting" / "site settings" in admin (e.g. the
+        # changelist footer's "1 site setting").
+        verbose_name = 'Site Setting'
+        verbose_name_plural = 'Site Settings'
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def load(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
+
+    def __str__(self):
+        return 'Site Settings'
+
+    def __str__(self):
+        return 'Site Settings'
+
+
 class FireRiskAssessmentItem(models.Model):
     text = models.CharField(max_length=200)
     order = models.PositiveIntegerField(default=0)

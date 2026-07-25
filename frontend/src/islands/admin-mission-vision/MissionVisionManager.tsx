@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import MissionVisionCard from './MissionVisionCard'
+import Skeleton from '../../lib/Skeleton'
 import type { MissionVisionItem } from './schema'
 
 type LoadState = 'loading' | 'loaded' | 'error'
@@ -39,7 +40,21 @@ export default function MissionVisionManager() {
   }
 
   if (loadState === 'loading') {
-    return <p className="section__sub">Loading Mission &amp; Vision…</p>
+    return (
+      <div className="grid grid--mission" aria-hidden="true">
+        {Array.from({ length: 2 }).map((_, i) => (
+          <div className="card admin-mv-card" key={i}>
+            <Skeleton className="skeleton-text" style={{ width: '50%', height: 22, marginBottom: 16 }} />
+            <Skeleton className="skeleton-text" style={{ width: '100%' }} />
+            <Skeleton className="skeleton-text" style={{ width: '95%' }} />
+            <Skeleton className="skeleton-text" style={{ width: '80%', marginBottom: 16 }} />
+            {Array.from({ length: 3 }).map((__, j) => (
+              <Skeleton className="skeleton-text" style={{ width: `${70 - j * 10}%` }} key={j} />
+            ))}
+          </div>
+        ))}
+      </div>
+    )
   }
 
   if (loadState === 'error') {

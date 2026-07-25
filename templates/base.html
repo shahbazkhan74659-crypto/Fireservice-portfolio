@@ -1,7 +1,8 @@
 {% load static %}<!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="no-js">
 <head>
 <meta charset="UTF-8">
+<script>document.documentElement.className='js';</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{% block title %}Iconic Techno Service | Total Fire Protection for Life &amp; Property{% endblock %}</title>
 <meta name="description" content="{% block meta_description %}Iconic Techno Service designs, installs and maintains complete fire safety systems for residential, commercial, industrial and institutional clients.{% endblock %}">
@@ -106,6 +107,7 @@
 <button id="backToTop" class="back-to-top" aria-label="Back to top">&uarr;</button>
 
 <script src="{% static 'js/site.js' %}"></script>
+<script src="{% static 'js/page-transitions.js' %}"></script>
 {% block extra_scripts %}{% endblock %}
 </body>
 </html>

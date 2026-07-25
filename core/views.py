@@ -17,6 +17,7 @@ from website.models import (
     MissionVisionItem,
     Product,
     Service,
+    SiteSetting,
 )
 
 LEAD_MODELS = (
@@ -106,25 +107,47 @@ class AdminHubHomeView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        today = timezone.localdate()
+        since = timezone.now() - timedelta(days=TREND_DAYS - 1)
+
         lead_counts = [(label, model.objects.count(), admin_name) for label, model, admin_name in LEAD_MODELS]
         total_leads = sum(count for _, count, _ in lead_counts)
+
+        # Meter cards show today's leads (resets at local midnight, since
+        # `today` is timezone.localdate()) rather than the all-time count —
+        # the ring's fill share is likewise scoped to today's totals.
+        today_counts = [
+            (label, model.objects.filter(created_at__date=today).count())
+            for label, model, _ in LEAD_MODELS
+        ]
+        total_today = sum(count for _, count in today_counts)
+        last_30d_counts = {
+            label: model.objects.filter(created_at__gte=since).count()
+            for label, model, _ in LEAD_MODELS
+        }
 
         context['lead_meters'] = [
             {
                 'label': label,
                 'count': count,
-                'pct': round((count / total_leads) * 100) if total_leads else 0,
+                'pct': round((count / total_today) * 100) if total_today else 0,
+                'last_30d': last_30d_counts[label],
             }
-            for label, count, _ in lead_counts
+            for label, count in today_counts
         ]
         context['total_leads'] = total_leads
+        site_setting = SiteSetting.load()
+        context['years_experience'] = site_setting.years_experience
+        context['clients_served'] = site_setting.clients_served
+        context['installations'] = site_setting.installations
+        context['emergency_support'] = site_setting.emergency_support
+        context['team_members'] = site_setting.team_members
 
         populated_types = sum(1 for model in CONTENT_MODELS if model.objects.exists())
         context['content_completeness_pct'] = round((populated_types / len(CONTENT_MODELS)) * 100)
         context['content_types_populated'] = populated_types
         context['content_types_total'] = len(CONTENT_MODELS)
 
-        since = timezone.now() - timedelta(days=TREND_DAYS - 1)
         daily_counts = {}
         daily_by_type = {}
         for label, model, _ in LEAD_MODELS:
@@ -138,7 +161,6 @@ class AdminHubHomeView(LoginRequiredMixin, TemplateView):
                 daily_counts[row['day']] = daily_counts.get(row['day'], 0) + row['n']
                 daily_by_type.setdefault(row['day'], {})[label] = row['n']
 
-        today = timezone.localdate()
         trend = [
             {'date': today - timedelta(days=i), 'count': daily_counts.get(today - timedelta(days=i), 0)}
             for i in range(TREND_DAYS - 1, -1, -1)
@@ -228,12 +250,6 @@ class AdminHubClienteleView(LoginRequiredMixin, TemplateView):
     # ensure_csrf_cookie needed — this page hosts the Client Logo management
     # React island, which POSTs/PATCHes/DELETEs with an X-CSRFToken header.
     template_name = 'adminhub/clientele.html'
-
-
-class AdminHubCounterView(LoginRequiredMixin, TemplateView):
-    # Bare placeholder, same as AdminHubHomeView originally was — no form/
-    # island yet, so no ensure_csrf_cookie needed until one is added.
-    template_name = 'adminhub/counter.html'
 
 
 @method_decorator(ensure_csrf_cookie, name='dispatch')

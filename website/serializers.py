@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Brand, Certification, ClientLogo, FireRiskAssessmentItem, MissionVisionItem, Product, Service
+from .models import Brand, Certification, ClientLogo, FireRiskAssessmentItem, MissionVisionItem, Product, Service, SiteSetting
 
 MAX_LOGO_SIZE_BYTES = 5 * 1024 * 1024  # 5MB
 ACCEPTED_ICON_CONTENT_TYPES = {'image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'}
@@ -113,6 +113,20 @@ class CertificationSerializer(serializers.ModelSerializer):
         if value.size > MAX_LOGO_SIZE_BYTES:
             raise serializers.ValidationError('Image is too large (max 5MB).')
         return value
+
+
+class SiteSettingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SiteSetting
+        fields = ['years_experience', 'clients_served', 'installations', 'emergency_support', 'team_members']
+        # No max_value set on the model fields, so cap them here.
+        extra_kwargs = {
+            'years_experience': {'max_value': 999},
+            'clients_served': {'max_value': 999999},
+            'installations': {'max_value': 999999},
+            'emergency_support': {'max_value': 999},
+            'team_members': {'max_value': 9999},
+        }
 
 
 class FireRiskAssessmentItemSerializer(serializers.ModelSerializer):

@@ -1,6 +1,13 @@
 {% extends "adminhub/base.html" %}
+{% load django_vite %}
 
 {% block title %}Admin Home | Iconic Techno Service{% endblock %}
+
+{% block extra_head %}
+  {% vite_hmr_client %}
+  {% vite_react_refresh %}
+  {% vite_asset 'src/islands/admin-site-settings/main.tsx' %}
+{% endblock %}
 
 {% block content %}
 <div class="command-center">
@@ -12,7 +19,23 @@
         <span class="command-center__subtitle">Dashboard Overview</span>
       </div>
     </div>
-    <p class="command-center__greeting">Welcome, {{ request.user.username }}</p>
+    <div class="cc-header-stats">
+      <div data-stat-editor data-field="years_experience" data-label="Years Experience" data-suffix="+" data-value="{{ years_experience }}">
+        <noscript>{{ years_experience }}+ Years Experience</noscript>
+      </div>
+      <div data-stat-editor data-field="clients_served" data-label="Clients Served" data-suffix="+" data-value="{{ clients_served }}">
+        <noscript>{{ clients_served }}+ Clients Served</noscript>
+      </div>
+      <div data-stat-editor data-field="installations" data-label="Installations" data-suffix="+" data-value="{{ installations }}">
+        <noscript>{{ installations }}+ Installations</noscript>
+      </div>
+      <div data-stat-editor data-field="emergency_support" data-label="Emergency Support" data-suffix="/7" data-value="{{ emergency_support }}">
+        <noscript>{{ emergency_support }}/7 Emergency Support</noscript>
+      </div>
+      <div data-stat-editor data-field="team_members" data-label="Team Members" data-suffix="+" data-value="{{ team_members }}">
+        <noscript>{{ team_members }}+ Team Members</noscript>
+      </div>
+    </div>
   </div>
 
   <div class="command-center__meters">
@@ -22,7 +45,7 @@
         <div class="cc-meter__value">{{ meter.count }}</div>
       </div>
       <p class="cc-meter-card__label">{{ meter.label }}</p>
-      <p class="cc-meter-card__sub">{{ meter.pct }}% of leads</p>
+      <p class="cc-meter-card__sub">{{ meter.last_30d }} in the last 30 days</p>
     </div>
     {% endfor %}
     <div class="cc-meter-card">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import AddFireRiskItemForm from './AddFireRiskItemForm'
 import FireRiskItemRow from './FireRiskItemRow'
+import Skeleton from '../../lib/Skeleton'
 import type { FireRiskAssessmentItem } from './schema'
 
 type LoadState = 'loading' | 'loaded' | 'error'
@@ -44,7 +45,17 @@ export default function FireRiskItemManager() {
   }
 
   if (loadState === 'loading') {
-    return <p className="section__sub">Loading checklist items…</p>
+    return (
+      <div aria-hidden="true">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div className="admin-mv-point" key={i}>
+            <Skeleton className="skeleton-text" style={{ flex: 1, height: 16, marginBottom: 0 }} />
+            <Skeleton style={{ width: 38, height: 38, borderRadius: 10 }} />
+            <Skeleton style={{ width: 38, height: 38, borderRadius: 10 }} />
+          </div>
+        ))}
+      </div>
+    )
   }
 
   if (loadState === 'error') {
