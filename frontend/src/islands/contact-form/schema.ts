@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { nameSchema, emailSchema } from '../../lib/validators'
+import { nameSchema, emailSchema, phoneSchema } from '../../lib/validators'
 
 export const SERVICE_OPTIONS = [
   { value: 'fire_detection', label: 'Fire Detection System' },
@@ -17,10 +17,7 @@ const serviceValues = SERVICE_OPTIONS.map((o) => o.value) as [string, ...string[
 
 export const contactMessageSchema = z.object({
   name: nameSchema,
-  phone: z.string().trim()
-    .min(1, 'Phone number is required.')
-    .max(20, 'Phone number is too long.')
-    .refine((v) => v.replace(/\D/g, '').length >= 7, 'Please enter a valid phone number.'),
+  phone: phoneSchema,
   email: emailSchema,
   service: z.enum(serviceValues, { message: 'Please select a service.' }),
   message: z.string().trim().max(2000, 'Message is too long (max 2000 characters).').optional(),

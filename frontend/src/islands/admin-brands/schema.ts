@@ -1,31 +1,20 @@
 import { z } from 'zod'
+import { entityNameField, imageFileSchema } from '../../lib/validators'
 
 const MAX_LOGO_SIZE_BYTES = 5 * 1024 * 1024
 const ACCEPTED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml']
-
-const nameField = z.string().trim()
-  .min(2, 'Name is required.')
-  .max(120, 'Name is too long (max 120 characters).')
-
-function checkImageFile(file: File, ctx: z.RefinementCtx) {
-  if (file.size > MAX_LOGO_SIZE_BYTES) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Image is too large (max 5MB).' })
-  }
-  if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Unsupported image type. Use PNG, JPEG, WebP or SVG.' })
-  }
-}
+const IMAGE_TYPE_ERROR = 'Unsupported image type. Use PNG, JPEG, WebP or SVG.'
 
 export const addBrandSchema = z.object({
-  name: nameField,
-  image: z.instanceof(File, { message: 'Please choose an image file.' }).superRefine(checkImageFile),
+  name: entityNameField,
+  image: imageFileSchema(MAX_LOGO_SIZE_BYTES, ACCEPTED_IMAGE_TYPES, IMAGE_TYPE_ERROR),
 })
 export type AddBrandInput = z.infer<typeof addBrandSchema>
 export type AddBrandErrors = Partial<Record<keyof AddBrandInput, string>>
 
 export const editBrandSchema = z.object({
-  name: nameField,
-  image: z.instanceof(File).superRefine(checkImageFile).optional(),
+  name: entityNameField,
+  image: imageFileSchema(MAX_LOGO_SIZE_BYTES, ACCEPTED_IMAGE_TYPES, IMAGE_TYPE_ERROR).optional(),
 })
 export type EditBrandInput = z.infer<typeof editBrandSchema>
 export type EditBrandErrors = Partial<Record<keyof EditBrandInput, string>>

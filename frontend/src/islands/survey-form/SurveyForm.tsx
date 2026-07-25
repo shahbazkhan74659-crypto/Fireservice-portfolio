@@ -1,69 +1,25 @@
-import { useState, type FormEvent, type ChangeEvent } from 'react'
-import { surveyRequestSchema, type SurveyRequestInput, type SurveyFormErrors } from './schema'
-import { getCsrfToken } from '../../lib/csrf'
-import { readErrorMessage } from '../../lib/api'
+import { surveyRequestSchema, type SurveyRequestInput } from './schema'
+import { useFormSubmit } from '../../lib/useFormSubmit'
 
 const initialValues: SurveyRequestInput = {
   name: '', email: '', address: '', problem: '', whySurvey: '',
 }
 
-type SubmitState = 'idle' | 'submitting' | 'success' | 'error'
+const ENDPOINT = '/api/survey/'
 
 export default function SurveyForm() {
-  const [values, setValues] = useState<SurveyRequestInput>(initialValues)
-  const [errors, setErrors] = useState<SurveyFormErrors>({})
-  const [state, setState] = useState<SubmitState>('idle')
-  const [serverError, setServerError] = useState<string | null>(null)
-
-  const handleChange =
-    (field: keyof SurveyRequestInput) =>
-    (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-      setValues((prev) => ({ ...prev, [field]: e.target.value }))
-
-  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    setServerError(null)
-
-    const result = surveyRequestSchema.safeParse(values)
-    if (!result.success) {
-      const fieldErrors: SurveyFormErrors = {}
-      for (const issue of result.error.issues) {
-        const key = issue.path[0] as keyof SurveyRequestInput
-        if (!fieldErrors[key]) fieldErrors[key] = issue.message
-      }
-      setErrors(fieldErrors)
-      return
-    }
-    setErrors({})
-    setState('submitting')
-
-    try {
-      const res = await fetch('/api/survey/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
-        credentials: 'same-origin',
-        body: JSON.stringify({
-          name: result.data.name,
-          email: result.data.email,
-          address: result.data.address,
-          problem: result.data.problem,
-          why_survey: result.data.whySurvey,
-        }),
-      })
-
-      if (!res.ok) {
-        setServerError(await readErrorMessage(res))
-        setState('error')
-        return
-      }
-
-      setState('success')
-      setValues(initialValues)
-    } catch {
-      setServerError('Network error. Check your connection and try again.')
-      setState('error')
-    }
-  }
+  const { values, errors, state, serverError, handleChange, handleSubmit } = useFormSubmit(
+    surveyRequestSchema,
+    ENDPOINT,
+    initialValues,
+    (data) => ({
+      name: data.name,
+      email: data.email,
+      address: data.address,
+      problem: data.problem,
+      why_survey: data.whySurvey,
+    }),
+  )
 
   if (state === 'success') {
     return (

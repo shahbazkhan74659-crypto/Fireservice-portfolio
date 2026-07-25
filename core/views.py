@@ -222,9 +222,9 @@ class AdminHubHomeView(LoginRequiredMixin, TemplateView):
                     'name': obj.name,
                     'created_at': obj.created_at,
                     # Points at the Leads page's own row for this lead — the
-                    # page auto-opens that lead's detail modal on load (see
-                    # leads.html's extra_scripts) instead of bouncing out to
-                    # the raw Django admin change form.
+                    # page switches to the matching tab and scrolls to that
+                    # row (see leads.html's extra_scripts) instead of
+                    # bouncing out to the raw Django admin change form.
                     'leads_url': f'/admin-hub/leads/#lead-{admin_name}-{obj.pk}',
                 })
         activity.sort(key=lambda a: a['created_at'], reverse=True)

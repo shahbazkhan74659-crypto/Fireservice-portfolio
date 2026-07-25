@@ -1,6 +1,50 @@
 from django.db import models
 from django.db.models.signals import post_delete, pre_save
-from django.dispatch import receiver
+
+
+def register_file_cleanup_signals(model, field_name='image', with_replace=True):
+    """Wires up file-cleanup signal receivers for a model with an
+    ImageField/FileField named `field_name`. Django never deletes the file
+    backing a FileField/ImageField on its own — without this, every deleted
+    row (post_delete) or replaced image (pre_save) leaves an orphaned file
+    in media/.
+
+    Used by ClientLogo/Brand/Product (field_name='image') and Service
+    (field_name='icon') with `with_replace=True` (they all support Edit, so
+    a "replace" case needs guarding); Certification passes
+    `with_replace=False` since it has no Edit, so there's no replace case —
+    only post_delete cleanup applies there.
+
+    `weak=False` is required here (unlike Django's `@receiver` decorator
+    default) because these receivers are closures created inside this
+    factory rather than module-level functions — without a strong
+    reference, Python's garbage collector could reclaim them and silently
+    disconnect the signal.
+    """
+
+    def on_delete(sender, instance, **kwargs):
+        file = getattr(instance, field_name)
+        if file:
+            file.delete(save=False)
+
+    post_delete.connect(on_delete, sender=model, weak=False)
+
+    if not with_replace:
+        return
+
+    def on_replace(sender, instance, **kwargs):
+        if not instance.pk:
+            return
+        try:
+            old_instance = model.objects.get(pk=instance.pk)
+        except model.DoesNotExist:
+            return
+        old_file = getattr(old_instance, field_name)
+        new_file = getattr(instance, field_name)
+        if old_file and old_file != new_file:
+            old_file.delete(save=False)
+
+    pre_save.connect(on_replace, sender=model, weak=False)
 
 
 class MissionVisionItem(models.Model):
@@ -28,27 +72,7 @@ class ClientLogo(models.Model):
         return self.name
 
 
-@receiver(post_delete, sender=ClientLogo)
-def delete_client_logo_file_on_delete(sender, instance, **kwargs):
-    # Django never deletes the file backing a FileField/ImageField on its
-    # own — without this, every deleted logo leaves an orphaned file in
-    # media/client-logos/.
-    if instance.image:
-        instance.image.delete(save=False)
-
-
-@receiver(pre_save, sender=ClientLogo)
-def delete_client_logo_file_on_replace(sender, instance, **kwargs):
-    # Same leak on replace: an edit that uploads a new image would otherwise
-    # leave the old file sitting in media/client-logos/ forever.
-    if not instance.pk:
-        return
-    try:
-        old_image = ClientLogo.objects.get(pk=instance.pk).image
-    except ClientLogo.DoesNotExist:
-        return
-    if old_image and old_image != instance.image:
-        old_image.delete(save=False)
+register_file_cleanup_signals(ClientLogo)
 
 
 class Brand(models.Model):
@@ -63,22 +87,7 @@ class Brand(models.Model):
         return self.name
 
 
-@receiver(post_delete, sender=Brand)
-def delete_brand_file_on_delete(sender, instance, **kwargs):
-    if instance.image:
-        instance.image.delete(save=False)
-
-
-@receiver(pre_save, sender=Brand)
-def delete_brand_file_on_replace(sender, instance, **kwargs):
-    if not instance.pk:
-        return
-    try:
-        old_image = Brand.objects.get(pk=instance.pk).image
-    except Brand.DoesNotExist:
-        return
-    if old_image and old_image != instance.image:
-        old_image.delete(save=False)
+register_file_cleanup_signals(Brand)
 
 
 class Service(models.Model):
@@ -94,22 +103,7 @@ class Service(models.Model):
         return self.name
 
 
-@receiver(post_delete, sender=Service)
-def delete_service_icon_on_delete(sender, instance, **kwargs):
-    if instance.icon:
-        instance.icon.delete(save=False)
-
-
-@receiver(pre_save, sender=Service)
-def delete_service_icon_on_replace(sender, instance, **kwargs):
-    if not instance.pk:
-        return
-    try:
-        old_icon = Service.objects.get(pk=instance.pk).icon
-    except Service.DoesNotExist:
-        return
-    if old_icon and old_icon != instance.icon:
-        old_icon.delete(save=False)
+register_file_cleanup_signals(Service, field_name='icon')
 
 
 class Product(models.Model):
@@ -124,22 +118,7 @@ class Product(models.Model):
         return self.name
 
 
-@receiver(post_delete, sender=Product)
-def delete_product_file_on_delete(sender, instance, **kwargs):
-    if instance.image:
-        instance.image.delete(save=False)
-
-
-@receiver(pre_save, sender=Product)
-def delete_product_file_on_replace(sender, instance, **kwargs):
-    if not instance.pk:
-        return
-    try:
-        old_image = Product.objects.get(pk=instance.pk).image
-    except Product.DoesNotExist:
-        return
-    if old_image and old_image != instance.image:
-        old_image.delete(save=False)
+register_file_cleanup_signals(Product)
 
 
 class Certification(models.Model):
@@ -156,10 +135,7 @@ class Certification(models.Model):
         return self.name
 
 
-@receiver(post_delete, sender=Certification)
-def delete_certification_file_on_delete(sender, instance, **kwargs):
-    if instance.image:
-        instance.image.delete(save=False)
+register_file_cleanup_signals(Certification, with_replace=False)
 
 
 class SiteSetting(models.Model):
@@ -189,9 +165,6 @@ class SiteSetting(models.Model):
     def load(cls):
         obj, _ = cls.objects.get_or_create(pk=1)
         return obj
-
-    def __str__(self):
-        return 'Site Settings'
 
     def __str__(self):
         return 'Site Settings'

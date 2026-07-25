@@ -16,13 +16,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Shrink site header on scroll
   // site-header is position:fixed (removed from flow), so body needs matching
   // padding-top kept in sync with its real height, including the shrink transition.
+  // syncHeaderOffsetFor() is shared with adminhub.js — see static/js/header-offset.js.
   const siteHeader = document.getElementById('siteHeader');
   const header = document.getElementById('header');
-  const syncHeaderOffset = () => {
-    document.body.style.paddingTop = siteHeader.offsetHeight + 'px';
-  };
-  syncHeaderOffset();
-  window.addEventListener('resize', syncHeaderOffset);
+  const syncHeaderOffset = syncHeaderOffsetFor(siteHeader);
   siteHeader.addEventListener('transitionend', syncHeaderOffset);
 
   window.addEventListener('scroll', () => {

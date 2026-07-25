@@ -1,44 +1,13 @@
-import { useEffect, useState } from 'react'
 import AddCertificationForm from './AddCertificationForm'
 import CertificationRow from './CertificationRow'
 import Skeleton from '../../lib/Skeleton'
+import { useCrudList } from '../../lib/useCrudList'
 import type { Certification } from './schema'
 
-type LoadState = 'loading' | 'loaded' | 'error'
+const ENDPOINT = '/api/admin-hub/certifications/'
 
 export default function CertificationManager() {
-  const [certifications, setCertifications] = useState<Certification[]>([])
-  const [loadState, setLoadState] = useState<LoadState>('loading')
-
-  useEffect(() => {
-    let cancelled = false
-
-    fetch('/api/admin-hub/certifications/', { credentials: 'same-origin' })
-      .then((res) => {
-        if (!res.ok) throw new Error('Failed to load')
-        return res.json()
-      })
-      .then((data: Certification[]) => {
-        if (cancelled) return
-        setCertifications(data)
-        setLoadState('loaded')
-      })
-      .catch(() => {
-        if (!cancelled) setLoadState('error')
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  function handleAdded(certification: Certification) {
-    setCertifications((prev) => [...prev, certification])
-  }
-
-  function handleDeleted(id: number) {
-    setCertifications((prev) => prev.filter((certification) => certification.id !== id))
-  }
+  const { items: certifications, loadState, add, remove } = useCrudList<Certification>(ENDPOINT)
 
   if (loadState === 'loading') {
     return (
@@ -75,7 +44,7 @@ export default function CertificationManager() {
 
   return (
     <>
-      <AddCertificationForm onAdded={handleAdded} />
+      <AddCertificationForm onAdded={add} />
       {certifications.length === 0 ? (
         <p className="section__sub">No certificates yet.</p>
       ) : (
@@ -92,7 +61,7 @@ export default function CertificationManager() {
             </thead>
             <tbody>
               {certifications.map((certification) => (
-                <CertificationRow key={certification.id} certification={certification} onDeleted={handleDeleted} />
+                <CertificationRow key={certification.id} certification={certification} onDeleted={remove} />
               ))}
             </tbody>
           </table>

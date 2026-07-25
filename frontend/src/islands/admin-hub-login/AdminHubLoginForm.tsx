@@ -1,7 +1,7 @@
 import { useState, type FormEvent, type ChangeEvent } from 'react'
 import { adminLoginSchema, type AdminLoginInput, type AdminLoginFormErrors } from './schema'
 import { getCsrfToken } from '../../lib/csrf'
-import { readErrorMessage } from '../../lib/api'
+import { readErrorMessage, NETWORK_ERROR_MESSAGE } from '../../lib/api'
 
 const initialValues: AdminLoginInput = { username: '', password: '' }
 
@@ -53,7 +53,7 @@ export default function AdminHubLoginForm() {
       // set by the login view is picked up by the next page's request.
       window.location.href = '/admin-hub/home/'
     } catch {
-      setServerError('Network error. Check your connection and try again.')
+      setServerError(NETWORK_ERROR_MESSAGE)
       setState('error')
     }
   }

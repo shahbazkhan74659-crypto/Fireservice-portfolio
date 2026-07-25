@@ -1,43 +1,12 @@
-import { useEffect, useState } from 'react'
 import MissionVisionCard from './MissionVisionCard'
 import Skeleton from '../../lib/Skeleton'
+import { useCrudList } from '../../lib/useCrudList'
 import type { MissionVisionItem } from './schema'
 
-type LoadState = 'loading' | 'loaded' | 'error'
+const ENDPOINT = '/api/admin-hub/mission-vision/'
 
 export default function MissionVisionManager() {
-  const [items, setItems] = useState<MissionVisionItem[]>([])
-  const [loadState, setLoadState] = useState<LoadState>('loading')
-
-  useEffect(() => {
-    let cancelled = false
-
-    fetch('/api/admin-hub/mission-vision/', { credentials: 'same-origin' })
-      .then((res) => {
-        if (!res.ok) throw new Error('Failed to load')
-        return res.json()
-      })
-      .then((data: MissionVisionItem[]) => {
-        if (cancelled) return
-        setItems(data)
-        setLoadState('loaded')
-      })
-      .catch(() => {
-        if (!cancelled) setLoadState('error')
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  function handleUpdated(updated: MissionVisionItem) {
-    setItems((prev) => prev.map((item) => (item.id === updated.id ? updated : item)))
-  }
-
-  function handleDeleted(id: number) {
-    setItems((prev) => prev.filter((item) => item.id !== id))
-  }
+  const { items, loadState, update, remove } = useCrudList<MissionVisionItem>(ENDPOINT)
 
   if (loadState === 'loading') {
     return (
@@ -68,7 +37,7 @@ export default function MissionVisionManager() {
   return (
     <div className="grid grid--mission">
       {items.map((item) => (
-        <MissionVisionCard key={item.id} item={item} onUpdated={handleUpdated} onDeleted={handleDeleted} />
+        <MissionVisionCard key={item.id} item={item} onUpdated={update} onDeleted={remove} />
       ))}
     </div>
   )

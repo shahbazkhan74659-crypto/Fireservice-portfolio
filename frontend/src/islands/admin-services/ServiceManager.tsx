@@ -1,48 +1,13 @@
-import { useEffect, useState } from 'react'
 import AddServiceForm from './AddServiceForm'
 import ServiceCard from './ServiceCard'
 import Skeleton from '../../lib/Skeleton'
+import { useCrudList } from '../../lib/useCrudList'
 import type { Service } from './schema'
 
-type LoadState = 'loading' | 'loaded' | 'error'
+const ENDPOINT = '/api/admin-hub/services/'
 
 export default function ServiceManager() {
-  const [services, setServices] = useState<Service[]>([])
-  const [loadState, setLoadState] = useState<LoadState>('loading')
-
-  useEffect(() => {
-    let cancelled = false
-
-    fetch('/api/admin-hub/services/', { credentials: 'same-origin' })
-      .then((res) => {
-        if (!res.ok) throw new Error('Failed to load')
-        return res.json()
-      })
-      .then((data: Service[]) => {
-        if (cancelled) return
-        setServices(data)
-        setLoadState('loaded')
-      })
-      .catch(() => {
-        if (!cancelled) setLoadState('error')
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  function handleAdded(service: Service) {
-    setServices((prev) => [...prev, service])
-  }
-
-  function handleUpdated(updated: Service) {
-    setServices((prev) => prev.map((service) => (service.id === updated.id ? updated : service)))
-  }
-
-  function handleDeleted(id: number) {
-    setServices((prev) => prev.filter((service) => service.id !== id))
-  }
+  const { items: services, loadState, add, update, remove } = useCrudList<Service>(ENDPOINT)
 
   if (loadState === 'loading') {
     return (
@@ -65,13 +30,13 @@ export default function ServiceManager() {
 
   return (
     <>
-      <AddServiceForm onAdded={handleAdded} />
+      <AddServiceForm onAdded={add} />
       {services.length === 0 ? (
         <p className="section__sub">No services yet.</p>
       ) : (
         <div className="grid grid--services">
           {services.map((service) => (
-            <ServiceCard key={service.id} service={service} onUpdated={handleUpdated} onDeleted={handleDeleted} />
+            <ServiceCard key={service.id} service={service} onUpdated={update} onDeleted={remove} />
           ))}
         </div>
       )}

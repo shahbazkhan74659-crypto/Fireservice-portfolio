@@ -5,13 +5,11 @@ import {
   type EditFireRiskItemInput,
   type EditFireRiskItemErrors,
 } from './schema'
-import { getCsrfToken } from '../../lib/csrf'
-import { readErrorMessage } from '../../lib/api'
+import { useEditDelete } from '../../lib/useEditDelete'
 import Modal from '../../lib/Modal'
-import { DeleteIcon, EditIcon } from './Icons'
+import { DeleteIcon, EditIcon } from '../../lib/Icons'
 
-type Dialog = 'none' | 'edit' | 'delete'
-type SaveState = 'idle' | 'saving' | 'deleting'
+const ENDPOINT = '/api/admin-hub/fire-risk-items/'
 
 interface Props {
   item: FireRiskAssessmentItem
@@ -20,27 +18,19 @@ interface Props {
 }
 
 export default function FireRiskItemRow({ item, onUpdated, onDeleted }: Props) {
-  const [dialog, setDialog] = useState<Dialog>('none')
+  const { dialog, saveState, serverError, openEdit, openDelete, closeDialog, save, remove } =
+    useEditDelete<FireRiskAssessmentItem>(ENDPOINT, item.id)
   const [text, setText] = useState(item.text)
   const [errors, setErrors] = useState<EditFireRiskItemErrors>({})
-  const [saveState, setSaveState] = useState<SaveState>('idle')
-  const [serverError, setServerError] = useState<string | null>(null)
 
   function startEdit() {
     setText(item.text)
     setErrors({})
-    setServerError(null)
-    setDialog('edit')
-  }
-
-  function closeDialog() {
-    setDialog('none')
-    setServerError(null)
+    openEdit()
   }
 
   async function handleSave(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    setServerError(null)
 
     const values: EditFireRiskItemInput = { text }
     const result = editFireRiskItemSchema.safeParse(values)
@@ -54,49 +44,13 @@ export default function FireRiskItemRow({ item, onUpdated, onDeleted }: Props) {
       return
     }
     setErrors({})
-    setSaveState('saving')
 
-    try {
-      const res = await fetch(`/api/admin-hub/fire-risk-items/${item.id}/`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
-        credentials: 'same-origin',
-        body: JSON.stringify(result.data),
-      })
-      if (!res.ok) {
-        setServerError(await readErrorMessage(res))
-        setSaveState('idle')
-        return
-      }
-      const updated: FireRiskAssessmentItem = await res.json()
-      onUpdated(updated)
-      setSaveState('idle')
-      setDialog('none')
-    } catch {
-      setServerError('Network error. Check your connection and try again.')
-      setSaveState('idle')
-    }
+    const updated = await save(result.data)
+    if (updated) onUpdated(updated)
   }
 
   async function handleDelete() {
-    setSaveState('deleting')
-    setServerError(null)
-    try {
-      const res = await fetch(`/api/admin-hub/fire-risk-items/${item.id}/`, {
-        method: 'DELETE',
-        headers: { 'X-CSRFToken': getCsrfToken() },
-        credentials: 'same-origin',
-      })
-      if (!res.ok && res.status !== 204) {
-        setServerError(await readErrorMessage(res))
-        setSaveState('idle')
-        return
-      }
-      onDeleted(item.id)
-    } catch {
-      setServerError('Network error. Check your connection and try again.')
-      setSaveState('idle')
-    }
+    if (await remove()) onDeleted(item.id)
   }
 
   return (
@@ -106,7 +60,7 @@ export default function FireRiskItemRow({ item, onUpdated, onDeleted }: Props) {
       <button type="button" className="btn btn--outline btn--icon" onClick={startEdit} aria-label="Edit">
         <EditIcon />
       </button>
-      <button type="button" className="btn btn--primary btn--icon" onClick={() => setDialog('delete')} aria-label="Delete">
+      <button type="button" className="btn btn--primary btn--icon" onClick={openDelete} aria-label="Delete">
         <DeleteIcon />
       </button>
 

@@ -6,6 +6,24 @@ MAX_LOGO_SIZE_BYTES = 5 * 1024 * 1024  # 5MB
 ACCEPTED_ICON_CONTENT_TYPES = {'image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'}
 
 
+def validate_entity_name(value):
+    """Shared name validation used by every image-backed content model's
+    serializer (Brand, ClientLogo, Product, Service, Certification) —
+    strips whitespace and requires at least 2 characters."""
+    value = value.strip()
+    if len(value) < 2:
+        raise serializers.ValidationError('Name is required.')
+    return value
+
+
+def validate_image_size(value, max_bytes=MAX_LOGO_SIZE_BYTES):
+    """Shared image-size validation used by every image-backed content
+    model's serializer — rejects uploads over max_bytes."""
+    if value.size > max_bytes:
+        raise serializers.ValidationError(f'Image is too large (max {max_bytes // (1024 * 1024)}MB).')
+    return value
+
+
 class MissionVisionItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = MissionVisionItem
@@ -39,15 +57,10 @@ class ClientLogoSerializer(serializers.ModelSerializer):
         read_only_fields = ['order']  # server-assigned on create — see perform_create
 
     def validate_name(self, value):
-        value = value.strip()
-        if len(value) < 2:
-            raise serializers.ValidationError('Name is required.')
-        return value
+        return validate_entity_name(value)
 
     def validate_image(self, value):
-        if value.size > MAX_LOGO_SIZE_BYTES:
-            raise serializers.ValidationError('Image is too large (max 5MB).')
-        return value
+        return validate_image_size(value)
 
 
 class ServiceSerializer(serializers.ModelSerializer):
@@ -65,10 +78,7 @@ class ServiceSerializer(serializers.ModelSerializer):
         read_only_fields = ['order']  # server-assigned on create — see perform_create
 
     def validate_name(self, value):
-        value = value.strip()
-        if len(value) < 2:
-            raise serializers.ValidationError('Name is required.')
-        return value
+        return validate_entity_name(value)
 
     def validate_description(self, value):
         value = value.strip()
@@ -92,10 +102,7 @@ class CertificationSerializer(serializers.ModelSerializer):
         read_only_fields = ['order']  # server-assigned on create — see perform_create
 
     def validate_name(self, value):
-        value = value.strip()
-        if len(value) < 2:
-            raise serializers.ValidationError('Name is required.')
-        return value
+        return validate_entity_name(value)
 
     def validate_description(self, value):
         value = value.strip()
@@ -110,9 +117,7 @@ class CertificationSerializer(serializers.ModelSerializer):
         return value
 
     def validate_image(self, value):
-        if value.size > MAX_LOGO_SIZE_BYTES:
-            raise serializers.ValidationError('Image is too large (max 5MB).')
-        return value
+        return validate_image_size(value)
 
 
 class SiteSettingSerializer(serializers.ModelSerializer):
@@ -149,15 +154,10 @@ class BrandSerializer(serializers.ModelSerializer):
         read_only_fields = ['order']  # server-assigned on create — see perform_create
 
     def validate_name(self, value):
-        value = value.strip()
-        if len(value) < 2:
-            raise serializers.ValidationError('Name is required.')
-        return value
+        return validate_entity_name(value)
 
     def validate_image(self, value):
-        if value.size > MAX_LOGO_SIZE_BYTES:
-            raise serializers.ValidationError('Image is too large (max 5MB).')
-        return value
+        return validate_image_size(value)
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -167,12 +167,7 @@ class ProductSerializer(serializers.ModelSerializer):
         read_only_fields = ['order']  # server-assigned on create — see perform_create
 
     def validate_name(self, value):
-        value = value.strip()
-        if len(value) < 2:
-            raise serializers.ValidationError('Name is required.')
-        return value
+        return validate_entity_name(value)
 
     def validate_image(self, value):
-        if value.size > MAX_LOGO_SIZE_BYTES:
-            raise serializers.ValidationError('Image is too large (max 5MB).')
-        return value
+        return validate_image_size(value)

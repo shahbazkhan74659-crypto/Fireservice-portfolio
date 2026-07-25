@@ -13,6 +13,12 @@ export function extractFirstErrorMessage(data: unknown): string | null {
 const DEFAULT_ERROR_MESSAGE = 'Something went wrong. Please try again or call us directly.'
 
 /**
+ * Shared fallback message shown when a `fetch()` call itself throws (offline,
+ * DNS failure, etc.) rather than the server responding with an error body.
+ */
+export const NETWORK_ERROR_MESSAGE = 'Network error. Check your connection and try again.'
+
+/**
  * Reads an error message out of a failed fetch Response's JSON body,
  * falling back to a generic message if the body can't be parsed or doesn't
  * contain a usable field error.

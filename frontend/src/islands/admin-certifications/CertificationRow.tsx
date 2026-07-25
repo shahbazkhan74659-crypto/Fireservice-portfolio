@@ -1,11 +1,9 @@
-import { useState } from 'react'
+import { useEditDelete } from '../../lib/useEditDelete'
 import type { Certification } from './schema'
-import { getCsrfToken } from '../../lib/csrf'
-import { readErrorMessage } from '../../lib/api'
 import Modal from '../../lib/Modal'
-import { DeleteIcon } from './Icons'
+import { DeleteIcon } from '../../lib/Icons'
 
-type SaveState = 'idle' | 'deleting'
+const ENDPOINT = '/api/admin-hub/certifications/'
 
 interface Props {
   certification: Certification
@@ -13,34 +11,11 @@ interface Props {
 }
 
 export default function CertificationRow({ certification, onDeleted }: Props) {
-  const [confirmOpen, setConfirmOpen] = useState(false)
-  const [saveState, setSaveState] = useState<SaveState>('idle')
-  const [serverError, setServerError] = useState<string | null>(null)
-
-  function closeDialog() {
-    setConfirmOpen(false)
-    setServerError(null)
-  }
+  const { dialog, saveState, serverError, openDelete, closeDialog, remove } =
+    useEditDelete<Certification>(ENDPOINT, certification.id)
 
   async function handleDelete() {
-    setSaveState('deleting')
-    setServerError(null)
-    try {
-      const res = await fetch(`/api/admin-hub/certifications/${certification.id}/`, {
-        method: 'DELETE',
-        headers: { 'X-CSRFToken': getCsrfToken() },
-        credentials: 'same-origin',
-      })
-      if (!res.ok && res.status !== 204) {
-        setServerError(await readErrorMessage(res))
-        setSaveState('idle')
-        return
-      }
-      onDeleted(certification.id)
-    } catch {
-      setServerError('Network error. Check your connection and try again.')
-      setSaveState('idle')
-    }
+    if (await remove()) onDeleted(certification.id)
   }
 
   return (
@@ -54,11 +29,11 @@ export default function CertificationRow({ certification, onDeleted }: Props) {
       <td className="cert-table__desc">{certification.description}</td>
       <td className="cert-table__meta">{certification.meta}</td>
       <td className="cert-table__action">
-        <button type="button" className="btn btn--primary btn--icon" onClick={() => setConfirmOpen(true)} aria-label="Delete">
+        <button type="button" className="btn btn--primary btn--icon" onClick={openDelete} aria-label="Delete">
           <DeleteIcon />
         </button>
 
-        <Modal open={confirmOpen} onClose={closeDialog} title="Delete Certificate">
+        <Modal open={dialog === 'delete'} onClose={closeDialog} title="Delete Certificate">
           <p className="modal__body">Delete &quot;{certification.name}&quot;? This can&apos;t be undone.</p>
 
           {serverError && <p className="form-note">{serverError}</p>}

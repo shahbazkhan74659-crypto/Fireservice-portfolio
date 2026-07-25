@@ -5,13 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // via JS rather than a fixed CSS value since the nav can wrap onto a
   // second line at narrower widths (see the 860px breakpoint override that
   // keeps .adminhub-header .nav inline instead of going off-canvas).
+  // syncHeaderOffsetFor() is shared with site.js — see static/js/header-offset.js.
   const header = document.querySelector('.adminhub-header');
-  if (!header) return;
-
-  const syncHeaderOffset = () => {
-    document.body.style.paddingTop = header.offsetHeight + 'px';
-  };
-  syncHeaderOffset();
-  window.addEventListener('resize', syncHeaderOffset);
+  syncHeaderOffsetFor(header);
 
 });

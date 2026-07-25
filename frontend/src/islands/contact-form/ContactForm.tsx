@@ -1,69 +1,25 @@
-import { useState, type FormEvent, type ChangeEvent } from 'react'
-import { contactMessageSchema, SERVICE_OPTIONS, type ContactMessageInput, type ContactFormErrors } from './schema'
-import { getCsrfToken } from '../../lib/csrf'
-import { readErrorMessage } from '../../lib/api'
+import { contactMessageSchema, SERVICE_OPTIONS, type ContactMessageInput } from './schema'
+import { useFormSubmit } from '../../lib/useFormSubmit'
 
 const initialValues: ContactMessageInput = {
   name: '', phone: '', email: '', service: SERVICE_OPTIONS[0].value, message: '',
 }
 
-type SubmitState = 'idle' | 'submitting' | 'success' | 'error'
+const ENDPOINT = '/api/contact/'
 
 export default function ContactForm() {
-  const [values, setValues] = useState<ContactMessageInput>(initialValues)
-  const [errors, setErrors] = useState<ContactFormErrors>({})
-  const [state, setState] = useState<SubmitState>('idle')
-  const [serverError, setServerError] = useState<string | null>(null)
-
-  const handleChange =
-    (field: keyof ContactMessageInput) =>
-    (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
-      setValues((prev) => ({ ...prev, [field]: e.target.value }))
-
-  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    setServerError(null)
-
-    const result = contactMessageSchema.safeParse(values)
-    if (!result.success) {
-      const fieldErrors: ContactFormErrors = {}
-      for (const issue of result.error.issues) {
-        const key = issue.path[0] as keyof ContactMessageInput
-        if (!fieldErrors[key]) fieldErrors[key] = issue.message
-      }
-      setErrors(fieldErrors)
-      return
-    }
-    setErrors({})
-    setState('submitting')
-
-    try {
-      const res = await fetch('/api/contact/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
-        credentials: 'same-origin',
-        body: JSON.stringify({
-          name: result.data.name,
-          phone: result.data.phone,
-          email: result.data.email,
-          service: result.data.service,
-          message: result.data.message ?? '',
-        }),
-      })
-
-      if (!res.ok) {
-        setServerError(await readErrorMessage(res))
-        setState('error')
-        return
-      }
-
-      setState('success')
-      setValues(initialValues)
-    } catch {
-      setServerError('Network error. Check your connection and try again.')
-      setState('error')
-    }
-  }
+  const { values, errors, state, serverError, handleChange, handleSubmit } = useFormSubmit(
+    contactMessageSchema,
+    ENDPOINT,
+    initialValues,
+    (data) => ({
+      name: data.name,
+      phone: data.phone,
+      email: data.email,
+      service: data.service,
+      message: data.message ?? '',
+    }),
+  )
 
   if (state === 'success') {
     return (

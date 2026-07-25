@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { editStatValueSchema, type SiteSetting, type SiteSettingField } from './schema'
 import { getCsrfToken } from '../../lib/csrf'
-import { readErrorMessage } from '../../lib/api'
+import { readErrorMessage, NETWORK_ERROR_MESSAGE } from '../../lib/api'
 import Modal from '../../lib/Modal'
 
 type SaveState = 'idle' | 'saving'
@@ -65,7 +65,7 @@ export default function EditableStat({ field, label, suffix = '+', initialValue 
       setSaveState('idle')
       setOpen(false)
     } catch {
-      setServerError('Network error. Check your connection and try again.')
+      setServerError(NETWORK_ERROR_MESSAGE)
       setSaveState('idle')
     }
   }

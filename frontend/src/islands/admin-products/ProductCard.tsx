@@ -5,13 +5,11 @@ import {
   type EditProductInput,
   type EditProductErrors,
 } from './schema'
-import { getCsrfToken } from '../../lib/csrf'
-import { readErrorMessage } from '../../lib/api'
+import { useEditDelete } from '../../lib/useEditDelete'
 import Modal from '../../lib/Modal'
-import { DeleteIcon, EditIcon } from './Icons'
+import { DeleteIcon, EditIcon } from '../../lib/Icons'
 
-type Dialog = 'none' | 'edit' | 'delete'
-type SaveState = 'idle' | 'saving' | 'deleting'
+const ENDPOINT = '/api/admin-hub/products/'
 
 interface Props {
   product: Product
@@ -20,24 +18,17 @@ interface Props {
 }
 
 export default function ProductCard({ product, onUpdated, onDeleted }: Props) {
-  const [dialog, setDialog] = useState<Dialog>('none')
+  const { dialog, saveState, serverError, openEdit, openDelete, closeDialog, save, remove } =
+    useEditDelete<Product>(ENDPOINT, product.id)
   const [name, setName] = useState(product.name)
   const [file, setFile] = useState<File | null>(null)
   const [errors, setErrors] = useState<EditProductErrors>({})
-  const [saveState, setSaveState] = useState<SaveState>('idle')
-  const [serverError, setServerError] = useState<string | null>(null)
 
   function startEdit() {
     setName(product.name)
     setFile(null)
     setErrors({})
-    setServerError(null)
-    setDialog('edit')
-  }
-
-  function closeDialog() {
-    setDialog('none')
-    setServerError(null)
+    openEdit()
   }
 
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
@@ -46,7 +37,6 @@ export default function ProductCard({ product, onUpdated, onDeleted }: Props) {
 
   async function handleSave(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    setServerError(null)
 
     const values: EditProductInput = { name, image: file ?? undefined }
     const result = editProductSchema.safeParse(values)
@@ -60,53 +50,17 @@ export default function ProductCard({ product, onUpdated, onDeleted }: Props) {
       return
     }
     setErrors({})
-    setSaveState('saving')
 
     const formData = new FormData()
     formData.append('name', result.data.name)
     if (result.data.image) formData.append('image', result.data.image)
 
-    try {
-      const res = await fetch(`/api/admin-hub/products/${product.id}/`, {
-        method: 'PATCH',
-        headers: { 'X-CSRFToken': getCsrfToken() },
-        credentials: 'same-origin',
-        body: formData,
-      })
-      if (!res.ok) {
-        setServerError(await readErrorMessage(res))
-        setSaveState('idle')
-        return
-      }
-      const updated: Product = await res.json()
-      onUpdated(updated)
-      setSaveState('idle')
-      setDialog('none')
-    } catch {
-      setServerError('Network error. Check your connection and try again.')
-      setSaveState('idle')
-    }
+    const updated = await save(formData)
+    if (updated) onUpdated(updated)
   }
 
   async function handleDelete() {
-    setSaveState('deleting')
-    setServerError(null)
-    try {
-      const res = await fetch(`/api/admin-hub/products/${product.id}/`, {
-        method: 'DELETE',
-        headers: { 'X-CSRFToken': getCsrfToken() },
-        credentials: 'same-origin',
-      })
-      if (!res.ok && res.status !== 204) {
-        setServerError(await readErrorMessage(res))
-        setSaveState('idle')
-        return
-      }
-      onDeleted(product.id)
-    } catch {
-      setServerError('Network error. Check your connection and try again.')
-      setSaveState('idle')
-    }
+    if (await remove()) onDeleted(product.id)
   }
 
   return (
@@ -117,7 +71,7 @@ export default function ProductCard({ product, onUpdated, onDeleted }: Props) {
         <button type="button" className="btn btn--outline btn--icon" onClick={startEdit} aria-label="Edit">
           <EditIcon />
         </button>
-        <button type="button" className="btn btn--primary btn--icon" onClick={() => setDialog('delete')} aria-label="Delete">
+        <button type="button" className="btn btn--primary btn--icon" onClick={openDelete} aria-label="Delete">
           <DeleteIcon />
         </button>
       </div>

@@ -1,48 +1,13 @@
-import { useEffect, useState } from 'react'
 import AddFireRiskItemForm from './AddFireRiskItemForm'
 import FireRiskItemRow from './FireRiskItemRow'
 import Skeleton from '../../lib/Skeleton'
+import { useCrudList } from '../../lib/useCrudList'
 import type { FireRiskAssessmentItem } from './schema'
 
-type LoadState = 'loading' | 'loaded' | 'error'
+const ENDPOINT = '/api/admin-hub/fire-risk-items/'
 
 export default function FireRiskItemManager() {
-  const [items, setItems] = useState<FireRiskAssessmentItem[]>([])
-  const [loadState, setLoadState] = useState<LoadState>('loading')
-
-  useEffect(() => {
-    let cancelled = false
-
-    fetch('/api/admin-hub/fire-risk-items/', { credentials: 'same-origin' })
-      .then((res) => {
-        if (!res.ok) throw new Error('Failed to load')
-        return res.json()
-      })
-      .then((data: FireRiskAssessmentItem[]) => {
-        if (cancelled) return
-        setItems(data)
-        setLoadState('loaded')
-      })
-      .catch(() => {
-        if (!cancelled) setLoadState('error')
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  function handleAdded(item: FireRiskAssessmentItem) {
-    setItems((prev) => [...prev, item])
-  }
-
-  function handleUpdated(updated: FireRiskAssessmentItem) {
-    setItems((prev) => prev.map((item) => (item.id === updated.id ? updated : item)))
-  }
-
-  function handleDeleted(id: number) {
-    setItems((prev) => prev.filter((item) => item.id !== id))
-  }
+  const { items, loadState, add, update, remove } = useCrudList<FireRiskAssessmentItem>(ENDPOINT)
 
   if (loadState === 'loading') {
     return (
@@ -64,12 +29,12 @@ export default function FireRiskItemManager() {
 
   return (
     <>
-      <AddFireRiskItemForm onAdded={handleAdded} />
+      <AddFireRiskItemForm onAdded={add} />
       {items.length === 0 ? (
         <p className="section__sub">No checklist items yet.</p>
       ) : (
         items.map((item) => (
-          <FireRiskItemRow key={item.id} item={item} onUpdated={handleUpdated} onDeleted={handleDeleted} />
+          <FireRiskItemRow key={item.id} item={item} onUpdated={update} onDeleted={remove} />
         ))
       )}
     </>
