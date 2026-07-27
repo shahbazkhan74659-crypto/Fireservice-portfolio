@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.views import redirect_to_login
 from django.db.models import Count
 from django.db.models.functions import TruncDate
 from django.utils import timezone
@@ -40,12 +41,29 @@ class StaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
     enough — the account must also be is_staff. Without this, any regular
     (non-staff) User account that successfully authenticates would get full
     Admin Hub access, since LoginRequiredMixin alone only checks
-    is_authenticated. UserPassesTestMixin redirects a logged-in-but-not-staff
+    is_authenticated. Intent is to redirect a logged-in-but-not-staff
     visitor to LOGIN_URL just like an anonymous one, rather than a 403 that
-    would confirm the account exists and merely lacks permission."""
+    would confirm the account exists and merely lacks permission — see
+    handle_no_permission() below for why that needs a manual override
+    rather than being AccessMixin's default behavior."""
 
     def test_func(self):
         return bool(self.request.user and self.request.user.is_staff)
+
+    def handle_no_permission(self):
+        # Django's AccessMixin.handle_no_permission() (inherited by both
+        # LoginRequiredMixin and UserPassesTestMixin — confirmed by reading
+        # Django 5.2's source directly, not assumed) only redirects
+        # *anonymous* visitors to LOGIN_URL; an already-authenticated user
+        # who merely fails test_func() gets `raise PermissionDenied` (a raw
+        # 403) instead. That contradicted this class's own stated intent
+        # above (a caught-by-test discrepancy, not a hypothetical one — see
+        # core/tests/test_views.py). Overridden to always redirect instead.
+        return redirect_to_login(
+            self.request.get_full_path(),
+            self.get_login_url(),
+            self.get_redirect_field_name(),
+        )
 
 
 class HomeView(TemplateView):
@@ -230,18 +248,29 @@ class AdminHubHomeView(StaffRequiredMixin, TemplateView):
 
         activity = []
         for label, model, admin_name in LEAD_MODELS:
-            for obj in model.objects.order_by('-created_at')[:5]:
+            # -pk tiebreaker (also applied to the final sort below) — without
+            # one, leads created close enough together to share a created_at
+            # value (plausible: auto_now_add's resolution can be coarser than
+            # the gap between two near-simultaneous submissions) sort in a
+            # DB-dependent, non-deterministic order. pk is a correct recency
+            # proxy for a same-type tie (the realistic case — e.g. a batch
+            # import); it's only a heuristic across two *different* lead
+            # types tied at the same instant, since each model has its own
+            # independent id sequence — an acceptable tradeoff for how rare
+            # a genuine cross-type tie is versus no tiebreaker at all.
+            for obj in model.objects.order_by('-created_at', '-pk')[:5]:
                 activity.append({
                     'type': label[:-1] if label.endswith('s') else label,
                     'name': obj.name,
                     'created_at': obj.created_at,
+                    'pk': obj.pk,
                     # Points at the Leads page's own row for this lead — the
                     # page switches to the matching tab and scrolls to that
                     # row (see leads.html's extra_scripts) instead of
                     # bouncing out to the raw Django admin change form.
                     'leads_url': f'/admin-hub/leads/#lead-{admin_name}-{obj.pk}',
                 })
-        activity.sort(key=lambda a: a['created_at'], reverse=True)
+        activity.sort(key=lambda a: (a['created_at'], a['pk']), reverse=True)
         context['recent_activity'] = activity[:5]
 
         return context
