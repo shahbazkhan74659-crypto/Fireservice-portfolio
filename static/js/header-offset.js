@@ -7,9 +7,10 @@
 // they both need.
 //
 // A fixed CSS value doesn't work here: the public header shrinks on scroll
-// (topbar collapses, padding/logo size reduce) and the Admin Hub header's
-// nav can wrap onto a second line at narrower widths — both change the
-// header's real height at runtime, so it has to be measured via JS.
+// (topbar collapses, padding/logo size reduce), and both headers' nav goes
+// off-canvas below 1150px (removing it from the header's own flow/height) —
+// both change the header's real height at runtime, so it has to be measured
+// via JS.
 function syncHeaderOffsetFor(headerEl) {
   if (!headerEl) return null;
 

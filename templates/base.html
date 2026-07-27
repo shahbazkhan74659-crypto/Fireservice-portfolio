@@ -41,6 +41,9 @@
     </a>
 
     <nav class="nav" id="nav">
+      <a href="/" class="nav__brand" aria-label="Iconic Techno Service — Home">
+        {% include "includes/logo.html" %}
+      </a>
       <a href="/" class="{% if request.path == '/' %}active{% endif %}">Home</a>
       <a href="/about/" class="{% if request.path == '/about/' %}active{% endif %}">About</a>
       <a href="/clientele/" class="{% if request.path == '/clientele/' %}active{% endif %}">Clientele</a>
@@ -53,13 +56,14 @@
     <div class="header__actions">
       <a href="/brochure/" class="btn btn--outline">Get Brochure</a>
       <a href="/consultation/" class="btn btn--primary">Free Consultation</a>
-      <button class="nav__toggle" id="navToggle" aria-label="Toggle menu">
+      <button class="nav__toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
     </div>
   </div>
 </header>
 </div>
+<div class="nav-overlay" id="navOverlay"></div>
 
 <main>
 {% block content %}{% endblock %}

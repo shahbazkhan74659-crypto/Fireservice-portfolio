@@ -78,7 +78,7 @@ p{margin:0 0 1em;}
 .btn--ghost:hover{background:rgba(255,255,255,.12);}
 .btn--lg{padding:15px 30px;font-size:1rem;}
 .btn--block{width:100%;}
-.btn--icon{width:38px;height:38px;padding:0;border-radius:10px;}
+.btn--icon{width:44px;height:44px;padding:0;border-radius:10px;}
 .btn--icon .icon{width:17px;height:17px;fill:none;}
 
 /* ============ Site header (topbar + header, both always on screen) ============ */
@@ -98,7 +98,12 @@ p{margin:0 0 1em;}
 .topbar__contact a:hover{opacity:1;color:var(--amber-500);}
 .topbar__contact .icon{width:14px;height:14px;}
 .topbar__social{display:flex;align-items:center;}
-.topbar__social a{display:flex;opacity:.9;transition:opacity .15s ease;}
+/* padding+negative-margin grows the tappable area to ~44x44 without
+   changing the icon's visual size/position or affecting sibling layout
+   (the margin box — what governs flex sizing/spacing — nets back to the
+   original 24x24 footprint since the negative margin exactly cancels the
+   added padding). */
+.topbar__social a{display:flex;opacity:.9;transition:opacity .15s ease;padding:10px;margin:-10px;}
 .topbar__social a:hover{opacity:1;}
 .topbar__social .icon{width:24px;height:24px;}
 a.instagram-icon{color:var(--red-600);}
@@ -127,8 +132,24 @@ a.instagram-icon:hover{color:var(--red-700);}
 .nav a.active::after{width:100%;}
 
 .header__actions{display:flex;align-items:center;gap:12px;}
-.nav__toggle{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:6px;}
-.nav__toggle span{width:22px;height:2px;background:var(--ink-900);border-radius:2px;}
+/* Logo shown above the link list inside the mobile drawer — a normal-flow
+   .nav child, so it's positioned automatically without fighting the fixed
+   header's own stacking (see the drawer media query below for why it's
+   hidden on desktop, where .nav is just an inline row of links). */
+.nav__brand{display:none;}
+/* Box grown to a ~44x44 touch target (from an effective ~34x28px);
+   flex-centering keeps the 3 visual bars (22x2px, unchanged) centered in
+   the larger box instead of just padding out unevenly. */
+.nav__toggle{display:none;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:none;border:none;cursor:pointer;width:44px;height:44px;padding:0;}
+.nav__toggle span{width:22px;height:2px;background:var(--ink-900);border-radius:2px;transition:transform .25s ease, opacity .2s ease;}
+/* Hamburger-to-X: bars 1/3 rotate into an X, middle bar fades out — the
+   visible "cancel mark" confirming the drawer is open and this same
+   button closes it. .open is toggled by static/js/site.js alongside
+   .nav/.nav-overlay's own .open class. 7px = span height (2px) + gap
+   (5px), so the top/bottom bars land exactly on the middle bar's line. */
+.nav__toggle.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+.nav__toggle.open span:nth-child(2){opacity:0;}
+.nav__toggle.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
 
 /* ============ Hero ============ */
 .hero{position:relative;color:#fff;padding-top:110px;overflow:hidden;}
@@ -215,6 +236,11 @@ a.instagram-icon:hover{color:var(--red-700);}
   content:'';position:absolute;left:5px;top:8px;width:6px;height:3px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg);
 }
 .check-list--columns{columns:2;column-gap:40px;}
+/* Prevents a single <li> splitting across the two columns at tablet
+   widths (~861-1024px, where the 2-column layout is active); scoped to
+   the --columns variant only, not the base .check-list used elsewhere
+   in a single column where this can't happen anyway. */
+.check-list--columns li{break-inside:avoid;-webkit-column-break-inside:avoid;}
 
 /* ============ Services grid ============ */
 .grid{display:grid;gap:26px;}
@@ -362,6 +388,12 @@ a.instagram-icon:hover{color:var(--red-700);}
   opacity:0;transition:opacity .2s ease;
 }
 .cert-card__img:hover::after{opacity:1;}
+/* Touch devices have no :hover — show the affordance persistently there so
+   touch users get a visual cue the thumbnail opens the full certificate,
+   without changing the desktop hover-reveal behavior. */
+@media (hover:none){
+  .cert-card__img::after{opacity:1;}
+}
 .cert-card__body{padding:16px 18px;border-top:1px solid var(--line);}
 .cert-card__body h3{font-size:1rem;margin:0 0 4px;}
 .cert-card__body p{font-size:.85rem;color:var(--ink-600);margin:0 0 6px;}
@@ -398,6 +430,10 @@ a.instagram-icon:hover{color:var(--red-700);}
   opacity:0;transition:opacity .2s ease;
 }
 .cert-table__preview a:hover::after{opacity:1;}
+/* Same touch-visibility treatment as .cert-card__img::after above. */
+@media (hover:none){
+  .cert-table__preview a::after{opacity:1;}
+}
 .cert-table__action{width:1%;white-space:nowrap;}
 
 /* ============ Brochure ============ */
@@ -430,6 +466,13 @@ a.instagram-icon:hover{color:var(--red-700);}
 .form-note--success{color:var(--ink-600);}
 .contact__item a{display:flex;align-items:center;gap:12px;color:inherit;text-decoration:none;}
 .contact__item a:hover{color:var(--red-600);}
+/* The email address is one unbreakable string with no spaces — flex items
+   default to min-width:auto, which honors that full unbroken width and
+   bubbles up through .contact__item's flex row into .contact__info's grid-
+   item sizing, pushing the whole contact block past its container's right
+   padding on narrow phones (~320-346px). overflow-wrap lets it break like
+   any other text so it never forces a wider minimum than it has room for. */
+.contact__item a span{overflow-wrap:anywhere;}
 
 /* ============ Footer ============ */
 .footer{background:var(--ink-900);color:#c7cad0;padding-top:60px;}
@@ -439,7 +482,12 @@ a.instagram-icon:hover{color:var(--red-700);}
 .footer__col a,.footer__col p{display:block;color:#a5abb3;font-size:.9rem;margin-bottom:10px;}
 .footer__col a:hover{color:var(--amber-500);}
 .footer__social{margin-top:6px;}
-.footer__social a{display:inline-flex;margin-bottom:0;}
+/* Same padding+negative-margin hit-area technique as .topbar__social a
+   above — grows the tappable area to ~44x44. margin-bottom stays 0 (not
+   negated) to preserve its original job of cancelling the 10px inherited
+   from .footer__col a, since this is the last element in the column; the
+   other three sides net back to the original footprint. */
+.footer__social a{display:inline-flex;padding:11px;margin:-11px -11px 0 -11px;}
 .footer__social .icon{width:22px;height:22px;}
 .footer__social a.instagram-icon{color:var(--red-600);}
 .footer__social a.instagram-icon:hover{color:var(--red-700);}
@@ -489,13 +537,29 @@ a.instagram-icon:hover{color:var(--red-700);}
 /* position:fixed, not sticky — same reason as .site-header above: the
    load-bearing overflow-x:hidden on html/body breaks position:sticky. */
 .adminhub-header{position:fixed;top:0;left:0;width:100%;z-index:100;background:#fff;border-bottom:1px solid var(--line);}
-.adminhub-header__inner{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;}
-.adminhub-header__brand{display:flex;align-items:center;gap:40px;}
-.adminhub-header__actions{display:flex;align-items:center;gap:16px;}
+.adminhub-header__inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:16px 24px;gap:12px;}
+.adminhub-header__brand{display:flex;align-items:center;flex-wrap:wrap;gap:16px 40px;}
+.adminhub-header__actions{display:flex;align-items:center;flex-wrap:wrap;gap:16px;}
 .adminhub-header__user{font-weight:600;font-size:.9rem;color:var(--ink-600);}
 .adminhub-header__actions form{margin:0;}
+/* Above the same 1150px breakpoint where the public nav goes off-canvas,
+   Admin Hub's nav stays a plain inline row (this used to be unconditional —
+   Admin Hub now gets the same off-canvas drawer as the public site below
+   1150px, reusing the plain .nav/.nav-overlay/.nav__toggle rules further
+   down verbatim, so it only needs gating here, not a parallel set of rules). */
+@media (min-width:1151px){
+  .adminhub-header .nav{position:static;height:auto;width:auto;background:none;flex-direction:row;flex-wrap:wrap;padding:0;box-shadow:none;transform:none;row-gap:10px;}
+}
+/* Username + Log Out shown inline in the header above 1150px; the drawer
+   gets its own copy at the bottom (.nav__footer, below) instead of this one
+   once the nav goes off-canvas — see the max-width:1150px block below. */
+.nav__footer{display:none;}
 
 .admin-mv-card .btn{padding:9px 18px;font-size:.85rem;}
+/* .btn--icon needs its own padding:0 to win back over the rule above —
+   without this, the Edit/Delete icon buttons' box shrinks (box-sizing:
+   border-box) far below the fixed 17x17 icon inside, clipping it. */
+.admin-mv-card .btn.btn--icon{padding:0;}
 .admin-mv-actions{display:flex;align-items:center;gap:10px;margin-top:16px;}
 .admin-mv-confirm-text{font-weight:600;font-size:.9rem;color:var(--ink-800);}
 .admin-mv-point{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
@@ -510,6 +574,10 @@ a.instagram-icon:hover{color:var(--red-700);}
 .logo-card--admin img{max-height:50px;}
 .logo-card__admin-actions{display:flex;gap:8px;}
 .logo-card__admin-actions .btn{padding:6px 14px;font-size:.75rem;}
+/* Same fix as .admin-mv-card .btn.btn--icon above — restore .btn--icon's
+   padding:0 so it wins over the padding:6px 14px rule immediately above,
+   which otherwise squishes the icon buttons' box below the icon's size. */
+.logo-card__admin-actions .btn.btn--icon{padding:0;}
 
 .logo-add-form{width:100%;}
 
@@ -625,8 +693,12 @@ a.instagram-icon:hover{color:var(--red-700);}
 }
 .modal__title{margin:0 0 20px;font-size:1.1rem;color:var(--ink-900);}
 .modal__close{
-  position:absolute;top:14px;right:14px;
-  width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+  /* Box grown 28x28 -> 44x44 for a real touch target; top/right pulled in
+     from 14px to 6px so the glyph's visual center stays roughly where it
+     was (14+14=28 before, 6+22=28 now), rather than the corner icon
+     visibly drifting inward as the box grows. */
+  position:absolute;top:6px;right:6px;
+  width:44px;height:44px;display:flex;align-items:center;justify-content:center;
   background:none;border:none;border-radius:6px;cursor:pointer;
   font-size:1.3rem;line-height:1;color:var(--ink-600);
 }
@@ -641,9 +713,83 @@ a.instagram-icon:hover{color:var(--red-700);}
 .lead-modal__field{border-bottom:1px solid var(--line);padding-bottom:16px;}
 .lead-modal__label{display:block;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-400);margin-bottom:6px;}
 .lead-modal__value{margin:0;color:var(--ink-800);white-space:pre-wrap;line-height:1.65;}
-.lead-modal__footer{display:flex;justify-content:flex-end;gap:12px;}
+/* flex-wrap so the two buttons (neither of which shrinks/wraps its own
+   text) stack instead of overflowing the modal box on narrow phones. */
+.lead-modal__footer{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:12px;}
 
 /* ============ Responsive ============ */
+/* The off-canvas nav drawer used to only activate at <=860px, but the
+   full desktop row (logo + 7 nav links + 2 CTA buttons, none of it
+   wrapping) only actually fits again above ~1150px — leaving 861-1150px
+   as a dead zone where nav items/buttons were clipped by the load-bearing
+   overflow-x:hidden on html/body. Widening the drawer's trigger width to
+   1150px closes that gap using the same working pattern already in place
+   below 860px, rather than inventing a second, different responsive
+   mechanism for the gap. Above 1150px and at/below 600px, appearance is
+   unchanged from before. */
+@media (max-width:1150px){
+  .nav{
+    position:fixed;top:0;right:0;height:100vh;width:260px;background:#fff;flex-direction:column;
+    padding:24px 28px 28px;gap:22px;box-shadow:-8px 0 24px rgba(0,0,0,.12);
+    transform:translateX(100%);transition:transform .25s ease;z-index:99;
+  }
+  .nav.open{transform:translateX(0);}
+  .nav__toggle{display:flex;}
+  /* .nav is a DOM descendant of .site-header (nested inside .header__inner,
+     needed so it stays in-flow between the logo and header__actions at
+     desktop widths). Because .site-header itself establishes the stacking
+     context, .nav's z-index:99 is compared against ITS OWN stacking
+     siblings inside .header__inner — not against .site-header as a whole.
+     .header__actions has no explicit position/z-index, so it paints in
+     normal document-flow order (before any positioned+z-indexed sibling),
+     meaning the drawer was rendering on top of the toggle button and
+     hiding it entirely once open. Giving .header__actions its own explicit
+     stacking (position+z-index above .nav's 99) fixes that without moving
+     .nav in the DOM. */
+  .header__actions{position:relative;z-index:101;}
+  .header__actions .btn--outline,
+  .header__actions .btn--primary{display:none;}
+  /* Logo row pinned to the top of the drawer, roughly level with the fixed
+     close (X) button that floats above via .header__actions — .nav's own
+     padding-top was shrunk from 100px to 24px (above) so this sits right at
+     the top instead of appearing further down near the first link. */
+  .nav__brand{
+    display:flex;align-items:center;padding-bottom:20px;margin-bottom:6px;
+    border-bottom:1px solid var(--line);
+  }
+  .nav__brand .logo__img{height:32px;}
+  /* Backdrop scrim behind the drawer — see static/js/site.js for the
+     open/close logic that toggles .nav-overlay's .open class alongside
+     .nav's. Only relevant while the drawer can open (<=1150px). */
+  .nav-overlay{
+    position:fixed;inset:0;background:rgba(16,18,21,.5);z-index:98;
+    opacity:0;pointer-events:none;transition:opacity .25s ease;
+  }
+  .nav-overlay.open{opacity:1;pointer-events:auto;}
+  /* Body-scroll lock while the drawer is open — toggled by static/js/site.js
+     alongside .nav/.nav-overlay's own .open class. Scoped inside this same
+     breakpoint since the drawer (and so this class) can only be toggled
+     open at widths where the toggle button is actually visible. */
+  body.nav-open{overflow:hidden;}
+  /* Admin Hub's own copy of the header__actions stacking fix above — same
+     reasoning, same z-index, just a differently-named class since Admin Hub
+     uses .adminhub-header__actions instead of .header__actions. The inline
+     username/Log Out this container normally shows are hidden here in favor
+     of the .nav__footer copy at the bottom of the drawer (below); only the
+     toggle button stays visible in the header itself. */
+  .adminhub-header__actions{position:relative;z-index:101;}
+  .adminhub-header__actions .adminhub-header__user,
+  .adminhub-header__actions form{display:none;}
+  /* Username + Log Out, pinned to the bottom of the drawer via margin-top:
+     auto (.nav is flex-direction:column here) — same footer-of-sidebar
+     pattern requested for Admin Hub's drawer. */
+  .nav__footer{
+    display:flex;flex-direction:column;gap:14px;margin-top:auto;padding-top:20px;
+    border-top:1px solid var(--line);
+  }
+  .nav__footer form{margin:0;}
+  .nav__footer .btn{width:100%;}
+}
 @media (max-width:1024px){
   .grid--services{grid-template-columns:repeat(2,1fr);}
   .process{grid-template-columns:repeat(2,1fr);}
@@ -654,26 +800,24 @@ a.instagram-icon:hover{color:var(--red-700);}
   .footer__grid{grid-template-columns:1fr 1fr;}
 }
 @media (max-width:860px){
-  .nav{
-    position:fixed;top:0;right:0;height:100vh;width:260px;background:#fff;flex-direction:column;
-    padding:100px 28px 28px;gap:22px;box-shadow:-8px 0 24px rgba(0,0,0,.12);
-    transform:translateX(100%);transition:transform .25s ease;z-index:99;
-  }
-  .nav.open{transform:translateX(0);}
-  .nav__toggle{display:flex;}
-  .header__actions .btn--outline,
-  .header__actions .btn--primary{display:none;}
   .about,.contact{grid-template-columns:1fr;}
   .about__media{margin-bottom:40px;}
   .stats__grid{grid-template-columns:repeat(2,1fr);gap:20px;}
+  .stats__grid--3{grid-template-columns:repeat(3,1fr);}
   .stat{border-right:none;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:14px;}
   .phase__items{grid-template-columns:1fr;}
   .product-grid{grid-template-columns:repeat(3,1fr);}
   .check-list--columns{columns:1;}
-  .adminhub-header .nav{position:static;height:auto;width:auto;background:none;flex-direction:row;padding:0;box-shadow:none;transform:none;}
   .command-center{padding:28px 20px;margin:20px auto;max-width:calc(100% - 32px);}
   .command-center__header{flex-direction:column;align-items:flex-start;gap:14px;}
   .command-center__main{grid-template-columns:1fr;}
+  /* .cc-header-stats' flex-wrap (desktop) leaves each wrapped row's
+     rightmost item keeping its border-right divider with nothing beside it
+     on that row — the stray floating lines seen on mobile. A 2-column grid
+     gives all 5 stats a consistent home instead of fighting the wrap. */
+  .cc-header-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:20px 16px;width:100%;}
+  .cc-header-stats [data-stat-editor]{padding-right:0;border-right:none;}
+  .cc-years-exp{align-items:flex-start;}
 }
 @media (max-width:600px){
   .about__pic{width:150px;}
@@ -687,11 +831,34 @@ a.instagram-icon:hover{color:var(--red-700);}
   .phase__marker-num{width:20px;height:20px;font-size:.6rem;}
   .phase-list::before{left:25px;}
   .logo-grid{grid-template-columns:repeat(2,1fr);}
+  /* .logo-card's aspect-ratio:2/1 + min-height:70px implies a 140px min-width
+     (grid items default to min-width:auto, which factors that in) — wider
+     than the ~127-147px a 2-column track actually has on narrow phones,
+     pushing the right card past the viewport edge instead of centering.
+     min-width:0 alone isn't enough: once min-height:70 wins over the
+     aspect-ratio-derived height, browsers transfer that height back into a
+     140px preferred width that still overrides the grid's stretch sizing.
+     An explicit width:100% pins the card to its actual track width so
+     aspect-ratio can only affect height, not push back out into width. */
+  .logo-card{min-width:0;width:100%;}
   .form-row{grid-template-columns:1fr;}
-  .topbar__inner{flex-direction:column;align-items:flex-start;}
+  /* Mobile phone/email/Instagram row is dropped entirely below 600px —
+     it stays desktop/tablet-only; syncHeaderOffset() in site.js re-measures
+     .site-header's height on resize so body padding-top shrinks to match. */
+  .topbar{display:none;}
   .hero__cta{flex-direction:column;}
   .footer__grid{grid-template-columns:1fr;}
   .footer__services-grid{grid-template-columns:1fr;}
   .cc-meter{width:84px;height:84px;}
   .cc-meter__value{font-size:1.2rem;}
+  /* Same 2-col grid as the 860px breakpoint, just tighter — the 5 header
+     stats (value+suffix+label each) are cramped in a 2-column grid at very
+     narrow phone widths, so shrink the numbers down a step. */
+  .cc-header-stats{gap:16px 12px;}
+  .cc-years-exp__value{font-size:1.4rem;}
+  .cc-years-exp__label{font-size:.72rem;}
+  /* Extra safety margin for .lead-modal__footer's flex-wrap fix above —
+     less padding leaves more room for the wrapped buttons on very narrow
+     phones (~360px), on top of the modal-overlay's own 24px padding. */
+  .modal--lead{padding:24px;}
 }

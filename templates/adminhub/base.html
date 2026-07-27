@@ -24,12 +24,25 @@
       <a href="{% url 'adminhub-home' %}" class="logo">
         {% include "includes/logo.html" %}
       </a>
-      <nav class="nav">
+      <nav class="nav" id="adminNav">
+        <a href="{% url 'adminhub-home' %}" class="nav__brand" aria-label="Iconic Techno Service — Home">
+          {% include "includes/logo.html" %}
+        </a>
         <a href="{% url 'adminhub-home' %}" class="{% if request.resolver_match.url_name == 'adminhub-home' %}active{% endif %}">Home</a>
         <a href="{% url 'adminhub-leads' %}" class="{% if request.resolver_match.url_name == 'adminhub-leads' %}active{% endif %}">Leads</a>
         <a href="{% url 'adminhub-clientele' %}" class="{% if request.resolver_match.url_name == 'adminhub-clientele' %}active{% endif %}">Clientele</a>
         <a href="{% url 'adminhub-services' %}" class="{% if request.resolver_match.url_name == 'adminhub-services' %}active{% endif %}">Services</a>
         <a href="{% url 'adminhub-certifications' %}" class="{% if request.resolver_match.url_name == 'adminhub-certifications' %}active{% endif %}">Certifications</a>
+        <!-- Drawer-only copy of username + Log Out, pinned to the bottom via
+             .nav__footer (margin-top:auto) — hidden above 1150px, where the
+             copy in .adminhub-header__actions below is shown instead. -->
+        <div class="nav__footer">
+          <span class="adminhub-header__user">{{ request.user.username }}</span>
+          <form method="post" action="{% url 'adminhub-logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn--outline">Log Out</button>
+          </form>
+        </div>
       </nav>
     </div>
     <div class="adminhub-header__actions">
@@ -38,9 +51,13 @@
         {% csrf_token %}
         <button type="submit" class="btn btn--outline">Log Out</button>
       </form>
+      <button class="nav__toggle" id="adminNavToggle" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </div>
 </header>
+<div class="nav-overlay" id="adminNavOverlay"></div>
 
 <main>
 {% block content %}{% endblock %}

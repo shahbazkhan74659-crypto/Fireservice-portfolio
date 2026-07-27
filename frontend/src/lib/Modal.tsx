@@ -18,6 +18,19 @@ export default function Modal({ open, onClose, title, children }: Props) {
     return () => document.removeEventListener('keydown', handleKey)
   }, [open, onClose])
 
+  // Body-scroll lock while open, so the page behind the full-screen overlay
+  // can't be scrolled. Restores whatever inline overflow value was present
+  // before (rather than hardcoding '' back) in case something else is ever
+  // also managing body overflow.
+  useEffect(() => {
+    if (!open) return
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [open])
+
   if (!open) return null
 
   function handleOverlayClick(e: MouseEvent<HTMLDivElement>) {

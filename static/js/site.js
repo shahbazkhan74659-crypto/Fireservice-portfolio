@@ -4,13 +4,38 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('year').textContent = new Date().getFullYear();
 
   // Mobile nav toggle
+  // Drawer open/close is coordinated across three things: the drawer
+  // itself (.nav.open, translateX transform in CSS), a backdrop scrim
+  // (#navOverlay, .open toggles its opacity/pointer-events in CSS) that
+  // closes the drawer when tapped, and a body-scroll lock (.nav-open on
+  // <body>, overflow:hidden) so the page behind the drawer can't scroll
+  // while it's open.
   const navToggle = document.getElementById('navToggle');
   const nav = document.getElementById('nav');
+  const navOverlay = document.getElementById('navOverlay');
+
+  const openNav = () => {
+    nav.classList.add('open');
+    navOverlay.classList.add('open');
+    navToggle.classList.add('open');
+    navToggle.setAttribute('aria-expanded', 'true');
+    document.body.classList.add('nav-open');
+  };
+  const closeNav = () => {
+    nav.classList.remove('open');
+    navOverlay.classList.remove('open');
+    navToggle.classList.remove('open');
+    navToggle.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('nav-open');
+  };
+
   navToggle.addEventListener('click', () => {
-    nav.classList.toggle('open');
+    if (nav.classList.contains('open')) closeNav();
+    else openNav();
   });
+  navOverlay.addEventListener('click', closeNav);
   nav.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', () => nav.classList.remove('open'));
+    link.addEventListener('click', closeNav);
   });
 
   // Shrink site header on scroll
@@ -23,6 +48,12 @@ document.addEventListener('DOMContentLoaded', () => {
   siteHeader.addEventListener('transitionend', syncHeaderOffset);
 
   window.addEventListener('scroll', () => {
+    // body.nav-open locks scroll via overflow:hidden, but that doesn't fully
+    // block touch-driven rubber-band scrolling on some mobile browsers —
+    // stray scroll events were still shrinking the header (topbar collapse +
+    // reduced padding) while the drawer was open, visibly shifting the close
+    // (X) button upward. Freeze the shrink state while the drawer is open.
+    if (document.body.classList.contains('nav-open')) return;
     siteHeader.classList.toggle('is-scrolled', window.scrollY > 10);
     header.style.boxShadow = window.scrollY > 10 ? '0 4px 16px rgba(0,0,0,.08)' : 'none';
   });
