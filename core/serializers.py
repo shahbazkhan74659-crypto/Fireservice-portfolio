@@ -59,3 +59,30 @@ class ChangePasswordSerializer(serializers.Serializer):
         user.set_password(self.validated_data['new_password'])
         user.save(update_fields=['password'])
         return user
+
+
+class ForgotPasswordEmailSerializer(serializers.Serializer):
+    """Used by both the "send code" and "resend code" requests — just format
+    validation. Whether the email actually matches a real staff account is
+    checked separately by the view, not here, since that check needs a DB
+    lookup the view already has to do anyway to send the email."""
+    email = serializers.EmailField()
+
+
+class ForgotPasswordVerifyOTPSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    otp = serializers.RegexField(r'^\d{6}$', error_messages={'invalid': 'Enter the 6-digit code.'})
+
+
+class ForgotPasswordResetSerializer(serializers.Serializer):
+    """No confirm_password field — that mismatch check is UX-only and already
+    happens client-side (same "Zod is UX only" convention as every other
+    form), and no reset_token field either — the view resolves+consumes the
+    token itself before this serializer ever runs, since a spent/expired
+    token is a different failure mode (410-style) than an invalid password
+    (400-style) and the two shouldn't be reported through the same field."""
+    new_password = serializers.CharField(write_only=True)
+
+    def validate_new_password(self, value):
+        password_validation.validate_password(value, user=self.context.get('user'))
+        return value

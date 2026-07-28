@@ -28,7 +28,7 @@ BREADCRUMB_NAMES = {
 # in this project — fabricating them would be a Google manual-action risk,
 # not a neutral placeholder.
 BUSINESS_NAME = 'Iconic Techno Service'
-BUSINESS_PHONES = ['+91 73592 29129', '+91 76988 39939']
+BUSINESS_PHONES = ['+91 73592 29129']
 BUSINESS_EMAIL = 'iconictechnoservice.in@gmail.com'
 BUSINESS_ADDRESS = {
     '@type': 'PostalAddress',

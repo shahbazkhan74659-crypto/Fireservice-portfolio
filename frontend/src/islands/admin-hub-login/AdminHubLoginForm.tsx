@@ -2,6 +2,7 @@ import { useState, type FormEvent, type ChangeEvent } from 'react'
 import { adminLoginSchema, type AdminLoginInput, type AdminLoginFormErrors } from './schema'
 import { getCsrfToken } from '../../lib/csrf'
 import { readErrorMessage, NETWORK_ERROR_MESSAGE } from '../../lib/api'
+import ForgotPasswordFlow from './ForgotPasswordFlow'
 
 const initialValues: AdminLoginInput = { username: '', password: '' }
 
@@ -79,6 +80,10 @@ export default function AdminHubLoginForm() {
       </button>
 
       {serverError && <p className="form-note">{serverError}</p>}
+
+      <div className="auth-card__forgot">
+        <ForgotPasswordFlow disabled={!values.username.trim()} />
+      </div>
     </form>
   )
 }

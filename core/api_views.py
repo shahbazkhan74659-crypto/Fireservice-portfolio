@@ -1,7 +1,10 @@
 import json
+import secrets
 
-from django.contrib.auth import authenticate, login, update_session_auth_hash
+from django.conf import settings
+from django.contrib.auth import authenticate, get_user_model, login, update_session_auth_hash
 from django.core.cache import cache
+from django.core.mail import send_mail
 from django.db import transaction
 from django.db.models import Max
 from django.http import JsonResponse
@@ -19,7 +22,14 @@ from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from core.serializers import ChangePasswordSerializer, ChangeUsernameSerializer
+from core import rate_limit
+from core.serializers import (
+    ChangePasswordSerializer,
+    ChangeUsernameSerializer,
+    ForgotPasswordEmailSerializer,
+    ForgotPasswordResetSerializer,
+    ForgotPasswordVerifyOTPSerializer,
+)
 from leads.models import ConsultationRequest, ContactMessage, SurveyRequest
 from leads.serializers import (
     ConsultationRequestSerializer,
@@ -157,6 +167,240 @@ class AdminHubLoginAPIView(View):
 
         login(request, user)
         return JsonResponse({'detail': ['Logged in.']})
+
+
+def _parse_json_body(request):
+    """Returns (data, error_response). Guards against both malformed JSON and
+    a technically-valid-but-non-object body (e.g. a bare list/number), which
+    would otherwise crash a later `data.get(...)`/serializer(data=data) call
+    instead of failing cleanly with a 400."""
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return None, JsonResponse({'detail': ['Invalid request.']}, status=400)
+    if not isinstance(data, dict):
+        return None, JsonResponse({'detail': ['Invalid request.']}, status=400)
+    return data, None
+
+
+def _otp_email_body(otp):
+    return f"""Dear Administrator,
+
+We received a request to reset the password for your ICONIC TECHNO SERVICE admin account.
+
+To proceed with the password reset, please use the following One-Time Password (OTP):
+
+---
+
+Admin Verification Code
+
+OTP: {otp}
+
+This verification code is valid for 5 minutes and can be used only once.
+
+---
+
+Important Security Notice
+
+For the security of your administrative account:
+
+- Do not share this OTP with anyone.
+- ICONIC TECHNO SERVICE will never ask for your OTP through phone calls, SMS, or email.
+- If you did not request a password reset, please ignore this email immediately and review your account activity.
+
+This request was generated from the ICONIC TECHNO SERVICE Admin Panel. If the code expires before use, you can submit a new password reset request from the login page.
+
+Maintaining the security of administrative access is critical to protecting website data, customer information, and system operations.
+
+Thank you for helping us keep your account secure.
+
+Best regards,
+
+ICONIC TECHNO SERVICE
+System Security Team
+📧 iconictechnoservice.in@gmail.com
+🌐 www.its.com
+
+---
+
+ICONIC TECHNO SERVICE
+Admin Security • System Protection • Trusted Access
+
+This is an automated security email. Please do not reply directly to this message."""
+
+
+class AdminHubForgotPasswordRequestOTPView(View):
+    """Plain Django View, same CSRF reasoning as AdminHubLoginAPIView above —
+    this runs before the admin is logged in, so a DRF APIView here would
+    silently skip CSRF enforcement (see AdminHubLoginAPIView's own docstring
+    for the full explanation).
+
+    Also doubles as the "resend code" endpoint the OTP step calls — same URL,
+    same cooldown/lockout rules apply to a resend as to the original request.
+
+    The admin submits *their own* registered email (User.email), never the
+    company's sending address — that address is only ever the "From" here.
+    """
+
+    OTP_TTL_SECONDS = 5 * 60
+    RESEND_COOLDOWN_SECONDS = 60
+    LOCKOUT_THRESHOLD = 5
+    LOCKOUT_WINDOW_SECONDS = 15 * 60
+
+    def post(self, request):
+        ip = rate_limit.client_ip(request)
+        ip_key = f'adminhub_forgot_request:ip:{ip}' if ip else None
+
+        data, error = _parse_json_body(request)
+        if error:
+            return error
+
+        serializer = ForgotPasswordEmailSerializer(data=data)
+        if not serializer.is_valid():
+            return JsonResponse(serializer.errors, status=400)
+        email = serializer.validated_data['email']
+        email_key = f'adminhub_forgot_request:email:{email.lower()}'
+
+        if rate_limit.is_locked_out(ip_key, email_key, threshold=self.LOCKOUT_THRESHOLD):
+            return JsonResponse(
+                {'detail': ['Too many requests. Please try again in a few minutes.']}, status=429,
+            )
+
+        User = get_user_model()
+        user = User.objects.filter(is_staff=True, email__iexact=email).first()
+        if user is None:
+            # Recorded on both counters like a login failure — an anonymous
+            # visitor otherwise has an unlimited-attempts oracle for guessing
+            # which email addresses are registered admin accounts.
+            rate_limit.record_failure(ip_key, self.LOCKOUT_WINDOW_SECONDS)
+            rate_limit.record_failure(email_key, self.LOCKOUT_WINDOW_SECONDS)
+            return JsonResponse({'detail': ['Enter Correct Email']}, status=400)
+
+        cooldown_key = f'adminhub_forgot_cooldown:{user.pk}'
+        if cache.get(cooldown_key):
+            return JsonResponse(
+                {'detail': ['Please wait a minute before requesting another code.']}, status=429,
+            )
+
+        otp = f'{secrets.randbelow(1_000_000):06d}'
+        cache.set(f'adminhub_forgot_otp:{user.pk}', {'otp': otp, 'attempts': 0}, self.OTP_TTL_SECONDS)
+        cache.set(cooldown_key, True, self.RESEND_COOLDOWN_SECONDS)
+
+        send_mail(
+            'ICONIC TECHNO SERVICE — Admin Password Reset OTP',
+            _otp_email_body(otp),
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            fail_silently=False,
+        )
+
+        return JsonResponse({'detail': ['A verification code has been sent to your email.']})
+
+
+class AdminHubForgotPasswordVerifyOTPView(View):
+    """Plain Django View — same CSRF reasoning as the request-OTP view above."""
+
+    OTP_TTL_SECONDS = 5 * 60  # must match AdminHubForgotPasswordRequestOTPView's own TTL
+    OTP_MAX_ATTEMPTS = 5
+    RESET_TOKEN_TTL_SECONDS = 10 * 60
+    LOCKOUT_THRESHOLD = 5
+    LOCKOUT_WINDOW_SECONDS = 5 * 60
+
+    def post(self, request):
+        ip = rate_limit.client_ip(request)
+        ip_key = f'adminhub_forgot_verify:ip:{ip}' if ip else None
+
+        data, error = _parse_json_body(request)
+        if error:
+            return error
+
+        serializer = ForgotPasswordVerifyOTPSerializer(data=data)
+        if not serializer.is_valid():
+            return JsonResponse(serializer.errors, status=400)
+        email = serializer.validated_data['email']
+        otp = serializer.validated_data['otp']
+
+        if rate_limit.is_locked_out(ip_key, threshold=self.LOCKOUT_THRESHOLD):
+            return JsonResponse(
+                {'detail': ['Too many attempts. Please request a new code and try again later.']}, status=429,
+            )
+
+        User = get_user_model()
+        user = User.objects.filter(is_staff=True, email__iexact=email).first()
+        if user is None:
+            rate_limit.record_failure(ip_key, self.LOCKOUT_WINDOW_SECONDS)
+            return JsonResponse({'detail': ['Enter Correct Email']}, status=400)
+
+        otp_key = f'adminhub_forgot_otp:{user.pk}'
+        entry = cache.get(otp_key)
+        if entry is None:
+            return JsonResponse({'detail': ['This code has expired. Please request a new one.']}, status=400)
+
+        if entry['otp'] != otp:
+            rate_limit.record_failure(ip_key, self.LOCKOUT_WINDOW_SECONDS)
+            entry['attempts'] += 1
+            if entry['attempts'] >= self.OTP_MAX_ATTEMPTS:
+                cache.delete(otp_key)
+                return JsonResponse(
+                    {'detail': ['Too many incorrect attempts. Please request a new code.']}, status=400,
+                )
+            cache.set(otp_key, entry, self.OTP_TTL_SECONDS)
+            return JsonResponse({'detail': ['Incorrect code.']}, status=400)
+
+        # OTP is single-use — consumed as soon as it's checked correctly, so
+        # it can't be replayed to mint a second reset token.
+        cache.delete(otp_key)
+        if ip_key:
+            cache.delete(ip_key)
+
+        reset_token = secrets.token_urlsafe(32)
+        cache.set(f'adminhub_forgot_reset_token:{reset_token}', user.pk, self.RESET_TOKEN_TTL_SECONDS)
+
+        return JsonResponse({'detail': ['Code verified.'], 'reset_token': reset_token})
+
+
+class AdminHubForgotPasswordResetView(View):
+    """Plain Django View — same CSRF reasoning as the two views above.
+
+    No rate-limiting of its own: the reset_token is a 256-bit
+    secrets.token_urlsafe value handed out only after a correct OTP, so
+    guessing one directly isn't a realistic attack the way a 6-digit OTP or a
+    password is — the OTP step above is what's actually guarded against
+    brute force.
+    """
+
+    def post(self, request):
+        data, error = _parse_json_body(request)
+        if error:
+            return error
+
+        reset_token = (data.get('reset_token') or '').strip()
+        token_key = f'adminhub_forgot_reset_token:{reset_token}'
+        user_pk = cache.get(token_key) if reset_token else None
+        if user_pk is None:
+            return JsonResponse(
+                {'detail': ['This reset link has expired. Please start again.']}, status=400,
+            )
+
+        User = get_user_model()
+        try:
+            user = User.objects.get(pk=user_pk, is_staff=True)
+        except User.DoesNotExist:
+            cache.delete(token_key)
+            return JsonResponse(
+                {'detail': ['This reset link has expired. Please start again.']}, status=400,
+            )
+
+        serializer = ForgotPasswordResetSerializer(data=data, context={'user': user})
+        if not serializer.is_valid():
+            return JsonResponse(serializer.errors, status=400)
+
+        user.set_password(serializer.validated_data['new_password'])
+        user.save(update_fields=['password'])
+        # Single-use: a spent or abandoned token can't be replayed.
+        cache.delete(token_key)
+
+        return JsonResponse({'detail': ['Password reset successful. Please log in with your new password.']})
 
 
 class AdminHubChangeUsernameView(APIView):

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { emailSchema, entityNameField, imageFileSchema, nameSchema, phoneSchema } from './validators'
+import { emailSchema, entityNameField, imageFileSchema, nameSchema, passwordStrengthSchema, phoneSchema } from './validators'
 
 describe('nameSchema', () => {
   it('trims and accepts a valid name', () => {
@@ -56,6 +56,28 @@ describe('entityNameField', () => {
 
   it('rejects a single character', () => {
     expect(entityNameField.safeParse('A').success).toBe(false)
+  })
+})
+
+describe('passwordStrengthSchema', () => {
+  it('accepts a password meeting every rule', () => {
+    expect(passwordStrengthSchema.safeParse('Strong-Pass1!').success).toBe(true)
+  })
+
+  it('rejects a password under 8 characters', () => {
+    expect(passwordStrengthSchema.safeParse('Sh0rt!').success).toBe(false)
+  })
+
+  it('rejects a password with no uppercase letter', () => {
+    expect(passwordStrengthSchema.safeParse('lowercase-pass1!').success).toBe(false)
+  })
+
+  it('rejects a password with no special character', () => {
+    expect(passwordStrengthSchema.safeParse('NoSpecialChar123').success).toBe(false)
+  })
+
+  it('rejects a password containing whitespace', () => {
+    expect(passwordStrengthSchema.safeParse('Has A Space1!').success).toBe(false)
   })
 })
 

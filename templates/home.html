@@ -2,13 +2,24 @@
 
 {% block content %}
 
-  <!-- ===== Hero ===== -->
+  <!-- ===== Hero (brand strip + intro share one background image) ===== -->
   <section class="hero" id="home">
     <div class="hero__bg"></div>
     <div class="hero__overlay"></div>
+
+    <div class="hero-brand">
+      <div class="container hero-brand__inner">
+        <span class="hero-brand__logo">{% include "includes/logo.html" with light=True %}</span>
+        <span class="hero-brand__text">
+          <span class="hero-brand__name">Iconic Techno Service</span>
+          <span class="hero-brand__tagline">Fire &amp; Life Safety Specialists</span>
+        </span>
+      </div>
+    </div>
+
     <div class="container hero__content">
-      <p class="eyebrow eyebrow--light">Fire &amp; Life Safety Specialists</p>
-      <h1>Total Fire Protection<br>for Life &amp; Property</h1>
+      <h1>FIRE DETECTION AND FIRE PROTECTION SYSTEMS PROVIDER</h1>
+      <p class="hero__subtagline">PROJECT CONSULTANCY &amp; ENGINEERING SERVICES</p>
       <p class="hero__lead">We design, install and maintain end-to-end fire detection and suppression systems &mdash; engineered for early warning, fast response, and full compliance.</p>
       <div class="hero__cta">
         <a href="/survey/" class="btn btn--primary btn--lg">Get Free Site Survey</a>

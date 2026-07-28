@@ -5,10 +5,13 @@ interface Props {
   open: boolean
   onClose: () => void
   title?: string
+  /** Extra class appended to the dialog box, e.g. 'modal--lead' for the
+   * larger size variant used by the lead-detail and Forgot Password modals. */
+  className?: string
   children: ReactNode
 }
 
-export default function Modal({ open, onClose, title, children }: Props) {
+export default function Modal({ open, onClose, title, className, children }: Props) {
   useEffect(() => {
     if (!open) return
     function handleKey(e: KeyboardEvent) {
@@ -44,7 +47,7 @@ export default function Modal({ open, onClose, title, children }: Props) {
   // block for fixed descendants.
   return createPortal(
     <div className="modal-overlay" onClick={handleOverlayClick}>
-      <div className="modal" role="dialog" aria-modal="true" aria-label={title}>
+      <div className={className ? `modal ${className}` : 'modal'} role="dialog" aria-modal="true" aria-label={title}>
         <button type="button" className="modal__close" onClick={onClose} aria-label="Close">&times;</button>
         {title && <h3 className="modal__title">{title}</h3>}
         {children}

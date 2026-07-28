@@ -23,6 +23,25 @@ export const entityNameField = z.string().trim()
   .max(120, 'Name is too long (max 120 characters).')
 
 /**
+ * Client-side checks are UX only — the real password rules (length,
+ * similarity to user attributes, common-password list, not-all-numeric, plus
+ * the uppercase/special-character/no-whitespace rules mirrored below) are
+ * enforced server-side via Django's AUTH_PASSWORD_VALIDATORS (including the
+ * custom core.password_validators trio), same "Zod is UX only, never the
+ * trust boundary" convention used by every form island in this app. Shared
+ * by the Account Settings change-password form and the Forgot Password
+ * flow's reset step, which both need the exact same rules.
+ */
+export const PASSWORD_REQUIREMENTS_HINT =
+  'At least 8 characters, with one uppercase letter, one special character (e.g. ! @ # $ %), and no spaces.'
+
+export const passwordStrengthSchema = z.string()
+  .min(8, 'Must be at least 8 characters.')
+  .regex(/[A-Z]/, 'Must contain at least one uppercase letter.')
+  .regex(/[^A-Za-z0-9\s]/, 'Must contain at least one special character.')
+  .refine((v) => !/\s/.test(v), 'Must not contain spaces.')
+
+/**
  * Factory for an image-upload Zod schema, parametrized by the caller's own
  * size cap / accepted MIME types / messages so each Admin Hub island can
  * keep its exact existing validation behavior (e.g. certifications rejects
