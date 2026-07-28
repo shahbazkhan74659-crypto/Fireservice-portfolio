@@ -5,8 +5,8 @@ from .models import ConsultationRequest, ContactMessage, SurveyRequest
 
 @admin.register(SurveyRequest)
 class SurveyRequestAdmin(admin.ModelAdmin):
-    list_display = ('name', 'email', 'created_at')
-    list_filter = ('created_at',)
+    list_display = ('name', 'email', 'created_at', 'resolved')
+    list_filter = ('resolved', 'created_at')
     search_fields = ('name', 'email', 'address', 'problem', 'why_survey')
     readonly_fields = ('created_at',)
     ordering = ('-created_at',)
@@ -14,8 +14,8 @@ class SurveyRequestAdmin(admin.ModelAdmin):
 
 @admin.register(ContactMessage)
 class ContactMessageAdmin(admin.ModelAdmin):
-    list_display = ('name', 'phone', 'email', 'service', 'created_at')
-    list_filter = ('service', 'created_at')
+    list_display = ('name', 'phone', 'email', 'service', 'created_at', 'resolved')
+    list_filter = ('service', 'resolved', 'created_at')
     search_fields = ('name', 'phone', 'email', 'message')
     readonly_fields = ('created_at',)
     ordering = ('-created_at',)
@@ -23,8 +23,8 @@ class ContactMessageAdmin(admin.ModelAdmin):
 
 @admin.register(ConsultationRequest)
 class ConsultationRequestAdmin(admin.ModelAdmin):
-    list_display = ('name', 'phone', 'created_at')
-    list_filter = ('created_at',)
+    list_display = ('name', 'phone', 'created_at', 'resolved')
+    list_filter = ('resolved', 'created_at')
     search_fields = ('name', 'phone')
     readonly_fields = ('created_at',)
     ordering = ('-created_at',)

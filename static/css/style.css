@@ -407,10 +407,17 @@ a.instagram-icon:hover{color:var(--red-700);}
 }
 .lead-tab:hover{background:var(--ink-800);color:#fff;}
 .lead-tab.is-active{background:var(--red-600);border-color:var(--red-600);color:#fff;}
+/* .section's default 90px top/bottom padding, stacked between the tabs'
+   section and each panel's own section, left a huge dead gap before the
+   table (each panel also repeated its own now-removed heading — the tab
+   button already names it) — tightened just for the Leads page instead of
+   touching .section globally. */
+.leads-header{padding-bottom:20px;}
+[data-lead-panel]{padding-top:20px;padding-bottom:60px;}
 
 .cert-table-wrap{overflow-x:auto;border:1px solid var(--ink-400);border-radius:var(--radius);background:#fff;}
 .cert-table{width:100%;border-collapse:collapse;}
-.cert-table th,.cert-table td{padding:16px 20px;text-align:left;vertical-align:middle;border-bottom:1px solid var(--ink-400);}
+.cert-table th,.cert-table td{padding:16px 20px;text-align:left;vertical-align:middle;border-bottom:1px solid var(--ink-400);overflow-wrap:anywhere;}
 .cert-table tr:last-child td{border-bottom:none;}
 .cert-table tr:target{background:var(--tint);}
 .cert-table th{background:var(--ink-900);font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;color:#fff;font-weight:700;}
@@ -642,8 +649,12 @@ a.instagram-icon:hover{color:var(--red-700);}
 .cc-panel{background:var(--cc-panel);border:1px solid var(--cc-line);border-radius:var(--radius);padding:22px;}
 .cc-panel__head h3{margin:0 0 16px;font-size:.95rem;font-weight:600;color:var(--cc-text);}
 
-.cc-panel--chart{position:relative;}
-.cc-linechart-wrap{position:relative;}
+/* flex column + margin-top:auto on the wrap keeps the heading pinned to the
+   top and pushes the (fixed-height) chart itself down flush with the
+   panel's bottom edge, instead of floating with empty space beneath it
+   whenever the panel stretches taller than the chart's own content. */
+.cc-panel--chart{position:relative;display:flex;flex-direction:column;}
+.cc-linechart-wrap{position:relative;margin-top:auto;}
 .cc-linechart{width:100%;height:160px;display:block;overflow:visible;}
 .cc-linechart__peak-label{
   position:absolute;transform:translate(-50%, calc(-100% - 10px));
@@ -724,6 +735,11 @@ a.instagram-icon:hover{color:var(--red-700);}
 /* flex-wrap so the two buttons (neither of which shrinks/wraps its own
    text) stack instead of overflowing the modal box on narrow phones. */
 .lead-modal__footer{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:12px;}
+/* .btn{display:inline-flex} (an author rule) otherwise wins over the plain
+   hidden attribute's UA-stylesheet default — same fix as .modal-overlay[hidden]
+   above, needed here so the already-resolved-lead case actually hides the
+   button instead of just leaving it inert. */
+#leadModalResolveBtn[hidden]{display:none;}
 
 /* ============ Responsive ============ */
 /* The off-canvas nav drawer used to only activate at <=860px, but the
@@ -870,4 +886,25 @@ a.instagram-icon:hover{color:var(--red-700);}
      less padding leaves more room for the wrapped buttons on very narrow
      phones (~360px), on top of the modal-overlay's own 24px padding. */
   .modal--lead{padding:24px;}
+  /* .cert-table (Leads, the Home dashboard's daily-breakdown table, Admin
+     Hub Certifications) was overflowing its .cert-table-wrap on phones —
+     6 columns of 16px/20px-padded cells is wider than any phone viewport,
+     so the wrap's overflow-x:auto let it scroll sideways with only
+     Received/View left on screen and Name/Contact/Address/Problem pushed
+     off the left edge entirely. Full detail is already one tap away via
+     the View button's modal, so the long free-text columns are dropped
+     here rather than reflowed into stacked cards; padding/the action
+     button are also shrunk so the remaining columns comfortably fit
+     instead of needing to scroll at all. */
+  .cert-table-wrap{overflow-x:hidden;}
+  .cert-table th,.cert-table td{padding:10px 12px;}
+  .cert-table__col--hide-mobile{display:none;}
+  .cert-table__action .btn{padding:8px 14px;font-size:.82rem;}
+  /* white-space:nowrap (desktop default, plenty of room) suppresses every
+     line-break opportunity, including the forced breaks overflow-wrap:anywhere
+     would otherwise add — so "Received"/"Resolved" (e.g. "1 hour, 4 minutes
+     ago") kept forcing the whole table wider than the phone viewport even
+     after the fixes above. Letting it wrap here is what actually lets the
+     column shrink to fit. */
+  .cert-table__meta{white-space:normal;}
 }

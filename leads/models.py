@@ -8,6 +8,8 @@ class SurveyRequest(models.Model):
     problem = models.TextField(max_length=2000)
     why_survey = models.TextField(max_length=2000, verbose_name='Why We Should Survey')
     created_at = models.DateTimeField(auto_now_add=True)
+    resolved = models.BooleanField(default=False)
+    resolved_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ['-created_at']
@@ -36,6 +38,8 @@ class ContactMessage(models.Model):
     service = models.CharField(max_length=30, choices=SERVICE_CHOICES, default='other')
     message = models.TextField(max_length=2000, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    resolved = models.BooleanField(default=False)
+    resolved_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ['-created_at']
@@ -48,6 +52,8 @@ class ConsultationRequest(models.Model):
     name = models.CharField(max_length=120)
     phone = models.CharField(max_length=20)
     created_at = models.DateTimeField(auto_now_add=True)
+    resolved = models.BooleanField(default=False)
+    resolved_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ['-created_at']

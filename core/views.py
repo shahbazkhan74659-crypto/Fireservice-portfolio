@@ -5,8 +5,11 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.views import redirect_to_login
 from django.db.models import Count
 from django.db.models.functions import TruncDate
+from django.http import Http404, JsonResponse
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.decorators import method_decorator
+from django.views import View
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import TemplateView
 
@@ -194,19 +197,29 @@ class AdminHubHomeView(StaffRequiredMixin, TemplateView):
         today = timezone.localdate()
         since = timezone.now() - timedelta(days=TREND_DAYS - 1)
 
-        lead_counts = [(label, model.objects.count(), admin_name) for label, model, admin_name in LEAD_MODELS]
+        # The whole dashboard reflects *open* (unresolved) leads only — once
+        # a lead is marked resolved on the Leads page it moves to that
+        # page's Resolved Requests tab and every count here (meters, totals,
+        # trend, recent activity) drops accordingly, rather than staying a
+        # permanent historical tally.
+        lead_counts = [
+            (label, model.objects.filter(resolved=False).count(), admin_name)
+            for label, model, admin_name in LEAD_MODELS
+        ]
         total_leads = sum(count for _, count, _ in lead_counts)
 
         # Meter cards show today's leads (resets at local midnight, since
-        # `today` is timezone.localdate()) rather than the all-time count —
-        # the ring's fill share is likewise scoped to today's totals.
+        # `today` is timezone.localdate()) rather than the all-time count.
+        # The ring itself is just a count display, not a ratio of anything
+        # (there's no natural "out of X" denominator for a raw count), so
+        # it's always rendered as a full ring regardless of the count —
+        # unlike Content Completeness below, which is a genuine fraction.
         today_counts = [
-            (label, model.objects.filter(created_at__date=today).count())
+            (label, model.objects.filter(created_at__date=today, resolved=False).count())
             for label, model, _ in LEAD_MODELS
         ]
-        total_today = sum(count for _, count in today_counts)
         last_30d_counts = {
-            label: model.objects.filter(created_at__gte=since).count()
+            label: model.objects.filter(created_at__gte=since, resolved=False).count()
             for label, model, _ in LEAD_MODELS
         }
 
@@ -214,7 +227,7 @@ class AdminHubHomeView(StaffRequiredMixin, TemplateView):
             {
                 'label': label,
                 'count': count,
-                'pct': round((count / total_today) * 100) if total_today else 0,
+                'pct': 100,
                 'last_30d': last_30d_counts[label],
             }
             for label, count in today_counts
@@ -236,7 +249,7 @@ class AdminHubHomeView(StaffRequiredMixin, TemplateView):
         daily_by_type = {}
         for label, model, _ in LEAD_MODELS:
             rows = (
-                model.objects.filter(created_at__gte=since)
+                model.objects.filter(created_at__gte=since, resolved=False)
                 .annotate(day=TruncDate('created_at'))
                 .values('day')
                 .annotate(n=Count('id'))
@@ -281,7 +294,7 @@ class AdminHubHomeView(StaffRequiredMixin, TemplateView):
         context['chart_w'] = CHART_W
         context['chart_h'] = CHART_H
         context['leads_last_7_days'] = sum(
-            model.objects.filter(created_at__gte=timezone.now() - timedelta(days=7)).count()
+            model.objects.filter(created_at__gte=timezone.now() - timedelta(days=7), resolved=False).count()
             for _, model, _ in LEAD_MODELS
         )
 
@@ -310,7 +323,7 @@ class AdminHubHomeView(StaffRequiredMixin, TemplateView):
             # types tied at the same instant, since each model has its own
             # independent id sequence — an acceptable tradeoff for how rare
             # a genuine cross-type tie is versus no tiebreaker at all.
-            for obj in model.objects.order_by('-created_at', '-pk')[:5]:
+            for obj in model.objects.filter(resolved=False).order_by('-created_at', '-pk')[:3]:
                 activity.append({
                     'type': label[:-1] if label.endswith('s') else label,
                     'name': obj.name,
@@ -323,21 +336,76 @@ class AdminHubHomeView(StaffRequiredMixin, TemplateView):
                     'leads_url': f'/admin-hub/leads/#lead-{admin_name}-{obj.pk}',
                 })
         activity.sort(key=lambda a: (a['created_at'], a['pk']), reverse=True)
-        context['recent_activity'] = activity[:5]
+        context['recent_activity'] = activity[:3]
 
         return context
 
 
 class AdminHubLeadsView(StaffRequiredMixin, TemplateView):
-    # Bare list view — no form/island, so no ensure_csrf_cookie needed.
+    # Bare list view — no form/island, so no ensure_csrf_cookie needed (the
+    # resolve action's {% csrf_token %} tag triggers the cookie itself).
     template_name = 'adminhub/leads.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['survey_requests'] = SurveyRequest.objects.all()
-        context['contact_messages'] = ContactMessage.objects.all()
-        context['consultation_requests'] = ConsultationRequest.objects.all()
+        context['survey_requests'] = SurveyRequest.objects.filter(resolved=False)
+        context['contact_messages'] = ContactMessage.objects.filter(resolved=False)
+        context['consultation_requests'] = ConsultationRequest.objects.filter(resolved=False)
+
+        # Resolved leads move here — out of the per-type tables above and
+        # out of every Dashboard count — combined into one list (mirroring
+        # the dashboard's own cross-type Recent Activity pattern) since each
+        # lead type has different fields and there's a single "Resolved
+        # Requests" table, not three parallel ones.
+        resolved = []
+        for obj in SurveyRequest.objects.filter(resolved=True):
+            resolved.append({
+                'type': 'Survey Request', 'pk': obj.pk, 'name': obj.name,
+                'email': obj.email, 'address': obj.address, 'problem': obj.problem,
+                'why': obj.why_survey, 'received': obj.created_at, 'resolved_at': obj.resolved_at,
+            })
+        for obj in ContactMessage.objects.filter(resolved=True):
+            resolved.append({
+                'type': 'Contact Message', 'pk': obj.pk, 'name': obj.name,
+                'phone': obj.phone, 'email': obj.email, 'service': obj.get_service_display(),
+                'message': obj.message, 'received': obj.created_at, 'resolved_at': obj.resolved_at,
+            })
+        for obj in ConsultationRequest.objects.filter(resolved=True):
+            resolved.append({
+                'type': 'Consultation Request', 'pk': obj.pk, 'name': obj.name,
+                'phone': obj.phone, 'received': obj.created_at, 'resolved_at': obj.resolved_at,
+            })
+        resolved.sort(key=lambda r: r['resolved_at'], reverse=True)
+        context['resolved_requests'] = resolved
         return context
+
+
+LEAD_TYPE_MODELS = {
+    'survey': SurveyRequest,
+    'contact': ContactMessage,
+    'consultation': ConsultationRequest,
+}
+
+
+class AdminHubResolveLeadView(StaffRequiredMixin, View):
+    """POST-only action from the Leads page's detail modal: marks one lead
+    resolved. Called via fetch, not a real form submission — the page's own
+    JS removes the row from whichever table it was in and closes the modal
+    on a 200, so the admin never leaves (or reloads) the tab they were
+    working through. A plain Django View (like adminhub-logout), not DRF —
+    this is a same-origin AJAX POST from a server-rendered page, not a JSON
+    API consumed by a React island, so a real {% csrf_token %} form (its
+    hidden input read directly by the fetch call) is the simplest fit."""
+
+    def post(self, request, lead_type, pk):
+        model = LEAD_TYPE_MODELS.get(lead_type)
+        if model is None:
+            raise Http404
+        lead = get_object_or_404(model, pk=pk)
+        lead.resolved = True
+        lead.resolved_at = timezone.now()
+        lead.save(update_fields=['resolved', 'resolved_at'])
+        return JsonResponse({'resolved': True})
 
 
 @method_decorator(ensure_csrf_cookie, name='dispatch')

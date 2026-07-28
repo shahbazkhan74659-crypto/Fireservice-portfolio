@@ -3,7 +3,7 @@
 {% block title %}Leads | Admin Hub | Iconic Techno Service{% endblock %}
 
 {% block content %}
-<section class="section">
+<section class="section leads-header">
   <div class="container">
     <p class="eyebrow">Admin Hub</p>
     <h2>Leads</h2>
@@ -12,23 +12,21 @@
       <button type="button" class="lead-tab is-active" data-tab="survey" role="tab" aria-selected="true">Survey Requests</button>
       <button type="button" class="lead-tab" data-tab="contact" role="tab" aria-selected="false">Contact Messages</button>
       <button type="button" class="lead-tab" data-tab="consultation" role="tab" aria-selected="false">Consultation Requests</button>
+      <button type="button" class="lead-tab" data-tab="resolved" role="tab" aria-selected="false">Resolved Requests</button>
     </div>
   </div>
 </section>
 
 <section class="section" id="leadPanel-survey" data-lead-panel="survey">
   <div class="container">
-    <div class="section__head">
-      <h2>Survey Requests</h2>
-    </div>
     <div class="cert-table-wrap">
       <table class="cert-table">
         <thead>
           <tr>
             <th>Name</th>
             <th>Contact</th>
-            <th>Address</th>
-            <th>Problem</th>
+            <th class="cert-table__col--hide-mobile">Address</th>
+            <th class="cert-table__col--hide-mobile">Problem</th>
             <th>Received</th>
             <th></th>
           </tr>
@@ -38,8 +36,8 @@
           <tr id="lead-surveyrequest-{{ lead.pk }}">
             <td class="cert-table__name">{{ lead.name }}</td>
             <td>{{ lead.email }}</td>
-            <td class="cert-table__desc">{{ lead.address|truncatechars:60 }}</td>
-            <td class="cert-table__desc">{{ lead.problem|truncatechars:60 }}</td>
+            <td class="cert-table__desc cert-table__col--hide-mobile">{{ lead.address|truncatechars:60 }}</td>
+            <td class="cert-table__desc cert-table__col--hide-mobile">{{ lead.problem|truncatechars:60 }}</td>
             <td class="cert-table__meta">{{ lead.created_at|timesince }} ago</td>
             <td class="cert-table__action">
               <button type="button" class="btn btn--outline lead-view-btn"
@@ -50,7 +48,7 @@
                       data-problem="{{ lead.problem }}"
                       data-why="{{ lead.why_survey }}"
                       data-received="{{ lead.created_at|date:'M j, Y, g:i A' }}"
-                      data-admin-url="/admin/leads/surveyrequest/{{ lead.pk }}/change/">View</button>
+                      data-resolve-url="{% url 'adminhub-leads-resolve' 'survey' lead.pk %}">View</button>
             </td>
           </tr>
           {% empty %}
@@ -64,17 +62,14 @@
 
 <section class="section" id="leadPanel-contact" data-lead-panel="contact" hidden>
   <div class="container">
-    <div class="section__head">
-      <h2>Contact Messages</h2>
-    </div>
     <div class="cert-table-wrap">
       <table class="cert-table">
         <thead>
           <tr>
             <th>Name</th>
             <th>Contact</th>
-            <th>Service</th>
-            <th>Message</th>
+            <th class="cert-table__col--hide-mobile">Service</th>
+            <th class="cert-table__col--hide-mobile">Message</th>
             <th>Received</th>
             <th></th>
           </tr>
@@ -84,8 +79,8 @@
           <tr id="lead-contactmessage-{{ lead.pk }}">
             <td class="cert-table__name">{{ lead.name }}</td>
             <td>{{ lead.phone }}<br>{{ lead.email }}</td>
-            <td class="cert-table__meta">{{ lead.get_service_display }}</td>
-            <td class="cert-table__desc">{{ lead.message|truncatechars:60|default:"—" }}</td>
+            <td class="cert-table__meta cert-table__col--hide-mobile">{{ lead.get_service_display }}</td>
+            <td class="cert-table__desc cert-table__col--hide-mobile">{{ lead.message|truncatechars:60|default:"—" }}</td>
             <td class="cert-table__meta">{{ lead.created_at|timesince }} ago</td>
             <td class="cert-table__action">
               <button type="button" class="btn btn--outline lead-view-btn"
@@ -96,7 +91,7 @@
                       data-service="{{ lead.get_service_display }}"
                       data-message="{{ lead.message }}"
                       data-received="{{ lead.created_at|date:'M j, Y, g:i A' }}"
-                      data-admin-url="/admin/leads/contactmessage/{{ lead.pk }}/change/">View</button>
+                      data-resolve-url="{% url 'adminhub-leads-resolve' 'contact' lead.pk %}">View</button>
             </td>
           </tr>
           {% empty %}
@@ -110,9 +105,6 @@
 
 <section class="section" id="leadPanel-consultation" data-lead-panel="consultation" hidden>
   <div class="container">
-    <div class="section__head">
-      <h2>Consultation Requests</h2>
-    </div>
     <div class="cert-table-wrap">
       <table class="cert-table">
         <thead>
@@ -135,7 +127,7 @@
                       data-name="{{ lead.name }}"
                       data-phone="{{ lead.phone }}"
                       data-received="{{ lead.created_at|date:'M j, Y, g:i A' }}"
-                      data-admin-url="/admin/leads/consultationrequest/{{ lead.pk }}/change/">View</button>
+                      data-resolve-url="{% url 'adminhub-leads-resolve' 'consultation' lead.pk %}">View</button>
             </td>
           </tr>
           {% empty %}
@@ -147,6 +139,56 @@
   </div>
 </section>
 
+<section class="section" id="leadPanel-resolved" data-lead-panel="resolved" hidden>
+  <div class="container">
+    <div class="cert-table-wrap">
+      <table class="cert-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th class="cert-table__col--hide-mobile">Type</th>
+            <th>Received</th>
+            <th>Resolved</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for lead in resolved_requests %}
+          <tr>
+            <td class="cert-table__name">{{ lead.name }}</td>
+            <td class="cert-table__meta cert-table__col--hide-mobile">{{ lead.type }}</td>
+            <td class="cert-table__meta">{{ lead.received|timesince }} ago</td>
+            <td class="cert-table__meta">{{ lead.resolved_at|timesince }} ago</td>
+            <td class="cert-table__action">
+              <button type="button" class="btn btn--outline lead-view-btn"
+                      data-type="{{ lead.type }}"
+                      data-name="{{ lead.name }}"
+                      {% if lead.email %}data-email="{{ lead.email }}"{% endif %}
+                      {% if lead.phone %}data-phone="{{ lead.phone }}"{% endif %}
+                      {% if lead.address %}data-address="{{ lead.address }}"{% endif %}
+                      {% if lead.problem %}data-problem="{{ lead.problem }}"{% endif %}
+                      {% if lead.why %}data-why="{{ lead.why }}"{% endif %}
+                      {% if lead.service %}data-service="{{ lead.service }}"{% endif %}
+                      {% if lead.message %}data-message="{{ lead.message }}"{% endif %}
+                      data-received="{{ lead.received|date:'M j, Y, g:i A' }}"
+                      data-resolved-on="{{ lead.resolved_at|date:'M j, Y, g:i A' }}">View</button>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="cert-table__desc">No resolved requests yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+{% comment %}
+Holds only the CSRF token — read directly by the resolve fetch() call
+below, not submitted as a real form (no full-page navigation).
+{% endcomment %}
+<form id="leadResolveForm">{% csrf_token %}</form>
+
 <div class="modal-overlay" id="leadModalOverlay" hidden>
   <div class="modal modal--lead" role="dialog" aria-modal="true" aria-labelledby="leadModalTitle">
     <button type="button" class="modal__close" id="leadModalClose" aria-label="Close">&times;</button>
@@ -154,8 +196,8 @@
     <h3 class="modal__title" id="leadModalTitle"></h3>
     <div class="lead-modal__fields" id="leadModalFields"></div>
     <div class="lead-modal__footer">
-      <a href="#" id="leadModalAdminLink" class="btn btn--outline" target="_blank" rel="noopener">Open in Django Admin</a>
-      <button type="button" class="btn btn--primary" id="leadModalCloseBtn">Close</button>
+      <button type="button" class="btn btn--primary" id="leadModalResolveBtn">Mark as Resolved</button>
+      <button type="button" class="btn btn--outline" id="leadModalCloseBtn">Close</button>
     </div>
   </div>
 </div>
@@ -204,7 +246,9 @@ document.addEventListener('DOMContentLoaded', function () {
   var typeEl = document.getElementById('leadModalType');
   var titleEl = document.getElementById('leadModalTitle');
   var fieldsEl = document.getElementById('leadModalFields');
-  var adminLink = document.getElementById('leadModalAdminLink');
+  var resolveForm = document.getElementById('leadResolveForm');
+  var resolveBtn = document.getElementById('leadModalResolveBtn');
+  var currentRow = null;
 
   var FIELD_LABELS = {
     email: 'Email',
@@ -214,9 +258,10 @@ document.addEventListener('DOMContentLoaded', function () {
     problem: "What's the Problem?",
     why: 'Why Should We Survey?',
     message: 'Message',
-    received: 'Received'
+    received: 'Received',
+    resolvedOn: 'Resolved On'
   };
-  var FIELD_ORDER = ['email', 'phone', 'address', 'service', 'problem', 'why', 'message', 'received'];
+  var FIELD_ORDER = ['email', 'phone', 'address', 'service', 'problem', 'why', 'message', 'received', 'resolvedOn'];
 
   function openModal(btn) {
     typeEl.textContent = btn.dataset.type || '';
@@ -237,12 +282,56 @@ document.addEventListener('DOMContentLoaded', function () {
       row.appendChild(val);
       fieldsEl.appendChild(row);
     });
-    adminLink.href = btn.dataset.adminUrl || '#';
+    currentRow = btn.closest('tr');
+    // Already-resolved leads (Resolved Requests tab) carry no resolve-url —
+    // nothing left to action, so the button is hidden rather than shown
+    // disabled.
+    if (btn.dataset.resolveUrl) {
+      resolveForm.dataset.resolveUrl = btn.dataset.resolveUrl;
+      resolveBtn.hidden = false;
+    } else {
+      resolveForm.dataset.resolveUrl = '';
+      resolveBtn.hidden = true;
+    }
     overlay.hidden = false;
   }
 
   function closeModal() {
     overlay.hidden = true;
+    currentRow = null;
+  }
+
+  function showEmptyStateIfNeeded(tbody) {
+    if (tbody.children.length) return;
+    var colspan = tbody.closest('table').querySelectorAll('thead th').length;
+    var row = document.createElement('tr');
+    row.innerHTML = '<td colspan="' + colspan + '" class="cert-table__desc">Nothing left here.</td>';
+    tbody.appendChild(row);
+  }
+
+  function resolveCurrentLead() {
+    var url = resolveForm.dataset.resolveUrl;
+    if (!url || !currentRow) return;
+    var token = resolveForm.querySelector('[name=csrfmiddlewaretoken]').value;
+    var row = currentRow;
+    var tbody = row.parentElement;
+    resolveBtn.disabled = true;
+    fetch(url, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': token },
+    }).then(function (res) {
+      if (!res.ok) throw new Error('Request failed');
+      // Marked resolved server-side — remove the row from whichever
+      // per-type table it was in and close the modal, without any page
+      // navigation, so the admin stays exactly where they were working.
+      row.remove();
+      showEmptyStateIfNeeded(tbody);
+      closeModal();
+    }).catch(function () {
+      window.alert('Could not mark this request as resolved. Please try again.');
+    }).finally(function () {
+      resolveBtn.disabled = false;
+    });
   }
 
   document.querySelectorAll('.lead-view-btn').forEach(function (btn) {
@@ -250,6 +339,7 @@ document.addEventListener('DOMContentLoaded', function () {
   });
   document.getElementById('leadModalClose').addEventListener('click', closeModal);
   document.getElementById('leadModalCloseBtn').addEventListener('click', closeModal);
+  resolveBtn.addEventListener('click', resolveCurrentLead);
   overlay.addEventListener('click', function (e) {
     if (e.target === overlay) closeModal();
   });
