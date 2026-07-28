@@ -1,6 +1,6 @@
 import json
 
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, update_session_auth_hash
 from django.core.cache import cache
 from django.db import transaction
 from django.db.models import Max
@@ -16,7 +16,10 @@ from rest_framework.generics import (
 )
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import AllowAny, IsAdminUser
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
+from core.serializers import ChangePasswordSerializer, ChangeUsernameSerializer
 from leads.models import ConsultationRequest, ContactMessage, SurveyRequest
 from leads.serializers import (
     ConsultationRequestSerializer,
@@ -154,6 +157,38 @@ class AdminHubLoginAPIView(View):
 
         login(request, user)
         return JsonResponse({'detail': ['Logged in.']})
+
+
+class AdminHubChangeUsernameView(APIView):
+    # Changing the username doesn't need update_session_auth_hash — Django's
+    # session auth hash is derived from the password, not the username, and
+    # the session itself keys off the user's pk, so the existing session
+    # stays valid across a username change with no extra handling.
+    permission_classes = [IsAdminUser]
+
+    def post(self, request):
+        serializer = ChangeUsernameSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        return Response({'detail': ['Username changed successfully.'], 'username': user.username})
+
+
+class AdminHubChangePasswordView(APIView):
+    # A regular DRF APIView (unlike AdminHubLoginAPIView) is fine here: the
+    # request is already authenticated by the time this runs, so
+    # SessionAuthentication.enforce_csrf() actually runs and CSRF is
+    # correctly enforced — the gap that forced AdminHubLoginAPIView to stay
+    # a plain Django View only applies to the anonymous login request.
+    permission_classes = [IsAdminUser]
+
+    def post(self, request):
+        serializer = ChangePasswordSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        # Changing a user's password rotates their session auth hash, which
+        # would otherwise log this same request's session out immediately.
+        update_session_auth_hash(request, request.user)
+        return Response({'detail': ['Password changed successfully.']})
 
 
 class MissionVisionItemListView(ListAPIView):

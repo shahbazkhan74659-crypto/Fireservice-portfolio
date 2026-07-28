@@ -134,6 +134,143 @@ class TestAdminHubLoginAPIView:
         assert res.status_code == 401
 
 
+class TestAdminHubChangeUsernameView:
+    url = '/api/admin-hub/change-username/'
+
+    def test_anonymous_rejected(self, client):
+        res = client.post(self.url, {'new_username': 'newname'}, content_type='application/json')
+        assert res.status_code in (401, 403)
+
+    def test_non_staff_rejected(self, client, regular_user):
+        client.force_login(regular_user)
+        res = client.post(self.url, {'new_username': 'newname'}, content_type='application/json')
+        assert res.status_code == 403
+
+    def test_changes_username_and_keeps_session_alive(self, admin_client, staff_user):
+        res = admin_client.post(self.url, {'new_username': 'shahbaz2'}, content_type='application/json')
+        assert res.status_code == 200
+        assert res.json()['username'] == 'shahbaz2'
+        assert '_auth_user_id' in admin_client.session
+
+        staff_user.refresh_from_db()
+        assert staff_user.username == 'shahbaz2'
+
+    def test_duplicate_username_rejected_case_insensitively(self, admin_client, staff_user, regular_user):
+        res = admin_client.post(
+            self.url, {'new_username': regular_user.username.upper()}, content_type='application/json',
+        )
+        assert res.status_code == 400
+        staff_user.refresh_from_db()
+        assert staff_user.username != regular_user.username.upper()
+
+    def test_keeping_the_same_username_is_allowed(self, admin_client, staff_user):
+        # Excludes the current user's own row from the uniqueness check, so
+        # re-submitting the same name isn't treated as a duplicate of itself.
+        res = admin_client.post(self.url, {'new_username': staff_user.username}, content_type='application/json')
+        assert res.status_code == 200
+
+    def test_invalid_characters_rejected(self, admin_client):
+        # '!' isn't in the allowed set even though spaces now are (see the
+        # test below) — this exercises rejection on a genuinely bad character.
+        res = admin_client.post(self.url, {'new_username': 'bad-name!'}, content_type='application/json')
+        assert res.status_code == 400
+
+    def test_username_with_spaces_is_allowed(self, admin_client, staff_user):
+        res = admin_client.post(self.url, {'new_username': 'Shahbaz Khan'}, content_type='application/json')
+        assert res.status_code == 200
+        staff_user.refresh_from_db()
+        assert staff_user.username == 'Shahbaz Khan'
+
+
+class TestAdminHubChangePasswordView:
+    url = '/api/admin-hub/change-password/'
+
+    def test_anonymous_rejected(self, client):
+        res = client.post(
+            self.url,
+            {'old_password': 'pw12345!', 'new_password': 'a-new-strong-pass'},
+            content_type='application/json',
+        )
+        assert res.status_code in (401, 403)
+
+    def test_non_staff_rejected(self, client, regular_user):
+        client.force_login(regular_user)
+        res = client.post(
+            self.url,
+            {'old_password': 'pw12345!', 'new_password': 'a-new-strong-pass'},
+            content_type='application/json',
+        )
+        assert res.status_code == 403
+
+    def test_wrong_old_password_rejected_and_password_unchanged(self, admin_client, staff_user):
+        res = admin_client.post(
+            self.url,
+            {'old_password': 'not-the-real-password', 'new_password': 'a-new-strong-pass'},
+            content_type='application/json',
+        )
+        assert res.status_code == 400
+        staff_user.refresh_from_db()
+        assert staff_user.check_password('pw12345!')
+
+    def test_weak_new_password_rejected_via_django_validators(self, admin_client, staff_user):
+        # Too short to satisfy AUTH_PASSWORD_VALIDATORS' MinimumLengthValidator,
+        # proving the server enforces Django's real validators, not just the
+        # frontend's lightweight length check.
+        res = admin_client.post(
+            self.url,
+            {'old_password': 'pw12345!', 'new_password': 'short'},
+            content_type='application/json',
+        )
+        assert res.status_code == 400
+        staff_user.refresh_from_db()
+        assert staff_user.check_password('pw12345!')
+
+    def test_new_password_without_uppercase_rejected(self, admin_client, staff_user):
+        res = admin_client.post(
+            self.url,
+            {'old_password': 'pw12345!', 'new_password': 'no-upper-here1!'},
+            content_type='application/json',
+        )
+        assert res.status_code == 400
+        staff_user.refresh_from_db()
+        assert staff_user.check_password('pw12345!')
+
+    def test_new_password_without_special_character_rejected(self, admin_client, staff_user):
+        res = admin_client.post(
+            self.url,
+            {'old_password': 'pw12345!', 'new_password': 'NoSpecialChar123'},
+            content_type='application/json',
+        )
+        assert res.status_code == 400
+        staff_user.refresh_from_db()
+        assert staff_user.check_password('pw12345!')
+
+    def test_new_password_with_whitespace_rejected(self, admin_client, staff_user):
+        res = admin_client.post(
+            self.url,
+            {'old_password': 'pw12345!', 'new_password': 'Has A Space1!'},
+            content_type='application/json',
+        )
+        assert res.status_code == 400
+        staff_user.refresh_from_db()
+        assert staff_user.check_password('pw12345!')
+
+    def test_correct_old_password_changes_it_and_keeps_session_alive(self, admin_client, staff_user):
+        res = admin_client.post(
+            self.url,
+            {'old_password': 'pw12345!', 'new_password': 'A-New-Strong-Pass1!'},
+            content_type='application/json',
+        )
+        assert res.status_code == 200
+        # update_session_auth_hash should have kept this same session valid —
+        # a protected page is still reachable without logging in again.
+        assert '_auth_user_id' in admin_client.session
+
+        staff_user.refresh_from_db()
+        assert staff_user.check_password('A-New-Strong-Pass1!')
+        assert not staff_user.check_password('pw12345!')
+
+
 class TestBrandListCreateViewPermissions:
     """Brand stands in for every IsAdminUser-protected content endpoint —
     they all share the same permission_classes = [IsAdminUser] pattern."""

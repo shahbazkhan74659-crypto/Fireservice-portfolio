@@ -1,4 +1,4 @@
-{% load static %}<!DOCTYPE html>
+{% load static django_vite %}<!DOCTYPE html>
 <html lang="en" class="no-js">
 <head>
 <meta charset="UTF-8">
@@ -15,6 +15,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/style.css' %}">
+{% vite_hmr_client %}
+{% vite_react_refresh %}
+{% vite_asset 'src/islands/admin-change-password/main.tsx' %}
 {% block extra_head %}{% endblock %}
 </head>
 <body>
@@ -38,20 +41,22 @@
              .nav__footer (margin-top:auto) — hidden above 1150px, where the
              copy in .adminhub-header__actions below is shown instead. -->
         <div class="nav__footer">
-          <span class="adminhub-header__user">{{ request.user.username }}</span>
+          <div data-change-password-root></div>
           <form method="post" action="{% url 'adminhub-logout' %}">
             {% csrf_token %}
             <button type="submit" class="btn btn--outline">Log Out</button>
           </form>
+          <span class="adminhub-header__user">{{ request.user.username }}</span>
         </div>
       </nav>
     </div>
     <div class="adminhub-header__actions">
-      <span class="adminhub-header__user">{{ request.user.username }}</span>
+      <div data-change-password-root></div>
       <form method="post" action="{% url 'adminhub-logout' %}">
         {% csrf_token %}
         <button type="submit" class="btn btn--outline">Log Out</button>
       </form>
+      <span class="adminhub-header__user">{{ request.user.username }}</span>
       <button class="nav__toggle" id="adminNavToggle" aria-label="Toggle menu" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>

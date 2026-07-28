@@ -3,6 +3,8 @@ from django.contrib.sitemaps.views import sitemap
 from django.urls import path
 
 from core.api_views import (
+    AdminHubChangePasswordView,
+    AdminHubChangeUsernameView,
     AdminHubLoginAPIView,
     BrandDetailView,
     BrandListCreateView,
@@ -70,6 +72,8 @@ urlpatterns = [
     path('admin-hub/services/', AdminHubServicesView.as_view(), name='adminhub-services'),
     path('admin-hub/certifications/', AdminHubCertificationsView.as_view(), name='adminhub-certifications'),
     path('admin-hub/logout/', LogoutView.as_view(next_page='adminhub-login'), name='adminhub-logout'),
+    path('api/admin-hub/change-password/', AdminHubChangePasswordView.as_view(), name='api-adminhub-change-password'),
+    path('api/admin-hub/change-username/', AdminHubChangeUsernameView.as_view(), name='api-adminhub-change-username'),
     path('api/admin-hub/mission-vision/', MissionVisionItemListView.as_view(), name='api-adminhub-mission-vision-list'),
     path('api/admin-hub/mission-vision/<int:pk>/', MissionVisionItemDetailView.as_view(), name='api-adminhub-mission-vision-detail'),
     path('api/admin-hub/client-logos/', ClientLogoListCreateView.as_view(), name='api-adminhub-client-logos-list'),
