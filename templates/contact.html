@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% load django_vite %}
 
-{% block title %}Contact Us | Iconic Techno Service{% endblock %}
-{% block meta_description %}Get in touch with Iconic Techno Service for fire safety system enquiries, quotes and support.{% endblock %}
+{% block title %}Contact Us | Iconic Techno Service, Silvassa{% endblock %}
+{% block meta_description %}Get in touch with Iconic Techno Service in Silvassa for fire safety system enquiries, quotes and support.{% endblock %}
 
 {% block extra_head %}
   {% vite_hmr_client %}
@@ -13,7 +13,7 @@
 {% block content %}
 <section class="section" id="contact">
   <div class="container contact">
-    {% include "includes/contact-info.html" %}
+    {% include "includes/contact-info.html" with is_h1=True %}
     {% include "includes/contact-form.html" %}
   </div>
 </section>

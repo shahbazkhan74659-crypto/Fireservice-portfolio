@@ -1,10 +1,21 @@
 import pytest
+from django.core.cache import cache
 
 pytestmark = pytest.mark.django_db
 
 
 class TestAdminHubLoginAPIView:
     url = '/api/admin-hub/login/'
+
+    @pytest.fixture(autouse=True)
+    def _clear_login_lockout_cache(self):
+        # Failure counters are keyed per-IP/per-username in the default
+        # cache, and every Django test Client request shares the same
+        # REMOTE_ADDR ('127.0.0.1') unless overridden — clear before and
+        # after each test so counts from one test don't leak into the next.
+        cache.clear()
+        yield
+        cache.clear()
 
     def test_valid_staff_credentials_log_in(self, client, staff_user):
         res = client.post(
@@ -43,6 +54,84 @@ class TestAdminHubLoginAPIView:
     def test_malformed_json_rejected(self, client):
         res = client.post(self.url, data='not json', content_type='application/json')
         assert res.status_code == 400
+
+    def test_lockout_after_repeated_failures_blocks_further_attempts(self, client, staff_user):
+        for _ in range(5):
+            res = client.post(
+                self.url,
+                {'username': staff_user.username, 'password': 'wrong'},
+                content_type='application/json',
+            )
+            assert res.status_code == 401
+
+        # 6th attempt is blocked by the lockout even with the *correct*
+        # password — the point of a lockout is to stop further guesses, not
+        # just to reject bad ones.
+        res = client.post(
+            self.url,
+            {'username': staff_user.username, 'password': 'pw12345!'},
+            content_type='application/json',
+        )
+        assert res.status_code == 429
+        assert '_auth_user_id' not in client.session
+
+    def test_successful_login_resets_failure_counter(self, client, staff_user):
+        for _ in range(4):
+            res = client.post(
+                self.url,
+                {'username': staff_user.username, 'password': 'wrong'},
+                content_type='application/json',
+            )
+            assert res.status_code == 401
+
+        res = client.post(
+            self.url,
+            {'username': staff_user.username, 'password': 'pw12345!'},
+            content_type='application/json',
+        )
+        assert res.status_code == 200
+
+        # A single wrong attempt right after logging back out is a normal
+        # 401, not a 429 — proving the earlier near-lockout was cleared.
+        client.logout()
+        res = client.post(
+            self.url,
+            {'username': staff_user.username, 'password': 'wrong'},
+            content_type='application/json',
+        )
+        assert res.status_code == 401
+
+    def test_lockout_is_tracked_per_username_independent_of_ip(self, client, staff_user, regular_user):
+        # Fail out staff_user's counter from one IP...
+        for _ in range(5):
+            res = client.post(
+                self.url,
+                {'username': staff_user.username, 'password': 'wrong'},
+                content_type='application/json',
+                REMOTE_ADDR='10.0.0.1',
+            )
+            assert res.status_code == 401
+
+        # ...then confirm staff_user is locked out even from a different IP,
+        # while a different username from that same fresh IP is unaffected.
+        res = client.post(
+            self.url,
+            {'username': staff_user.username, 'password': 'pw12345!'},
+            content_type='application/json',
+            REMOTE_ADDR='10.0.0.2',
+        )
+        assert res.status_code == 429
+
+        res = client.post(
+            self.url,
+            {'username': regular_user.username, 'password': 'pw12345!'},
+            content_type='application/json',
+            REMOTE_ADDR='10.0.0.2',
+        )
+        # regular_user is non-staff, so this is a normal 401 rejection, not
+        # a 429 — proving the lockout above was scoped to staff_user, not a
+        # blanket lockout of the whole cache.
+        assert res.status_code == 401
 
 
 class TestBrandListCreateViewPermissions:

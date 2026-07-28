@@ -1,7 +1,9 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}About Us | Iconic Techno Service{% endblock %}
-{% block meta_description %}Iconic Techno Service is a fire &amp; life-safety systems company delivering design, supply, installation and AMC support across manufacturing, commercial and institutional sites.{% endblock %}
+{% block title %}About Us | Iconic Techno Service, Silvassa{% endblock %}
+{% block meta_description %}Iconic Techno Service is a Silvassa-based fire &amp; life-safety systems company delivering design, supply, installation and AMC support across manufacturing, commercial and institutional sites.{% endblock %}
+{% block og_image %}{{ site_origin }}{% static 'image/brochure-equipment-lineup.jpg' %}{% endblock %}
 
 {% block content %}
 
@@ -11,7 +13,7 @@
     <div class="about-intro__overlay"></div>
     <div class="container section__head about-intro__content">
       <p class="eyebrow">About Us</p>
-      <h2>Engineering Safety Into Every Site We Touch</h2>
+      <h1>Engineering Safety Into Every Site We Touch</h1>
       <p class="section__sub">Iconic Techno Service is an innovation-driven company dedicated to fire safety &mdash; engaged in training, product support and system design, backed by engineering expertise, efficient operations and consistent quality.</p>
     </div>
 

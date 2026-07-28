@@ -1,7 +1,9 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Our Process | Iconic Techno Service{% endblock %}
 {% block meta_description %}From initial inquiry to handover and AMC &mdash; the 7-phase process Iconic Techno Service follows to design, approve, install and commission every fire &amp; life-safety project.{% endblock %}
+{% block og_image %}{{ site_origin }}{% static 'image/process-intro-bg.jpg' %}{% endblock %}
 
 {% block content %}
 
@@ -11,7 +13,7 @@
     <div class="process-intro__overlay"></div>
     <div class="container section__head process-intro__content">
       <p class="eyebrow">Our Process</p>
-      <h2>Our Project Execution Process</h2>
+      <h1>Our Project Execution Process</h1>
       <p class="section__sub">Every project moves through the same seven phases &mdash; from first inquiry to handover and ongoing maintenance &mdash; so nothing gets missed along the way.</p>
     </div>
   </section>

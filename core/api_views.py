@@ -1,6 +1,7 @@
 import json
 
 from django.contrib.auth import authenticate, login
+from django.core.cache import cache
 from django.db import transaction
 from django.db.models import Max
 from django.http import JsonResponse
@@ -61,9 +62,58 @@ class AdminHubLoginAPIView(View):
     user is already attached to the request, so a DRF view here would
     silently skip CSRF checking on the one request (an anonymous login POST)
     where that check actually matters. A plain View still goes through
-    CsrfViewMiddleware normally."""
+    CsrfViewMiddleware normally.
+
+    Brute-force protection: failed attempts are counted per client IP and
+    per attempted username in django.core.cache (no new dependency/model —
+    this project has no other rate-limit infrastructure to extend). Either
+    counter hitting LOCKOUT_THRESHOLD within LOCKOUT_WINDOW_SECONDS blocks
+    further attempts against that IP/username with a 429 until the window
+    expires. Uses whatever CACHES backend is configured (the project has none
+    explicitly set, so this runs on Django's default local-memory cache) —
+    fine for this single-process dev/staging setup, but that cache is
+    per-process, so it would NOT enforce a shared lockout across multiple
+    worker processes/machines in a real multi-process production deployment;
+    a shared backend (e.g. Redis/memcached) would be needed for that.
+    """
+
+    LOCKOUT_THRESHOLD = 5
+    LOCKOUT_WINDOW_SECONDS = 5 * 60  # 5 minutes
+
+    @staticmethod
+    def _client_ip(request):
+        # No reverse-proxy trust is configured anywhere in this project for
+        # client-IP purposes (SECURE_PROXY_SSL_HEADER in prod.py only trusts
+        # X-Forwarded-Proto for SSL detection, not X-Forwarded-For for the
+        # client address) — trusting X-Forwarded-For here would let an
+        # attacker spoof a fresh IP on every request and bypass the lockout
+        # entirely, so REMOTE_ADDR is used unconditionally.
+        return request.META.get('REMOTE_ADDR', '')
+
+    def _locked_out(self, ip_key, user_key):
+        if ip_key and cache.get(ip_key, 0) >= self.LOCKOUT_THRESHOLD:
+            return True
+        if user_key and cache.get(user_key, 0) >= self.LOCKOUT_THRESHOLD:
+            return True
+        return False
+
+    def _record_failure(self, key):
+        if not key:
+            return
+        # add()/incr() rather than get()-then-set() to avoid losing counts to
+        # a read-then-write race between concurrent requests; add() seeds the
+        # key only if it doesn't already exist (first failure in the window).
+        if not cache.add(key, 1, self.LOCKOUT_WINDOW_SECONDS):
+            try:
+                cache.incr(key)
+            except ValueError:
+                # Key expired between the add() and incr() calls — reseed it.
+                cache.set(key, 1, self.LOCKOUT_WINDOW_SECONDS)
 
     def post(self, request):
+        ip = self._client_ip(request)
+        ip_key = f'adminhub_login_fail:ip:{ip}' if ip else None
+
         try:
             data = json.loads(request.body)
         except json.JSONDecodeError:
@@ -71,6 +121,15 @@ class AdminHubLoginAPIView(View):
 
         username = (data.get('username') or '').strip()
         password = data.get('password') or ''
+
+        user_key = f'adminhub_login_fail:user:{username.lower()}' if username else None
+
+        if self._locked_out(ip_key, user_key):
+            return JsonResponse(
+                {'detail': ['Too many failed login attempts. Please try again in a few minutes.']},
+                status=429,
+            )
+
         if not username or not password:
             return JsonResponse({'detail': ['Username and password are required.']}, status=400)
 
@@ -81,7 +140,17 @@ class AdminHubLoginAPIView(View):
         # used to enumerate which usernames exist but merely lack Admin Hub
         # access.
         if user is None or not user.is_staff:
+            self._record_failure(ip_key)
+            self._record_failure(user_key)
             return JsonResponse({'detail': ['Invalid username or password.']}, status=401)
+
+        # Successful login clears both counters so a legitimate user who
+        # mistyped their password a few times isn't left partway toward a
+        # lockout from stale failures.
+        if ip_key:
+            cache.delete(ip_key)
+        if user_key:
+            cache.delete(user_key)
 
         login(request, user)
         return JsonResponse({'detail': ['Logged in.']})

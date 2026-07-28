@@ -1,8 +1,9 @@
 {% extends "base.html" %}
-{% load django_vite %}
+{% load django_vite static %}
 
 {% block title %}Free Consultation | Iconic Techno Service{% endblock %}
 {% block meta_description %}Book a free fire safety consultation with Iconic Techno Service.{% endblock %}
+{% block og_image %}{{ site_origin }}{% static 'image/consultation-intro-bg.jpg' %}{% endblock %}
 
 {% block extra_head %}
   {% vite_hmr_client %}
@@ -15,7 +16,7 @@
     <div class="consultation-intro__bg"></div>
     <div class="consultation-intro__overlay"></div>
     <div class="container section__head consultation-intro__content">
-      <h2>Consultation from our Expert</h2>
+      <h1>Consultation from our Expert</h1>
       <p class="section__sub">Get a free, no-obligation consultation with our fire safety specialists to assess your site's needs and recommend the right protection plan.</p>
     </div>
   </section>

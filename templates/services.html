@@ -1,8 +1,13 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Our Services | Iconic Techno Service{% endblock %}
-{% block meta_description %}Fire detection, suppression, extinguishers, safety equipment and more &mdash; the full range of fire &amp; life-safety services Iconic Techno Service designs, supplies and maintains.{% endblock %}
+{% block title %}Our Services | Iconic Techno Service, Silvassa{% endblock %}
+{% block meta_description %}Fire detection, suppression, extinguishers, safety equipment and more &mdash; the full range of fire &amp; life-safety services Iconic Techno Service designs, supplies and maintains for clients in Silvassa and beyond.{% endblock %}
+{% block og_image %}{{ site_origin }}{% static 'image/services-intro-bg.jpg' %}{% endblock %}
+
+{% block extra_head %}
+  <script type="application/ld+json">{{ services_jsonld|safe }}</script>
+{% endblock %}
 
 {% block content %}
 
@@ -12,7 +17,7 @@
     <div class="services-intro__overlay"></div>
     <div class="container section__head services-intro__content">
       <p class="eyebrow">Our Services</p>
-      <h2>Complete Fire &amp; Life-Safety Solutions</h2>
+      <h1>Complete Fire &amp; Life-Safety Solutions</h1>
       <p class="section__sub">One partner for detection, suppression, extinguishers, safety equipment and electrical work &mdash; sales, installation and ongoing service, all under one roof.</p>
     </div>
   </section>

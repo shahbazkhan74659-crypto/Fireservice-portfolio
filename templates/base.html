@@ -1,19 +1,54 @@
-{% load static %}<!DOCTYPE html>
+{% load static seo_extras %}<!DOCTYPE html>
 <html lang="en" class="no-js">
 <head>
 <meta charset="UTF-8">
 <script>document.documentElement.className='js';</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{% block title %}Iconic Techno Service | Total Fire Protection for Life &amp; Property{% endblock %}</title>
-<meta name="description" content="{% block meta_description %}Iconic Techno Service designs, installs and maintains complete fire safety systems for residential, commercial, industrial and institutional clients.{% endblock %}">
+{% capture as page_title %}{% block title %}Iconic Techno Service | Total Fire Protection for Life &amp; Property in Silvassa{% endblock %}{% endcapture %}
+{% capture as page_description %}{% block meta_description %}Iconic Techno Service designs, installs and maintains complete fire safety systems for residential, commercial, industrial and institutional clients in Silvassa and across Dadra &amp; Nagar Haveli.{% endblock %}{% endcapture %}
+{% capture as og_title %}{% block og_title %}{{ page_title }}{% endblock %}{% endcapture %}
+{% capture as og_description %}{% block og_description %}{{ page_description }}{% endblock %}{% endcapture %}
+{% capture as og_image %}{% block og_image %}{{ og_image_default }}{% endblock %}{% endcapture %}
+<title>{{ page_title }}</title>
+<meta name="description" content="{{ page_description }}">
+<link rel="canonical" href="{{ canonical_url }}">
 <link rel="apple-touch-icon" sizes="180x180" href="{% static 'favicon/apple-touch-icon.png' %}">
 <link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicon/favicon-32x32.png' %}">
 <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon/favicon-16x16.png' %}">
 <link rel="icon" href="{% static 'favicon/favicon.ico' %}">
 <link rel="manifest" href="{% static 'favicon/site.webmanifest' %}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+<!-- ===== Open Graph / Twitter Card =====
+     og_title/og_description/og_image default to the page's own
+     title/meta_description/logo (via the capture tag vars above) so
+     every page gets correct social-share metadata even without an
+     explicit override; About/Clientele/Consultation/Services/Process
+     override the og_image block with their own real intro photo. -->
+<meta property="og:site_name" content="Iconic Techno Service">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="en_IN">
+<meta property="og:url" content="{{ canonical_url }}">
+<meta property="og:title" content="{{ og_title }}">
+<meta property="og:description" content="{{ og_description }}">
+<meta property="og:image" content="{{ og_image }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ og_title }}">
+<meta name="twitter:description" content="{{ og_description }}">
+<meta name="twitter:image" content="{{ og_image }}">
+
+<!-- ===== Structured data (JSON-LD) =====
+     LocalBusiness reuses the same NAP/logo/Instagram data already shown in
+     the topbar/footer (see core/context_processors.py) — no fabricated
+     ratings/hours/reviews. BreadcrumbList is one level deep (Home > this
+     page), skipped entirely on Home itself (see breadcrumb_jsonld's own
+     None default for the 'home' url name). -->
+<script type="application/ld+json">{{ local_business_jsonld|safe }}</script>
+{% if breadcrumb_jsonld %}<script type="application/ld+json">{{ breadcrumb_jsonld|safe }}</script>{% endif %}
+
 {% block extra_head %}{% endblock %}
 </head>
 <body>

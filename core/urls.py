@@ -1,4 +1,5 @@
 from django.contrib.auth.views import LogoutView
+from django.contrib.sitemaps.views import sitemap
 from django.urls import path
 
 from core.api_views import (
@@ -22,6 +23,7 @@ from core.api_views import (
     SiteSettingDetailView,
     SurveyRequestCreateView,
 )
+from core.sitemaps import StaticViewSitemap
 from core.views import (
     AboutView,
     AdminHubCertificationsView,
@@ -37,12 +39,17 @@ from core.views import (
     ContactPageView,
     HomeView,
     ProcessView,
+    RobotsTxtView,
     ServicesView,
     SurveyPageView,
 )
 
+sitemaps = {'static': StaticViewSitemap()}
+
 urlpatterns = [
     path('', HomeView.as_view(), name='home'),
+    path('robots.txt', RobotsTxtView.as_view(), name='robots-txt'),
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
     path('about/', AboutView.as_view(), name='about'),
     path('clientele/', ClienteleView.as_view(), name='clientele'),
     path('services/', ServicesView.as_view(), name='services'),

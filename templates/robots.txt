@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /admin-hub/
+Disallow: /api/
+
+Sitemap: http{% if request.is_secure %}s{% endif %}://{{ request.get_host }}/sitemap.xml

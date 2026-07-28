@@ -1,11 +1,13 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Clientele | Iconic Techno Service{% endblock %}
 {% block meta_description %}Organizations across oil &amp; gas, BFSI, real estate, retail and manufacturing trust Iconic Techno Service for end-to-end fire &amp; life-safety systems.{% endblock %}
+{% block og_image %}{{ site_origin }}{% static 'image/clientele-intro-bg.jpg' %}{% endblock %}
 
 {% block content %}
 
-  {% include "includes/clientele-intro.html" %}
+  {% include "includes/clientele-intro.html" with is_h1=True %}
 
   {% include "includes/clientelestats.html" %}
 

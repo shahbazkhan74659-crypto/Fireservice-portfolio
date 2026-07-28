@@ -1,7 +1,7 @@
 <!-- ===== Contact info (Get in Touch) ===== -->
 <div class="contact__info">
   <p class="eyebrow">{{ eyebrow|default:"Get in Touch" }}</p>
-  <h2>{{ heading|default:"Contact Us" }}</h2>
+  {% if is_h1 %}<h1>{{ heading|default:"Contact Us" }}</h1>{% else %}<h2>{{ heading|default:"Contact Us" }}</h2>{% endif %}
   <p>{{ lead|default:"Have a question or need a quote? Reach out and our team will get back to you within one business day." }}</p>
 
   <div class="contact__item">{% include "includes/address.html" %}</div>

@@ -1,3 +1,4 @@
+import json
 from datetime import timedelta
 
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
@@ -66,6 +67,18 @@ class StaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
         )
 
 
+class RobotsTxtView(TemplateView):
+    # Plain-text robots.txt — allows every public route, disallows Django's
+    # own /admin/, the custom Admin Hub (/admin-hub/, already noindex'd via
+    # adminhub/base.html's <meta name="robots"> tag, but crawlers should
+    # ideally never even request it), and the API-only /api/ surface. The
+    # Sitemap: line is built from the real request host rather than a
+    # hardcoded domain, since no production domain is configured anywhere
+    # in this project yet (ALLOWED_HOSTS is env-driven, currently empty).
+    template_name = 'robots.txt'
+    content_type = 'text/plain'
+
+
 class HomeView(TemplateView):
     template_name = 'home.html'
 
@@ -92,8 +105,47 @@ class ServicesView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['services'] = Service.objects.all()
+        services = Service.objects.all()
+        context['services'] = services
         context['fire_risk_items'] = FireRiskAssessmentItem.objects.all()
+
+        # Service/hasOfferCatalog JSON-LD, built from the real Service rows
+        # already looped in the page's own .grid--services (not fabricated
+        # copy) — schema.org's guidance is hasOfferCatalog (not makesOffer,
+        # which is for an Organization linking out to a catalog) when the
+        # catalog is declared directly on a Service entity. Built with
+        # json.dumps() rather than template-side {{ }} interpolation since
+        # service.name/description are admin-editable free text (see
+        # website.Service) that could contain quotes/ampersands Django's
+        # HTML auto-escaping would otherwise corrupt inside a JSON string.
+        origin = 'https' if self.request.is_secure() else 'http'
+        origin = f'{origin}://{self.request.get_host()}'
+        context['services_jsonld'] = json.dumps({
+            '@context': 'https://schema.org',
+            '@type': 'Service',
+            'name': 'Fire & Life-Safety Systems',
+            'provider': {
+                '@type': 'LocalBusiness',
+                'name': 'Iconic Techno Service',
+                'url': f'{origin}/',
+            },
+            'areaServed': 'Silvassa',
+            'hasOfferCatalog': {
+                '@type': 'OfferCatalog',
+                'name': 'Fire & Life-Safety Services',
+                'itemListElement': [
+                    {
+                        '@type': 'Offer',
+                        'itemOffered': {
+                            '@type': 'Service',
+                            'name': service.name,
+                            'description': service.description,
+                        },
+                    }
+                    for service in services
+                ],
+            },
+        })
         return context
 
 

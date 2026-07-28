@@ -155,7 +155,7 @@ a.instagram-icon:hover{color:var(--red-700);}
 .hero{position:relative;color:#fff;padding-top:110px;overflow:hidden;}
 .hero__bg{
   position:absolute;inset:0;
-  background:url(../image/bg-image.png) center/cover no-repeat;
+  background:url(../image/bg-image.jpg) center/cover no-repeat;
 }
 .hero__overlay{
   position:absolute;inset:0;
@@ -198,7 +198,7 @@ a.instagram-icon:hover{color:var(--red-700);}
 .about-intro__overlay{position:absolute;inset:0;z-index:0;background:linear-gradient(180deg, rgba(16,18,21,.6) 0%, rgba(16,18,21,.78) 55%, rgba(16,18,21,.94) 100%);}
 .about-intro__content{position:relative;z-index:1;margin-bottom:140px;}
 .about-intro__content .eyebrow{color:var(--amber-500);}
-.about-intro__content h2{color:#fff;}
+.about-intro__content h1{color:#fff;}
 .about-intro__content .section__sub{color:#e7e5e2;}
 
 /* ============ Consultation intro (photo backdrop) ============ */
@@ -206,7 +206,7 @@ a.instagram-icon:hover{color:var(--red-700);}
 .consultation-intro__bg{position:absolute;inset:0;z-index:0;background:url(../image/consultation-intro-bg.jpg) center/cover no-repeat;}
 .consultation-intro__overlay{position:absolute;inset:0;z-index:0;background:linear-gradient(180deg, rgba(16,18,21,.6) 0%, rgba(16,18,21,.78) 55%, rgba(16,18,21,.94) 100%);}
 .consultation-intro__content{position:relative;z-index:1;margin:0 auto;}
-.consultation-intro__content h2{color:#fff;}
+.consultation-intro__content h1{color:#fff;}
 .consultation-intro__content .section__sub{color:#e7e5e2;}
 
 /* ============ About ============ */
@@ -326,7 +326,7 @@ a.instagram-icon:hover{color:var(--red-700);}
 .clientele-intro__overlay{position:absolute;inset:0;z-index:0;background:linear-gradient(180deg, rgba(16,18,21,.6) 0%, rgba(16,18,21,.78) 55%, rgba(16,18,21,.94) 100%);}
 .clientele-intro__content{position:relative;z-index:1;}
 .clientele-intro__content .eyebrow{color:var(--amber-500);}
-.clientele-intro__content h2{color:#fff;}
+.clientele-intro__content h1,.clientele-intro__content h2{color:#fff;}
 .clientele-intro__content .section__sub{color:#e7e5e2;}
 
 .clientele-intro--no-bg{min-height:0;background:var(--tint);}
@@ -340,7 +340,7 @@ a.instagram-icon:hover{color:var(--red-700);}
 .services-intro__overlay{position:absolute;inset:0;z-index:0;background:linear-gradient(180deg, rgba(16,18,21,.6) 0%, rgba(16,18,21,.78) 55%, rgba(16,18,21,.94) 100%);}
 .services-intro__content{position:relative;z-index:1;}
 .services-intro__content .eyebrow{color:var(--amber-500);}
-.services-intro__content h2{color:#fff;}
+.services-intro__content h1{color:#fff;}
 .services-intro__content .section__sub{color:#e7e5e2;}
 
 /* ============ Process intro backdrop ============ */
@@ -349,7 +349,7 @@ a.instagram-icon:hover{color:var(--red-700);}
 .process-intro__overlay{position:absolute;inset:0;z-index:0;background:linear-gradient(180deg, rgba(16,18,21,.6) 0%, rgba(16,18,21,.78) 55%, rgba(16,18,21,.94) 100%);}
 .process-intro__content{position:relative;z-index:1;}
 .process-intro__content .eyebrow{color:var(--amber-500);}
-.process-intro__content h2{color:#fff;}
+.process-intro__content h1{color:#fff;}
 .process-intro__content .section__sub{color:#e7e5e2;}
 
 /* ============ Clientele ============ */
