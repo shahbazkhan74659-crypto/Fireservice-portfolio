@@ -24,6 +24,8 @@ from rest_framework.views import APIView
 
 from core import rate_limit
 from core.serializers import (
+    ChangeEmailRequestSerializer,
+    ChangeEmailVerifyOTPSerializer,
     ChangePasswordSerializer,
     ChangeUsernameSerializer,
     ForgotPasswordEmailSerializer,
@@ -209,6 +211,52 @@ For the security of your administrative account:
 - If you did not request a password reset, please ignore this email immediately and review your account activity.
 
 This request was generated from the ICONIC TECHNO SERVICE Admin Panel. If the code expires before use, you can submit a new password reset request from the login page.
+
+Maintaining the security of administrative access is critical to protecting website data, customer information, and system operations.
+
+Thank you for helping us keep your account secure.
+
+Best regards,
+
+ICONIC TECHNO SERVICE
+System Security Team
+📧 iconictechnoservice.in@gmail.com
+🌐 www.its.com
+
+---
+
+ICONIC TECHNO SERVICE
+Admin Security • System Protection • Trusted Access
+
+This is an automated security email. Please do not reply directly to this message."""
+
+
+def _email_change_otp_body(otp, new_email):
+    return f"""Dear Administrator,
+
+We received a request to update the email address on your ICONIC TECHNO SERVICE admin account to {new_email}.
+
+To confirm you own this address, please use the following One-Time Password (OTP):
+
+---
+
+Admin Verification Code
+
+OTP: {otp}
+
+This verification code is valid for 5 minutes and can be used only once.
+
+---
+
+Important Security Notice
+
+For the security of your administrative account:
+
+- Do not share this OTP with anyone.
+- ICONIC TECHNO SERVICE will never ask for your OTP through phone calls, SMS, or email.
+- If you did not request this change, please ignore this email and review your account activity.
+
+This request was generated from the ICONIC TECHNO SERVICE Admin Panel. If the code expires before use, you can restart the email change from Account Settings.
 
 Maintaining the security of administrative access is critical to protecting website data, customer information, and system operations.
 
@@ -433,6 +481,163 @@ class AdminHubChangePasswordView(APIView):
         # would otherwise log this same request's session out immediately.
         update_session_auth_hash(request, request.user)
         return Response({'detail': ['Password changed successfully.']})
+
+
+class AdminHubChangeEmailRequestOTPView(APIView):
+    """Step 1 of Account Settings' "Change Email": sends a 6-digit OTP to the
+    *new* address the admin typed (not their current registered email) to
+    prove they actually control it before it's ever saved. A regular DRF
+    APIView is fine here (unlike the anonymous Forgot Password/Login views
+    above) — the request is already authenticated by the time this runs, so
+    SessionAuthentication.enforce_csrf() actually runs and CSRF is correctly
+    enforced (same reasoning as AdminHubChangePasswordView).
+
+    Also doubles as the "resend code" endpoint — same URL, same cooldown
+    applies to a resend as to the original request, mirroring
+    AdminHubForgotPasswordRequestOTPView's own convention.
+    """
+
+    permission_classes = [IsAdminUser]
+
+    OTP_TTL_SECONDS = 5 * 60  # must match AdminHubChangeEmailVerifyOTPView's own TTL
+    RESEND_COOLDOWN_SECONDS = 60
+    LOCKOUT_THRESHOLD = 5
+    LOCKOUT_WINDOW_SECONDS = 15 * 60
+
+    def post(self, request):
+        serializer = ChangeEmailRequestSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        new_email = serializer.validated_data['new_email']
+
+        user = request.user
+        ip_key = f'adminhub_email_change_request:ip:{rate_limit.client_ip(request)}'
+        user_key = f'adminhub_email_change_request:user:{user.pk}'
+        if rate_limit.is_locked_out(ip_key, user_key, threshold=self.LOCKOUT_THRESHOLD):
+            return Response(
+                {'detail': ['Too many requests. Please try again in a few minutes.']}, status=429,
+            )
+
+        cooldown_key = f'adminhub_email_change_cooldown:{user.pk}'
+        if cache.get(cooldown_key):
+            return Response(
+                {'detail': ['Please wait a minute before requesting another code.']}, status=429,
+            )
+
+        otp = f'{secrets.randbelow(1_000_000):06d}'
+        # Keyed by user pk (not the new email) and stores the target email
+        # alongside the code, so verify can confirm the OTP was actually
+        # issued for the address being submitted, not a stale one left over
+        # from an earlier attempt with a different address.
+        cache.set(
+            f'adminhub_email_change_otp:{user.pk}',
+            {'otp': otp, 'attempts': 0, 'email': new_email},
+            self.OTP_TTL_SECONDS,
+        )
+        cache.set(cooldown_key, True, self.RESEND_COOLDOWN_SECONDS)
+
+        send_mail(
+            'ICONIC TECHNO SERVICE — Confirm Your New Admin Email',
+            _email_change_otp_body(otp, new_email),
+            settings.DEFAULT_FROM_EMAIL,
+            [new_email],
+            fail_silently=False,
+        )
+
+        return Response({'detail': ['A verification code has been sent to the new email address.']})
+
+
+class AdminHubChangeEmailVerifyOTPView(APIView):
+    """Step 2 — a correct OTP against the *new* email is what actually saves
+    it onto the user's account; there's no separate save step after this
+    succeeds, matching how the checkbox's green tick is meant to mean
+    "confirmed and already saved," not just "verified, now click Save."
+
+    The address being replaced is stashed in the cache for REVERT_TTL_SECONDS
+    so Account Settings' Cancel button — or closing the modal any way other
+    than Done — can restore it via AdminHubChangeEmailRevertView without
+    needing a second OTP round-trip to the *old* address just to undo
+    something that was never meant to be final yet."""
+
+    permission_classes = [IsAdminUser]
+
+    OTP_TTL_SECONDS = 5 * 60  # must match AdminHubChangeEmailRequestOTPView's own TTL
+    OTP_MAX_ATTEMPTS = 5
+    LOCKOUT_THRESHOLD = 5
+    LOCKOUT_WINDOW_SECONDS = 5 * 60
+    REVERT_TTL_SECONDS = 30 * 60  # generous window covering a realistic Account Settings session
+
+    def post(self, request):
+        serializer = ChangeEmailVerifyOTPSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        new_email = serializer.validated_data['new_email']
+        otp = serializer.validated_data['otp']
+
+        user = request.user
+        ip_key = f'adminhub_email_change_verify:ip:{rate_limit.client_ip(request)}'
+        if rate_limit.is_locked_out(ip_key, threshold=self.LOCKOUT_THRESHOLD):
+            return Response(
+                {'detail': ['Too many attempts. Please request a new code and try again later.']}, status=429,
+            )
+
+        otp_key = f'adminhub_email_change_otp:{user.pk}'
+        entry = cache.get(otp_key)
+        if entry is None:
+            return Response({'detail': ['This code has expired. Please request a new one.']}, status=400)
+
+        if entry['email'].lower() != new_email.lower() or entry['otp'] != otp:
+            rate_limit.record_failure(ip_key, self.LOCKOUT_WINDOW_SECONDS)
+            entry['attempts'] += 1
+            if entry['attempts'] >= self.OTP_MAX_ATTEMPTS:
+                cache.delete(otp_key)
+                return Response(
+                    {'detail': ['Too many incorrect attempts. Please request a new code.']}, status=400,
+                )
+            cache.set(otp_key, entry, self.OTP_TTL_SECONDS)
+            return Response({'detail': ['Incorrect code.']}, status=400)
+
+        # OTP is single-use — consumed as soon as it's checked correctly, so
+        # it can't be replayed to reconfirm/overwrite the email a second time.
+        cache.delete(otp_key)
+        rate_limit.clear(ip_key)
+
+        # Stashed before overwriting so a same-session Cancel can restore it
+        # (see AdminHubChangeEmailRevertView) — each successful verify
+        # overwrites this with whatever was active immediately before it, so
+        # an abandoned session's stale key is harmless: it's only ever read
+        # by a revert call the frontend gates on "did this session's Email
+        # section actually run"; it doesn't reappear as a live email value on
+        # its own.
+        cache.set(f'adminhub_email_revert:{user.pk}', user.email, self.REVERT_TTL_SECONDS)
+
+        user.email = new_email
+        user.save(update_fields=['email'])
+
+        return Response({'detail': ['Email confirmed and updated.'], 'email': user.email})
+
+
+class AdminHubChangeEmailRevertView(APIView):
+    """Restores whatever email AdminHubChangeEmailVerifyOTPView most recently
+    overwrote for this user, without requiring a fresh OTP — reverting to an
+    address that was already the account's own confirmed email needs no new
+    proof of ownership. Only ever called by the frontend when Account
+    Settings' Cancel button (or closing the modal any other way) is used
+    after the Email section actually changed something this session; if
+    nothing did, there's no pending key and this is a harmless no-op."""
+
+    permission_classes = [IsAdminUser]
+
+    def post(self, request):
+        user = request.user
+        key = f'adminhub_email_revert:{user.pk}'
+        previous_email = cache.get(key)
+        if previous_email is None:
+            return Response({'detail': ['Nothing to revert.']})
+
+        user.email = previous_email
+        user.save(update_fields=['email'])
+        cache.delete(key)
+
+        return Response({'detail': ['Email change reverted.'], 'email': user.email})
 
 
 class MissionVisionItemListView(ListAPIView):

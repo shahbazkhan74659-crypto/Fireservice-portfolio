@@ -8,10 +8,17 @@ interface Props {
   /** Extra class appended to the dialog box, e.g. 'modal--lead' for the
    * larger size variant used by the lead-detail and Forgot Password modals. */
   className?: string
+  /** Hides the top-right "×" close button — used by Account Settings, whose
+   * three sections (username/password/email) apply changes immediately as
+   * each is saved, so the only sanctioned ways out are an explicit Cancel
+   * (which reverts everything applied this session) or Done (which locks it
+   * in). Escape and overlay-click still call onClose either way — the
+   * caller is expected to treat that identically to Cancel. */
+  hideCloseButton?: boolean
   children: ReactNode
 }
 
-export default function Modal({ open, onClose, title, className, children }: Props) {
+export default function Modal({ open, onClose, title, className, hideCloseButton, children }: Props) {
   useEffect(() => {
     if (!open) return
     function handleKey(e: KeyboardEvent) {
@@ -48,7 +55,9 @@ export default function Modal({ open, onClose, title, className, children }: Pro
   return createPortal(
     <div className="modal-overlay" onClick={handleOverlayClick}>
       <div className={className ? `modal ${className}` : 'modal'} role="dialog" aria-modal="true" aria-label={title}>
-        <button type="button" className="modal__close" onClick={onClose} aria-label="Close">&times;</button>
+        {!hideCloseButton && (
+          <button type="button" className="modal__close" onClick={onClose} aria-label="Close">&times;</button>
+        )}
         {title && <h3 className="modal__title">{title}</h3>}
         {children}
       </div>

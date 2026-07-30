@@ -61,6 +61,29 @@ class ChangePasswordSerializer(serializers.Serializer):
         return user
 
 
+class ChangeEmailRequestSerializer(serializers.Serializer):
+    """Step 1 of Account Settings' "Change Email" flow — validates the new
+    address's format and uniqueness before an OTP is ever sent to it. Doesn't
+    write anything itself; the address is only saved once the OTP is
+    verified (see AdminHubChangeEmailVerifyOTPView)."""
+    new_email = serializers.EmailField()
+
+    def validate_new_email(self, value):
+        current_user = self.context['request'].user
+        if value.lower() == (current_user.email or '').lower():
+            raise serializers.ValidationError('This is already your registered email.')
+
+        User = get_user_model()
+        if User.objects.exclude(pk=current_user.pk).filter(is_staff=True, email__iexact=value).exists():
+            raise serializers.ValidationError('That email is already registered to another admin account.')
+        return value
+
+
+class ChangeEmailVerifyOTPSerializer(serializers.Serializer):
+    new_email = serializers.EmailField()
+    otp = serializers.RegexField(r'^\d{6}$', error_messages={'invalid': 'Enter the 6-digit code.'})
+
+
 class ForgotPasswordEmailSerializer(serializers.Serializer):
     """Used by both the "send code" and "resend code" requests — just format
     validation. Whether the email actually matches a real staff account is

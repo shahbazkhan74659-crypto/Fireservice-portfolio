@@ -9,7 +9,7 @@ import AccountSettingsButton from './AccountSettingsButton'
 document.querySelectorAll<HTMLElement>('[data-change-password-root]').forEach((container) => {
   createRoot(container).render(
     <StrictMode>
-      <AccountSettingsButton />
+      <AccountSettingsButton initialUsername={container.dataset.username ?? ''} />
     </StrictMode>,
   )
 })

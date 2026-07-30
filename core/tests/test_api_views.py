@@ -1,7 +1,22 @@
+import re
+
 import pytest
+from django.core import mail
 from django.core.cache import cache
 
 pytestmark = pytest.mark.django_db
+
+OTP_RE = re.compile(r'\b(\d{6})\b')
+
+
+def _latest_otp():
+    """Pulls the OTP straight out of the last sent email, same convention as
+    core/tests/test_forgot_password.py's own helper — exercises the same
+    path a real admin would rather than reaching into cache directly."""
+    body = mail.outbox[-1].body
+    match = OTP_RE.search(body)
+    assert match, f'no 6-digit code found in email body: {body!r}'
+    return match.group(1)
 
 
 class TestAdminHubLoginAPIView:
@@ -269,6 +284,215 @@ class TestAdminHubChangePasswordView:
         staff_user.refresh_from_db()
         assert staff_user.check_password('A-New-Strong-Pass1!')
         assert not staff_user.check_password('pw12345!')
+
+
+class TestAdminHubChangeEmailRequestOTPView:
+    url = '/api/admin-hub/change-email/request-otp/'
+
+    @pytest.fixture(autouse=True)
+    def _clear_cache(self):
+        cache.clear()
+        mail.outbox.clear()
+        yield
+        cache.clear()
+
+    def test_anonymous_rejected(self, client):
+        res = client.post(self.url, {'new_email': 'new@example.com'}, content_type='application/json')
+        assert res.status_code in (401, 403)
+        assert len(mail.outbox) == 0
+
+    def test_non_staff_rejected(self, client, regular_user):
+        client.force_login(regular_user)
+        res = client.post(self.url, {'new_email': 'new@example.com'}, content_type='application/json')
+        assert res.status_code == 403
+        assert len(mail.outbox) == 0
+
+    def test_valid_new_email_sends_otp_to_new_address_not_current(self, admin_client, staff_user):
+        res = admin_client.post(self.url, {'new_email': 'new-address@example.com'}, content_type='application/json')
+        assert res.status_code == 200
+        assert len(mail.outbox) == 1
+        assert mail.outbox[0].to == ['new-address@example.com']
+        assert _latest_otp()
+
+    def test_same_as_current_email_rejected(self, admin_client, staff_user):
+        res = admin_client.post(self.url, {'new_email': staff_user.email}, content_type='application/json')
+        assert res.status_code == 400
+        assert len(mail.outbox) == 0
+
+    def test_email_already_used_by_another_staff_account_rejected(self, admin_client, django_user_model):
+        django_user_model.objects.create_user('other', 'taken@example.com', 'pw12345!', is_staff=True)
+        res = admin_client.post(self.url, {'new_email': 'taken@example.com'}, content_type='application/json')
+        assert res.status_code == 400
+        assert len(mail.outbox) == 0
+
+    def test_malformed_email_rejected(self, admin_client):
+        res = admin_client.post(self.url, {'new_email': 'not-an-email'}, content_type='application/json')
+        assert res.status_code == 400
+        assert len(mail.outbox) == 0
+
+    def test_resend_within_cooldown_is_blocked(self, admin_client):
+        res1 = admin_client.post(self.url, {'new_email': 'new-address@example.com'}, content_type='application/json')
+        assert res1.status_code == 200
+
+        res2 = admin_client.post(self.url, {'new_email': 'new-address@example.com'}, content_type='application/json')
+        assert res2.status_code == 429
+        assert len(mail.outbox) == 1
+
+
+class TestAdminHubChangeEmailVerifyOTPView:
+    REQUEST_URL = '/api/admin-hub/change-email/request-otp/'
+    VERIFY_URL = '/api/admin-hub/change-email/verify/'
+    NEW_EMAIL = 'new-address@example.com'
+
+    @pytest.fixture(autouse=True)
+    def _clear_cache(self):
+        cache.clear()
+        mail.outbox.clear()
+        yield
+        cache.clear()
+
+    def test_anonymous_rejected(self, client):
+        res = client.post(self.VERIFY_URL, {'new_email': self.NEW_EMAIL, 'otp': '123456'}, content_type='application/json')
+        assert res.status_code in (401, 403)
+
+    def test_non_staff_rejected(self, client, regular_user):
+        client.force_login(regular_user)
+        res = client.post(self.VERIFY_URL, {'new_email': self.NEW_EMAIL, 'otp': '123456'}, content_type='application/json')
+        assert res.status_code == 403
+
+    def test_correct_otp_saves_new_email_and_keeps_session_alive(self, admin_client, staff_user):
+        admin_client.post(self.REQUEST_URL, {'new_email': self.NEW_EMAIL}, content_type='application/json')
+        otp = _latest_otp()
+
+        res = admin_client.post(self.VERIFY_URL, {'new_email': self.NEW_EMAIL, 'otp': otp}, content_type='application/json')
+        assert res.status_code == 200
+        assert res.json()['email'] == self.NEW_EMAIL
+        assert '_auth_user_id' in admin_client.session
+
+        staff_user.refresh_from_db()
+        assert staff_user.email == self.NEW_EMAIL
+
+    def test_wrong_otp_rejected_and_email_unchanged(self, admin_client, staff_user):
+        admin_client.post(self.REQUEST_URL, {'new_email': self.NEW_EMAIL}, content_type='application/json')
+        real_otp = _latest_otp()
+        wrong_otp = '000000' if real_otp != '000000' else '111111'
+
+        res = admin_client.post(self.VERIFY_URL, {'new_email': self.NEW_EMAIL, 'otp': wrong_otp}, content_type='application/json')
+        assert res.status_code == 400
+        staff_user.refresh_from_db()
+        assert staff_user.email != self.NEW_EMAIL
+
+    def test_otp_is_single_use(self, admin_client):
+        admin_client.post(self.REQUEST_URL, {'new_email': self.NEW_EMAIL}, content_type='application/json')
+        otp = _latest_otp()
+
+        res1 = admin_client.post(self.VERIFY_URL, {'new_email': self.NEW_EMAIL, 'otp': otp}, content_type='application/json')
+        assert res1.status_code == 200
+
+        res2 = admin_client.post(self.VERIFY_URL, {'new_email': self.NEW_EMAIL, 'otp': otp}, content_type='application/json')
+        assert res2.status_code == 400
+
+    def test_otp_issued_for_a_different_email_is_rejected(self, admin_client):
+        # Proves the cached OTP entry's own stored email is checked, not just
+        # the code — an OTP sent to address A can't be replayed to confirm
+        # address B even if the 6 digits happen to be typed correctly.
+        admin_client.post(self.REQUEST_URL, {'new_email': self.NEW_EMAIL}, content_type='application/json')
+        otp = _latest_otp()
+
+        res = admin_client.post(
+            self.VERIFY_URL, {'new_email': 'someone-else@example.com', 'otp': otp}, content_type='application/json',
+        )
+        assert res.status_code == 400
+
+    def test_no_otp_requested_yet_rejected(self, admin_client):
+        res = admin_client.post(self.VERIFY_URL, {'new_email': self.NEW_EMAIL, 'otp': '123456'}, content_type='application/json')
+        assert res.status_code == 400
+
+    def test_five_wrong_attempts_invalidate_the_otp_even_with_correct_code_after(self, admin_client, staff_user):
+        admin_client.post(self.REQUEST_URL, {'new_email': self.NEW_EMAIL}, content_type='application/json')
+        real_otp = _latest_otp()
+        wrong_otp = '000000' if real_otp != '000000' else '111111'
+
+        for i in range(5):
+            res = admin_client.post(
+                self.VERIFY_URL, {'new_email': self.NEW_EMAIL, 'otp': wrong_otp}, content_type='application/json',
+                REMOTE_ADDR=f'10.0.1.{i}',  # spread across IPs so only the OTP's own attempt cap kicks in
+            )
+            assert res.status_code == 400
+
+        res = admin_client.post(
+            self.VERIFY_URL, {'new_email': self.NEW_EMAIL, 'otp': real_otp}, content_type='application/json',
+            REMOTE_ADDR='10.0.1.99',
+        )
+        assert res.status_code == 400
+        staff_user.refresh_from_db()
+        assert staff_user.email != self.NEW_EMAIL
+
+    def test_malformed_otp_rejected(self, admin_client):
+        res = admin_client.post(self.VERIFY_URL, {'new_email': self.NEW_EMAIL, 'otp': 'abc'}, content_type='application/json')
+        assert res.status_code == 400
+
+
+class TestAdminHubChangeEmailRevertView:
+    REQUEST_URL = '/api/admin-hub/change-email/request-otp/'
+    VERIFY_URL = '/api/admin-hub/change-email/verify/'
+    REVERT_URL = '/api/admin-hub/change-email/revert/'
+    NEW_EMAIL = 'new-address@example.com'
+
+    @pytest.fixture(autouse=True)
+    def _clear_cache(self):
+        cache.clear()
+        mail.outbox.clear()
+        yield
+        cache.clear()
+
+    def test_anonymous_rejected(self, client):
+        res = client.post(self.REVERT_URL, {}, content_type='application/json')
+        assert res.status_code in (401, 403)
+
+    def test_non_staff_rejected(self, client, regular_user):
+        client.force_login(regular_user)
+        res = client.post(self.REVERT_URL, {}, content_type='application/json')
+        assert res.status_code == 403
+
+    def test_nothing_to_revert_is_a_harmless_no_op(self, admin_client, staff_user):
+        original_email = staff_user.email
+        res = admin_client.post(self.REVERT_URL, {}, content_type='application/json')
+        assert res.status_code == 200
+        staff_user.refresh_from_db()
+        assert staff_user.email == original_email
+
+    def test_revert_restores_the_previous_email_without_a_fresh_otp(self, admin_client, staff_user):
+        original_email = staff_user.email
+
+        admin_client.post(self.REQUEST_URL, {'new_email': self.NEW_EMAIL}, content_type='application/json')
+        otp = _latest_otp()
+        admin_client.post(self.VERIFY_URL, {'new_email': self.NEW_EMAIL, 'otp': otp}, content_type='application/json')
+        staff_user.refresh_from_db()
+        assert staff_user.email == self.NEW_EMAIL
+
+        res = admin_client.post(self.REVERT_URL, {}, content_type='application/json')
+        assert res.status_code == 200
+        assert res.json()['email'] == original_email
+        staff_user.refresh_from_db()
+        assert staff_user.email == original_email
+
+    def test_revert_is_single_use(self, admin_client, staff_user):
+        admin_client.post(self.REQUEST_URL, {'new_email': self.NEW_EMAIL}, content_type='application/json')
+        otp = _latest_otp()
+        admin_client.post(self.VERIFY_URL, {'new_email': self.NEW_EMAIL, 'otp': otp}, content_type='application/json')
+
+        admin_client.post(self.REVERT_URL, {}, content_type='application/json')
+        staff_user.refresh_from_db()
+        reverted_email = staff_user.email
+
+        # A second revert call has nothing left pending — it's a no-op, not
+        # a further change (e.g. reverting a second time to some even older
+        # value that doesn't exist).
+        res = admin_client.post(self.REVERT_URL, {}, content_type='application/json')
+        assert res.status_code == 200
+        staff_user.refresh_from_db()
+        assert staff_user.email == reverted_email
 
 
 class TestBrandListCreateViewPermissions:

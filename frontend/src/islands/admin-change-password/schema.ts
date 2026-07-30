@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { passwordStrengthSchema, PASSWORD_REQUIREMENTS_HINT } from '../../lib/validators'
+import { emailSchema, passwordStrengthSchema, PASSWORD_REQUIREMENTS_HINT } from '../../lib/validators'
 
 export { PASSWORD_REQUIREMENTS_HINT }
 
@@ -37,3 +37,15 @@ export const changePasswordSchema = z
 
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>
 export type ChangePasswordErrors = Partial<Record<keyof ChangePasswordInput, string>>
+
+export const changeEmailRequestSchema = z.object({
+  new_email: emailSchema,
+})
+export type ChangeEmailRequestInput = z.infer<typeof changeEmailRequestSchema>
+export type ChangeEmailRequestErrors = Partial<Record<keyof ChangeEmailRequestInput, string>>
+
+export const changeEmailOtpSchema = z.object({
+  otp: z.string().trim().regex(/^\d{6}$/, 'Enter the 6-digit code.'),
+})
+export type ChangeEmailOtpInput = z.infer<typeof changeEmailOtpSchema>
+export type ChangeEmailOtpErrors = Partial<Record<keyof ChangeEmailOtpInput, string>>

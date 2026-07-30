@@ -3,6 +3,9 @@ from django.contrib.sitemaps.views import sitemap
 from django.urls import path
 
 from core.api_views import (
+    AdminHubChangeEmailRequestOTPView,
+    AdminHubChangeEmailRevertView,
+    AdminHubChangeEmailVerifyOTPView,
     AdminHubChangePasswordView,
     AdminHubChangeUsernameView,
     AdminHubForgotPasswordRequestOTPView,
@@ -82,6 +85,9 @@ urlpatterns = [
     path('admin-hub/logout/', LogoutView.as_view(next_page='adminhub-login'), name='adminhub-logout'),
     path('api/admin-hub/change-password/', AdminHubChangePasswordView.as_view(), name='api-adminhub-change-password'),
     path('api/admin-hub/change-username/', AdminHubChangeUsernameView.as_view(), name='api-adminhub-change-username'),
+    path('api/admin-hub/change-email/request-otp/', AdminHubChangeEmailRequestOTPView.as_view(), name='api-adminhub-change-email-request-otp'),
+    path('api/admin-hub/change-email/verify/', AdminHubChangeEmailVerifyOTPView.as_view(), name='api-adminhub-change-email-verify'),
+    path('api/admin-hub/change-email/revert/', AdminHubChangeEmailRevertView.as_view(), name='api-adminhub-change-email-revert'),
     path('api/admin-hub/mission-vision/', MissionVisionItemListView.as_view(), name='api-adminhub-mission-vision-list'),
     path('api/admin-hub/mission-vision/<int:pk>/', MissionVisionItemDetailView.as_view(), name='api-adminhub-mission-vision-detail'),
     path('api/admin-hub/client-logos/', ClientLogoListCreateView.as_view(), name='api-adminhub-client-logos-list'),

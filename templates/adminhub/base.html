@@ -38,7 +38,7 @@
              .nav__footer (margin-top:auto) — hidden above 1150px, where the
              copy in .adminhub-header__actions below is shown instead. -->
         <div class="nav__footer">
-          <div data-change-password-root></div>
+          <div data-change-password-root data-username="{{ request.user.username }}"></div>
           <form method="post" action="{% url 'adminhub-logout' %}">
             {% csrf_token %}
             <button type="submit" class="btn btn--outline">Log Out</button>

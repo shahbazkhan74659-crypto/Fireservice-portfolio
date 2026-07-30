@@ -815,6 +815,28 @@ a.whatsapp-icon:hover{color:#1ebe5b;}
 .modal__body{color:var(--ink-600);margin-bottom:20px;}
 .admin-modal-divider{border:none;border-top:1px solid var(--line);margin:24px 0;}
 
+/* ---- Account Settings "Change Email" checkbox + OTP-confirmed tick ---- */
+.account-email-section .field--checkbox{
+  display:flex;align-items:center;gap:8px;margin-bottom:20px;cursor:pointer;
+}
+.field--checkbox input[type="checkbox"]{width:auto;margin:0;accent-color:var(--red-600);cursor:pointer;}
+.field--checkbox span{font-size:.85rem;font-weight:600;color:var(--ink-800);}
+.email-confirmed-tick{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:20px;height:20px;border-radius:50%;
+  background:#1f9d55;color:#fff;font-size:.7rem;font-weight:700;line-height:1;
+}
+
+/* Account Settings modal's Cancel/Done footer — replaces the modal's usual
+   top-right "×" (see Modal's hideCloseButton prop) since this modal applies
+   each section's change immediately but only *finalizes* it once Done is
+   clicked; Cancel (or Escape/overlay-click, treated the same) reverts
+   whatever was applied this session instead. */
+.account-settings-footer{
+  display:flex;justify-content:flex-end;gap:12px;
+  margin-top:28px;padding-top:20px;border-top:1px solid var(--line);
+}
+
 /* ---- Lead detail modal — deliberately larger than the standard confirm-dialog
    .modal, per the request for a "giant" pop-up presenting the full message ---- */
 .modal--lead{max-width:680px;padding:36px;}
