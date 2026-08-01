@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // Scroll reveal for cards/sections
-  const revealTargets = document.querySelectorAll('.card, .process__step, .why, .about__media, .about__text, .logo-card, .cert-card, .phase, .product-card');
+  const revealTargets = document.querySelectorAll('.card, .process__step, .why, .about__media, .about__text, .logo-card, .cert-card, .phase, .product-card, .about__badge');
   revealTargets.forEach(el => el.classList.add('reveal'));
 
   const observer = new IntersectionObserver((entries) => {
@@ -109,5 +109,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }, { threshold: 0.4 });
   const statsSection = document.querySelector('.stats');
   if (statsSection) statsObserver.observe(statsSection);
+
+  // Hero background slideshow (home page only — querySelectorAll returns
+  // an empty list on every other page, so this is a harmless no-op there)
+  const heroBgSlides = document.querySelectorAll('.hero__bg-slide');
+  if (heroBgSlides.length > 1) {
+    let heroBgIndex = 0;
+    setInterval(() => {
+      heroBgSlides[heroBgIndex].classList.remove('is-active');
+      heroBgIndex = (heroBgIndex + 1) % heroBgSlides.length;
+      heroBgSlides[heroBgIndex].classList.add('is-active');
+    }, 5000);
+  }
 
 });

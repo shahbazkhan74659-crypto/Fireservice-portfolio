@@ -24,8 +24,12 @@
 
   {% include "includes/consultationstats.html" %}
 
-  <section class="section">
-    <div class="container">
+  {% include "includes/brands.html" %}
+
+  <section class="section services-cards">
+    {% include "includes/hero-bg-slideshow.html" %}
+    <div class="services-cards__overlay"></div>
+    <div class="container services-cards__content">
       <div class="grid grid--services">
         {% for service in services %}
         <div class="card">
@@ -39,12 +43,12 @@
   </section>
 
   <!-- ===== Fire Risk Assessment ===== -->
-  <section class="section section--tint">
+  <section class="section section--dark">
     <div class="container">
       <div class="section__head">
-        <p class="eyebrow">Fire Risk Assessment</p>
-        <h2>Know Exactly Where You Stand</h2>
-        <p class="section__sub">Whether you already have a fire risk assessment in place or need one from scratch, keeping it under regular review is essential to staying compliant. Our audits take the following into consideration:</p>
+        <p class="eyebrow eyebrow--light">Fire Risk Assessment</p>
+        <h2 class="text-light">Know Exactly Where You Stand</h2>
+        <p class="section__sub section__sub--light">Whether you already have a fire risk assessment in place or need one from scratch, keeping it under regular review is essential to staying compliant. Our audits take the following into consideration:</p>
       </div>
 
       <ul class="check-list check-list--columns">
@@ -56,8 +60,6 @@
   </section>
 
   {% include "includes/products.html" %}
-
-  {% include "includes/brands.html" %}
 
   {% include "includes/client-logos.html" with heading_eyebrow="Our Clients" heading_title="Trusted By Organizations Across Industries" %}
 

@@ -1,10 +1,14 @@
-{% load static %}
+{% load static website_extras %}
+{% get_services as services_list %}
 <!-- ===== Who We Are ===== -->
 <section class="section section--tint">
   <div class="container about">
     <div class="about__media">
-      <img class="about__img" src="{% static 'image/about-fire-alarm-system.jpg' %}" alt="Fire alarm control panels and system accessories">
-      <img class="about__pic about__pic--tl" src="{% static 'image/about-fire-extinguishers.jpg' %}" alt="Range of fire extinguishers">
+      <img class="about__img" src="{% static 'image/about-fire-alarm-system.jpg' %}" alt="Iconic Techno Service team designing, installing and servicing fire protection systems">
+      <div class="about__badge">
+        <strong>{{ services_list|length }}</strong>
+        <span>Services</span>
+      </div>
       {% include "includes/map.html" %}
     </div>
     <div class="about__text">
