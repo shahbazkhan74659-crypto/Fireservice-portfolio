@@ -111,33 +111,7 @@
 
 <section class="section">
   <div class="container">
-    <div class="section__head">
-      <h2>Leads — Daily Breakdown (Last 30 Days)</h2>
-    </div>
-    <div class="cert-table-wrap">
-      <table class="cert-table">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Survey Requests</th>
-            <th>Contact Messages</th>
-            <th>Consultation Requests</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for day in daily_breakdown %}
-          <tr>
-            <td class="cert-table__meta">{{ day.date|date:'M j, Y' }}</td>
-            <td>{{ day.survey }}</td>
-            <td>{{ day.contact }}</td>
-            <td>{{ day.consultation }}</td>
-            <td class="cert-table__name">{{ day.total }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+    {% include "adminhub/breakdown-table.html" %}
   </div>
 </section>
 {% endblock %}
@@ -173,5 +147,64 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 });
+
+// Previous/Next month on the daily-breakdown table: fetch() the same URL
+// (?month=YYYY-MM) instead of a full page navigation, so the table content
+// fades out/in smoothly instead of the whole page reloading. The server
+// (AdminHubHomeView.get) returns just the #breakdownTable fragment when it
+// sees the X-Requested-With header set below.
+(function () {
+  var FADE_MS = 180;
+
+  function bindBreakdownNav(root) {
+    root.querySelectorAll('.breakdown-nav__btn').forEach(function (link) {
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        loadMonth(link.getAttribute('href'), true);
+      });
+    });
+  }
+
+  function loadMonth(url, pushHistory) {
+    var current = document.getElementById('breakdownTable');
+    if (!current) return;
+    current.classList.add('is-loading');
+    fetch(url, { headers: { 'X-Requested-With': 'fetch' } })
+      .then(function (res) {
+        if (!res.ok) throw new Error('Request failed');
+        return res.text();
+      })
+      .then(function (html) {
+        // Give the fade-out transition time to actually play before
+        // swapping content, so the change never reads as an abrupt cut.
+        window.setTimeout(function () {
+          var temp = document.createElement('div');
+          temp.innerHTML = html.trim();
+          var fresh = temp.firstElementChild;
+          current.replaceWith(fresh);
+          fresh.classList.add('is-loading');
+          // Force layout so the browser registers the faded-out starting
+          // state before the class is removed — otherwise it skips
+          // straight to fully visible with no fade-in.
+          void fresh.offsetWidth;
+          fresh.classList.remove('is-loading');
+          bindBreakdownNav(fresh);
+          if (pushHistory) history.pushState(null, '', url);
+        }, FADE_MS);
+      })
+      .catch(function () {
+        // Fetch failed (offline, etc.) — fall back to a real navigation
+        // rather than leaving the table stuck faded out.
+        window.location.href = url;
+      });
+  }
+
+  var initial = document.getElementById('breakdownTable');
+  if (initial) bindBreakdownNav(initial);
+
+  window.addEventListener('popstate', function () {
+    loadMonth(window.location.pathname + window.location.search, false);
+  });
+})();
 </script>
 {% endblock %}

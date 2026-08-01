@@ -1,0 +1,47 @@
+{% comment %}
+Leads — Daily Breakdown table + month nav on Admin Home. Rendered both by
+the normal full-page load (home.html) and, as a bare fragment, by
+AdminHubHomeView.get() when the Previous/Next buttons fetch() a new month —
+same template either way, so the two code paths can never drift apart.
+{% endcomment %}
+<div id="breakdownTable">
+  <div class="section__head">
+    <h2>Leads — Daily Breakdown — {{ breakdown_month_label }}</h2>
+  </div>
+  <div class="cert-table-wrap">
+    <table class="cert-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Survey Requests</th>
+          <th>Contact Messages</th>
+          <th>Consultation Requests</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for day in daily_breakdown %}
+        <tr>
+          <td class="cert-table__meta">{{ day.date|date:'M j, Y' }}</td>
+          <td>{{ day.survey }}</td>
+          <td>{{ day.contact }}</td>
+          <td>{{ day.consultation }}</td>
+          <td class="cert-table__name">{{ day.total }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="cert-table__desc">No leads in {{ breakdown_month_label }}.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <nav class="breakdown-nav" aria-label="Change month">
+    <a href="?month={{ breakdown_prev_month }}" class="btn btn--outline btn--icon breakdown-nav__btn" aria-label="Previous month">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </a>
+    {% if breakdown_next_month %}
+    <a href="?month={{ breakdown_next_month }}" class="btn btn--outline btn--icon breakdown-nav__btn" aria-label="Next month">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    </a>
+    {% endif %}
+  </nav>
+</div>

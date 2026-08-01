@@ -1,12 +1,13 @@
+import calendar
 import json
-from datetime import timedelta
+from datetime import date, datetime, timedelta
 
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.views import redirect_to_login
 from django.db.models import Count
 from django.db.models.functions import TruncDate
 from django.http import Http404, JsonResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -38,6 +39,15 @@ CONTENT_MODELS = (
 
 TREND_DAYS = 30
 CHART_W, CHART_H = 720, 160
+
+
+def _shift_month(first_of_month, delta):
+    """Return the first-of-month date `delta` calendar months away from
+    `first_of_month` (also assumed to already be a first-of-month date)."""
+    month_index = first_of_month.month - 1 + delta
+    year = first_of_month.year + month_index // 12
+    month = month_index % 12 + 1
+    return date(year, month, 1)
 
 
 class StaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
@@ -300,16 +310,69 @@ class AdminHubHomeView(StaffRequiredMixin, TemplateView):
 
         # Detailed per-type daily breakdown for the table shown below the
         # dashboard — newest day first, unlike the chart's oldest-first trend.
+        # Unlike the chart/meters above (always a fixed trailing 30-day
+        # window), this table is paginated by real calendar month via a
+        # ?month=YYYY-MM query param, so older leads aren't stuck outside any
+        # viewable window — the Previous/Next arrows below the table just
+        # link to this same page with a different month.
+        current_month_start = today.replace(day=1)
+        try:
+            selected_month_start = datetime.strptime(
+                self.request.GET.get('month', ''), '%Y-%m'
+            ).date().replace(day=1)
+        except ValueError:
+            selected_month_start = current_month_start
+        # A future month has nothing to show and would break the "Next only
+        # appears once you've gone back" rule below — clamp rather than 404,
+        # since this only happens from a hand-edited URL.
+        if selected_month_start > current_month_start:
+            selected_month_start = current_month_start
+
+        days_in_selected_month = calendar.monthrange(selected_month_start.year, selected_month_start.month)[1]
+        month_end = selected_month_start.replace(day=days_in_selected_month)
+        # Don't list days that haven't happened yet when the selected month
+        # is the current one.
+        last_visible_day = min(month_end, today)
+
+        month_daily_counts = {}
+        month_daily_by_type = {}
+        for label, model, _ in LEAD_MODELS:
+            rows = (
+                model.objects.filter(
+                    created_at__date__gte=selected_month_start,
+                    created_at__date__lte=last_visible_day,
+                    resolved=False,
+                )
+                .annotate(day=TruncDate('created_at'))
+                .values('day')
+                .annotate(n=Count('id'))
+            )
+            for row in rows:
+                month_daily_counts[row['day']] = month_daily_counts.get(row['day'], 0) + row['n']
+                month_daily_by_type.setdefault(row['day'], {})[label] = row['n']
+
+        days_span = (last_visible_day - selected_month_start).days + 1
         context['daily_breakdown'] = [
             {
-                'date': today - timedelta(days=i),
-                'survey': daily_by_type.get(today - timedelta(days=i), {}).get('Survey Requests', 0),
-                'contact': daily_by_type.get(today - timedelta(days=i), {}).get('Contact Messages', 0),
-                'consultation': daily_by_type.get(today - timedelta(days=i), {}).get('Consultation Requests', 0),
-                'total': daily_counts.get(today - timedelta(days=i), 0),
+                'date': last_visible_day - timedelta(days=i),
+                'survey': month_daily_by_type.get(last_visible_day - timedelta(days=i), {}).get('Survey Requests', 0),
+                'contact': month_daily_by_type.get(last_visible_day - timedelta(days=i), {}).get('Contact Messages', 0),
+                'consultation': month_daily_by_type.get(last_visible_day - timedelta(days=i), {}).get('Consultation Requests', 0),
+                'total': month_daily_counts.get(last_visible_day - timedelta(days=i), 0),
             }
-            for i in range(TREND_DAYS)
+            for i in range(days_span)
         ]
+        context['breakdown_month_label'] = selected_month_start.strftime('%B %Y')
+        # Left/Previous has no lower bound and is always shown, regardless of
+        # whether that month turns out to have any leads in it — the table's
+        # own empty state covers that case. Right/Next is only ever shown
+        # once the admin has navigated to a month before the current one,
+        # since there's nothing meaningful to view ahead of "now".
+        context['breakdown_prev_month'] = _shift_month(selected_month_start, -1).strftime('%Y-%m')
+        context['breakdown_next_month'] = (
+            _shift_month(selected_month_start, 1).strftime('%Y-%m')
+            if selected_month_start < current_month_start else None
+        )
 
         activity = []
         for label, model, admin_name in LEAD_MODELS:
@@ -339,6 +402,21 @@ class AdminHubHomeView(StaffRequiredMixin, TemplateView):
         context['recent_activity'] = activity[:3]
 
         return context
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        # The Previous/Next month buttons on the daily-breakdown table
+        # fetch() this same URL (?month=YYYY-MM) rather than doing a full
+        # page navigation, so the change can fade in smoothly instead of a
+        # hard reload — see breakdown-table.html's inline script. Reusing
+        # the full get_context_data() (rather than splitting out a
+        # cheaper month-only path) keeps this view's context-building in
+        # one place; the extra dashboard-wide queries are inexpensive and
+        # this is low-traffic, staff-only usage, not worth the added
+        # complexity of a second, leaner context method.
+        if request.headers.get('X-Requested-With') == 'fetch':
+            return render(request, 'adminhub/breakdown-table.html', context)
+        return self.render_to_response(context)
 
 
 class AdminHubLeadsView(StaffRequiredMixin, TemplateView):

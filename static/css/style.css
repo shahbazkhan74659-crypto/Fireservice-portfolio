@@ -195,6 +195,10 @@ a.whatsapp-icon:hover{color:#1ebe5b;}
 .nav a.active::after{width:100%;}
 
 .header__actions{display:flex;align-items:center;gap:12px;}
+/* Drawer-only "Get Brochure", below the link list — hidden here (desktop,
+   where .nav is just an inline row of links); shown at the drawer
+   breakpoint below. */
+.nav__brochure-link{display:none;}
 /* Logo shown above the link list inside the mobile drawer — a normal-flow
    .nav child, so it's positioned automatically without fighting the fixed
    header's own stacking (see the drawer media query below for why it's
@@ -261,6 +265,11 @@ a.whatsapp-icon:hover{color:#1ebe5b;}
 }
 .hero__lead{font-size:1.1rem;color:#e7e5e2;max-width:600px;}
 .hero__cta{display:flex;gap:16px;flex-wrap:wrap;margin-top:28px;}
+/* Hidden on desktop (its own Free Consultation button already lives in the
+   header) — shown only at the 600px breakpoint below, the same one that
+   turns .hero__cta into a column, so this slots in as a natural third
+   stacked button rather than needing its own separate placement logic. */
+.hero__cta-mobile-only{display:none;}
 
 .stats{position:relative;z-index:2;background:var(--ink-900);border-top:1px solid rgba(255,255,255,.08);}
 .stats__grid{display:grid;grid-template-columns:repeat(4,1fr);padding:26px 24px;}
@@ -679,6 +688,39 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
   .cert-table__preview a::after{opacity:1;}
 }
 .cert-table__action{width:1%;white-space:nowrap;}
+/* Prev/Next month buttons below the Home dashboard's daily-breakdown table.
+   justify-content:space-between pins Previous to the table's left edge and
+   Next to its right edge, mirroring the table's own corners rather than
+   sitting side by side. Left/Previous always renders (no bound on how far
+   back an admin can look); when Right/Next isn't in the DOM at all (current
+   month — see AdminHubHomeView), space-between still leaves Previous
+   correctly pinned left with a lone flex item. */
+.breakdown-nav{display:flex;justify-content:space-between;margin-top:20px;}
+/* Leads-page table pagination (Survey/Contact/Consultation/Resolved) —
+   centered Prev/status/Next, unlike .breakdown-nav's corner-pinned arrows,
+   since both ends are always meaningful here (Prev/Next disable at the
+   bounds rather than one of them disappearing). */
+.lead-pagination{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:20px;}
+.lead-pagination__status{font-size:.9rem;font-weight:600;color:var(--ink-600);}
+.lead-pagination__prev:disabled,.lead-pagination__next:disabled{opacity:.35;cursor:not-allowed;}
+.lead-pagination__prev:disabled:hover,.lead-pagination__next:disabled:hover{background:transparent;color:var(--ink-800);}
+/* #breakdownTable is swapped out wholesale (not diffed) whenever a
+   Previous/Next click fetch()es a new month, so this transition targets the
+   element itself rather than any child — see breakdown-table.html's script. */
+#breakdownTable{opacity:1;transition:opacity .18s ease;}
+#breakdownTable.is-loading{opacity:0;}
+/* Same fade treatment on the Leads-page tables' Prev/Next (leads.html's
+   script), even though that pagination is pure client-side (rows already in
+   the DOM, just re-hidden) rather than a fetch() swap like #breakdownTable
+   above — the fade is what actually reads as "smooth" to the user, not the
+   network round-trip. [data-lead-panel] gets the same treatment for the
+   Survey/Contact/Consultation/Resolved tab buttons themselves, not just
+   pagination within one tab. */
+.cert-table-wrap,[data-lead-panel]{opacity:1;transition:opacity .18s ease;}
+.cert-table-wrap.is-loading,[data-lead-panel].is-loading{opacity:0;}
+@media (prefers-reduced-motion:reduce){
+  #breakdownTable,.cert-table-wrap,[data-lead-panel]{transition:none;}
+}
 
 /* ============ Brochure ============ */
 .brochure-icon{display:block;width:180px;margin:0 auto;color:var(--red-600);transition:transform .2s ease;}
@@ -1045,6 +1087,20 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
   .header__actions{position:relative;z-index:101;}
   .header__actions .btn--outline,
   .header__actions .btn--primary{display:none;}
+  /* .nav a's ancestor-class+element selector ((0,1,1) specificity) would
+     otherwise win over a plain .btn/.btn--outline pairing ((0,1,0) each) —
+     same cascade gotcha as elsewhere in this file — so this is styled as
+     its own explicit button look scoped under .nav rather than composed
+     from the shared .btn classes. */
+  .nav .nav__brochure-link{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    margin-top:12px;padding:12px 22px;border-radius:999px;
+    border:2px solid var(--red-600);color:var(--red-600);
+    font-weight:600;font-size:.95rem;
+  }
+  .nav .nav__brochure-link:hover{background:var(--red-600);color:#fff;}
+  .nav .nav__brochure-link::after{display:none;}
+  .nav .nav__brochure-link .icon{width:18px;height:18px;flex-shrink:0;}
   /* Logo row pinned to the top of the drawer, roughly level with the fixed
      close (X) button that floats above via .header__actions — .nav's own
      padding-top was shrunk from 100px to 24px (above) so this sits right at
@@ -1086,6 +1142,15 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
   }
   .nav__footer form{margin:0;}
   .nav__footer .btn{width:100%;}
+  /* Username reads as a plain trailing label under Account Settings/Log Out
+     otherwise — centering it and giving it its own thin top divider (on top
+     of .nav__footer's own gap:14px) marks it as a separate "who's logged in"
+     line rather than one more stacked action. */
+  .nav__footer .adminhub-header__user{
+    text-align:center;
+    border-top:1px solid var(--line);
+    padding-top:14px;
+  }
 }
 @media (max-width:1024px){
   .grid--services{grid-template-columns:repeat(2,1fr);}
@@ -1120,7 +1185,12 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
   .about__pic{width:150px;}
   .about__pic--tl{top:-16px;left:-16px;}
   .about__pic--br{bottom:-16px;right:-16px;}
-  .about__badge{top:-16px;left:-16px;padding:18px 22px;}
+  /* top pulled up further than the -16px used elsewhere for this same
+     corner-badge positioning (.about__pic--tl above) — the mobile photo is
+     much shorter than its desktop crop, so -16px let the badge's bottom
+     edge sink down over the people's faces instead of just clipping the
+     photo's corner. */
+  .about__badge{top:-48px;left:-16px;padding:18px 22px;}
   .about__badge strong{font-size:1.8rem;}
   .grid--services,.grid--why,.grid--mission,.cert-grid{grid-template-columns:1fr;}
   .product-grid{grid-template-columns:repeat(2,1fr);}
@@ -1151,6 +1221,7 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
   .hero-brand__name{font-size:1.4rem;}
   .hero-brand__tagline{font-size:.75rem;}
   .hero__cta{flex-direction:column;}
+  .hero__cta-mobile-only{display:inline-flex;}
   .footer__grid{grid-template-columns:1fr;}
   .footer__services-grid{grid-template-columns:1fr;}
   .cc-meter{width:84px;height:84px;}
@@ -1166,24 +1237,26 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
      phones (~360px), on top of the modal-overlay's own 24px padding. */
   .modal--lead{padding:24px;}
   /* .cert-table (Leads, the Home dashboard's daily-breakdown table, Admin
-     Hub Certifications) was overflowing its .cert-table-wrap on phones —
-     6 columns of 16px/20px-padded cells is wider than any phone viewport,
-     so the wrap's overflow-x:auto let it scroll sideways with only
-     Received/View left on screen and Name/Contact/Address/Problem pushed
-     off the left edge entirely. Full detail is already one tap away via
-     the View button's modal, so the long free-text columns are dropped
-     here rather than reflowed into stacked cards; padding/the action
-     button are also shrunk so the remaining columns comfortably fit
-     instead of needing to scroll at all. */
-  .cert-table-wrap{overflow-x:hidden;}
-  .cert-table th,.cert-table td{padding:10px 12px;}
-  .cert-table__col--hide-mobile{display:none;}
-  .cert-table__action .btn{padding:8px 14px;font-size:.82rem;}
-  /* white-space:nowrap (desktop default, plenty of room) suppresses every
-     line-break opportunity, including the forced breaks overflow-wrap:anywhere
-     would otherwise add — so "Received"/"Resolved" (e.g. "1 hour, 4 minutes
-     ago") kept forcing the whole table wider than the phone viewport even
-     after the fixes above. Letting it wrap here is what actually lets the
-     column shrink to fit. */
-  .cert-table__meta{white-space:normal;}
+     Hub Certifications) is wider than any phone viewport once every column
+     is shown at a readable size. A prior pass handled this by hiding
+     columns and shrinking padding so everything crammed into the viewport
+     with no scrolling — but overflow-wrap:anywhere (base rule above) then
+     let the browser break header/cell text mid-word to fit the squeezed
+     columns, reading as vertically-stacked letters instead of words.
+     Reverted per explicit request: keep every column and let the table
+     scroll horizontally instead of compressing or hiding content.
+     .cert-table-wrap keeps its base overflow-x:auto (no override needed),
+     and every cell is forced to a single line (white-space:nowrap,
+     overriding overflow-wrap:anywhere) so content determines the table's
+     real width rather than being squeezed into the viewport.
+     Mixing white-space:normal on .cert-table__desc (an earlier attempt)
+     with nowrap siblings in the same row confused the browser's auto
+     table-layout column-width calculation — the Address/Problem columns
+     both collapsed to near-zero assigned width while their text still
+     rendered at its natural, unclipped size (table cells don't clip
+     overflow by default), so the two columns' text visually overlapped
+     each other instead of sitting side by side. Keeping every column
+     nowrap, with no per-column exception, is what makes auto table-layout
+     assign each column its own non-overlapping natural width. */
+  .cert-table th,.cert-table td{padding:12px 16px;white-space:nowrap;}
 }

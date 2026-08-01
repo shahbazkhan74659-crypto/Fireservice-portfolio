@@ -33,7 +33,7 @@
         </thead>
         <tbody>
           {% for lead in survey_requests %}
-          <tr id="lead-surveyrequest-{{ lead.pk }}">
+          <tr id="lead-surveyrequest-{{ lead.pk }}" class="lead-row">
             <td class="cert-table__name">{{ lead.name }}</td>
             <td>{{ lead.email }}</td>
             <td class="cert-table__desc cert-table__col--hide-mobile">{{ lead.address|truncatechars:60 }}</td>
@@ -57,6 +57,7 @@
         </tbody>
       </table>
     </div>
+    {% include "adminhub/lead-pagination.html" %}
   </div>
 </section>
 
@@ -76,7 +77,7 @@
         </thead>
         <tbody>
           {% for lead in contact_messages %}
-          <tr id="lead-contactmessage-{{ lead.pk }}">
+          <tr id="lead-contactmessage-{{ lead.pk }}" class="lead-row">
             <td class="cert-table__name">{{ lead.name }}</td>
             <td>{{ lead.phone }}<br>{{ lead.email }}</td>
             <td class="cert-table__meta cert-table__col--hide-mobile">{{ lead.get_service_display }}</td>
@@ -100,6 +101,7 @@
         </tbody>
       </table>
     </div>
+    {% include "adminhub/lead-pagination.html" %}
   </div>
 </section>
 
@@ -117,7 +119,7 @@
         </thead>
         <tbody>
           {% for lead in consultation_requests %}
-          <tr id="lead-consultationrequest-{{ lead.pk }}">
+          <tr id="lead-consultationrequest-{{ lead.pk }}" class="lead-row">
             <td class="cert-table__name">{{ lead.name }}</td>
             <td>{{ lead.phone }}</td>
             <td class="cert-table__meta">{{ lead.created_at|timesince }} ago</td>
@@ -136,6 +138,7 @@
         </tbody>
       </table>
     </div>
+    {% include "adminhub/lead-pagination.html" %}
   </div>
 </section>
 
@@ -154,7 +157,7 @@
         </thead>
         <tbody>
           {% for lead in resolved_requests %}
-          <tr>
+          <tr class="lead-row">
             <td class="cert-table__name">{{ lead.name }}</td>
             <td class="cert-table__meta cert-table__col--hide-mobile">{{ lead.type }}</td>
             <td class="cert-table__meta">{{ lead.received|timesince }} ago</td>
@@ -180,6 +183,7 @@
         </tbody>
       </table>
     </div>
+    {% include "adminhub/lead-pagination.html" %}
   </div>
 </section>
 
@@ -214,8 +218,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
   var tabs = document.querySelectorAll('.lead-tab');
   var panels = document.querySelectorAll('[data-lead-panel]');
+  var TAB_FADE_MS = 180;
 
-  function showTab(tabName) {
+  function applyTab(tabName) {
     tabs.forEach(function (tab) {
       var active = tab.dataset.tab === tabName;
       tab.classList.toggle('is-active', active);
@@ -224,10 +229,102 @@ document.addEventListener('DOMContentLoaded', function () {
     panels.forEach(function (panel) {
       panel.hidden = panel.dataset.leadPanel !== tabName;
     });
+    var shown = document.querySelector('[data-lead-panel="' + tabName + '"]');
+    if (shown) {
+      // Force a reflow between adding/removing .is-loading so the browser
+      // registers the faded-out starting state first — otherwise it skips
+      // straight to fully visible with no fade-in (same technique as the
+      // Home dashboard's breakdown-table swap).
+      shown.classList.add('is-loading');
+      void shown.offsetWidth;
+      shown.classList.remove('is-loading');
+    }
+  }
+
+  // `animate` is false for the initial tab shown on page load — nothing's
+  // been seen yet, so there's nothing to fade from.
+  function showTab(tabName, animate) {
+    var current = Array.prototype.filter.call(panels, function (p) { return !p.hidden; })[0];
+    if (!animate || !current || current.dataset.leadPanel === tabName) {
+      applyTab(tabName);
+      return;
+    }
+    current.classList.add('is-loading');
+    window.setTimeout(function () {
+      current.classList.remove('is-loading');
+      applyTab(tabName);
+    }, TAB_FADE_MS);
   }
 
   tabs.forEach(function (tab) {
-    tab.addEventListener('click', function () { showTab(tab.dataset.tab); });
+    tab.addEventListener('click', function () { showTab(tab.dataset.tab, true); });
+  });
+
+  // ---- Pagination (10 rows/page) for every Leads table. Every row is
+  // already server-rendered — this just hides all but the current page's
+  // rows client-side, the same "toggle visibility, don't re-fetch" approach
+  // the tab-switching above already uses. Not applied to the Admin Hub
+  // Certifications table (a separate React island, out of scope here).
+  // The fade (via .cert-table-wrap's .is-loading, same class/timing as the
+  // Home dashboard's daily-breakdown table) is purely cosmetic here — there's
+  // no fetch to wait on, the delay just gives the swap somewhere to happen
+  // instead of an instant jump-cut.
+  var LEAD_PAGE_SIZE = 10;
+  var LEAD_PAGE_FADE_MS = 180;
+  var leadPagination = {};
+
+  function paginationTotalPages(state) {
+    return Math.max(1, Math.ceil(state.rows.length / LEAD_PAGE_SIZE));
+  }
+
+  function renderPagination(state) {
+    var pages = paginationTotalPages(state);
+    if (state.page > pages) state.page = pages;
+    state.rows.forEach(function (row, i) {
+      row.hidden = (Math.floor(i / LEAD_PAGE_SIZE) + 1) !== state.page;
+    });
+    state.nav.hidden = state.rows.length === 0 || pages <= 1;
+    state.status.textContent = 'Page ' + state.page + ' of ' + pages;
+    state.prevBtn.disabled = state.page <= 1;
+    state.nextBtn.disabled = state.page >= pages;
+  }
+
+  // `animate` is false for the initial render and the deep-link jump below —
+  // both happen before the page has been shown to the user, so there's
+  // nothing to visibly fade between yet.
+  function goToPage(state, page, animate) {
+    var target = Math.min(Math.max(1, page), paginationTotalPages(state));
+    if (target === state.page) return;
+    if (!animate) {
+      state.page = target;
+      renderPagination(state);
+      return;
+    }
+    state.wrap.classList.add('is-loading');
+    window.setTimeout(function () {
+      state.page = target;
+      renderPagination(state);
+      state.wrap.classList.remove('is-loading');
+    }, LEAD_PAGE_FADE_MS);
+  }
+
+  panels.forEach(function (panel) {
+    var tbody = panel.querySelector('tbody');
+    var nav = panel.querySelector('.lead-pagination');
+    if (!tbody || !nav) return;
+    var state = {
+      rows: Array.prototype.slice.call(tbody.querySelectorAll('.lead-row')),
+      page: 1,
+      wrap: panel.querySelector('.cert-table-wrap'),
+      nav: nav,
+      status: nav.querySelector('.lead-pagination__status'),
+      prevBtn: nav.querySelector('.lead-pagination__prev'),
+      nextBtn: nav.querySelector('.lead-pagination__next'),
+    };
+    leadPagination[panel.dataset.leadPanel] = state;
+    state.prevBtn.addEventListener('click', function () { goToPage(state, state.page - 1, true); });
+    state.nextBtn.addEventListener('click', function () { goToPage(state, state.page + 1, true); });
+    renderPagination(state);
   });
 
   var initialTab = 'survey';
@@ -236,13 +333,24 @@ document.addEventListener('DOMContentLoaded', function () {
   if (LEAD_TYPE_TO_TAB[hashType]) {
     initialTab = LEAD_TYPE_TO_TAB[hashType];
   }
-  showTab(initialTab);
+  showTab(initialTab, false);
   if (window.location.hash) {
     var target = document.querySelector(window.location.hash);
-    if (target) target.scrollIntoView();
+    if (target) {
+      // The row a Recent Activity link points to may be paginated onto a
+      // later page — jump there first, or it'd stay hidden even after
+      // scrollIntoView().
+      var targetState = leadPagination[initialTab];
+      if (targetState) {
+        var rowIndex = targetState.rows.indexOf(target);
+        if (rowIndex !== -1) goToPage(targetState, Math.floor(rowIndex / LEAD_PAGE_SIZE) + 1, false);
+      }
+      target.scrollIntoView();
+    }
   }
 
   var overlay = document.getElementById('leadModalOverlay');
+  var modalBox = overlay.querySelector('.modal');
   var typeEl = document.getElementById('leadModalType');
   var titleEl = document.getElementById('leadModalTitle');
   var fieldsEl = document.getElementById('leadModalFields');
@@ -294,6 +402,12 @@ document.addEventListener('DOMContentLoaded', function () {
       resolveBtn.hidden = true;
     }
     overlay.hidden = false;
+    // .modal has overflow-y:auto for long detail text — without this, a
+    // modal scrolled down while reading one lead (e.g. a long message)
+    // would still be scrolled down the next time View is clicked for a
+    // different lead, since it's the same DOM element being reused/refilled
+    // rather than recreated each time.
+    modalBox.scrollTop = 0;
   }
 
   function closeModal() {
@@ -324,8 +438,15 @@ document.addEventListener('DOMContentLoaded', function () {
       // Marked resolved server-side — remove the row from whichever
       // per-type table it was in and close the modal, without any page
       // navigation, so the admin stays exactly where they were working.
+      var panel = tbody.closest('[data-lead-panel]');
+      var state = panel && leadPagination[panel.dataset.leadPanel];
+      if (state) {
+        var idx = state.rows.indexOf(row);
+        if (idx !== -1) state.rows.splice(idx, 1);
+      }
       row.remove();
       showEmptyStateIfNeeded(tbody);
+      if (state) renderPagination(state);
       closeModal();
     }).catch(function () {
       window.alert('Could not mark this request as resolved. Please try again.');
