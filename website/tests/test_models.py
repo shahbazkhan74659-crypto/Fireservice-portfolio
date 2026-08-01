@@ -1,6 +1,6 @@
 import pytest
 
-from website.models import Brand, SiteSetting
+from website.models import Brand, Certification, SiteSetting
 
 pytestmark = pytest.mark.django_db
 
@@ -69,3 +69,21 @@ class TestFileCleanupSignals:
         # crash trying to look itself up by a pk it doesn't have yet.
         brand = Brand.objects.create(name='Only Brand', image=make_png_upload())
         assert brand.image.storage.exists(brand.image.name)
+
+    def test_deleting_a_certification_deletes_both_its_image_and_pdf_files(self, png_upload, pdf_upload):
+        # Certification is the only model with two file-backed fields, each
+        # registered with its own register_file_cleanup_signals() call — a
+        # regression guard that the second (pdf) registration actually wires
+        # up its own post_delete cleanup rather than silently no-op'ing.
+        certification = Certification.objects.create(
+            name='Test Cert', description='Desc', meta='Meta',
+            image=png_upload, pdf=pdf_upload,
+        )
+        image_storage, image_path = certification.image.storage, certification.image.name
+        pdf_storage, pdf_path = certification.pdf.storage, certification.pdf.name
+
+        assert image_storage.exists(image_path)
+        assert pdf_storage.exists(pdf_path)
+        certification.delete()
+        assert not image_storage.exists(image_path)
+        assert not pdf_storage.exists(pdf_path)

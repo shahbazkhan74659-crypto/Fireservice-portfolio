@@ -583,32 +583,58 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
 .testimonial cite{color:var(--ink-600);font-style:normal;font-size:.9rem;}
 
 /* ============ Certifications ============ */
-.cert-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;}
+/* auto-fit + minmax(250px, 1fr) so the *number of tracks* stays correct —
+   the browser calculates how many auto-fit tracks to create using each
+   track's MAX sizing function when that max is a fixed length, but falls
+   back to the MIN when the max is flexible (1fr). A fixed px max (e.g.
+   minmax(250px,380px)) was tried first and broke the "4 per row" math: it
+   made auto-fit create only 2 tracks (floor(1154/402)), wrapping 4 real
+   certificates into a 2x2 block instead of one row. Keeping the max as 1fr
+   restores the min-based calculation (4 tracks — see below) while
+   .cert-card's own max-width (not the track's) is what actually stops a
+   lone certificate from stretching into an absurdly tall ~1600px portrait
+   card; justify-items:center centers that narrower-than-track card inside
+   whatever leftover track width auto-fit gave it.
+   250px is tuned against .container's max content width
+   (1180 - 2*24 padding = 1132px) with a 22px gap so auto-fit creates
+   exactly 4 tracks (4*250 + 3*22 = 1066 <= 1132, a 5th would need
+   5*250 + 4*22 = 1338 > 1132) — a 5th+ certificate wraps to a new row
+   instead of a 5th column. With exactly 4 real cards the natural
+   even-split track width (~266px) is already under .cert-card's 380px cap,
+   so the cap never engages and the row still ends up edge-to-edge. */
+.cert-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));justify-items:center;gap:22px;}
 .cert{aspect-ratio:3/4;}
 .cert-card{
   display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:var(--radius);
   overflow:hidden;transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  width:100%;max-width:380px;
 }
-.cert-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:var(--ink-400);}
+.cert-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:var(--amber-500);}
 .cert-card__img{position:relative;aspect-ratio:210/297;background:var(--tint);display:flex;align-items:center;justify-content:center;padding:10px;cursor:zoom-in;}
 .cert-card__img img{width:100%;height:100%;object-fit:contain;}
-.cert-card__img::after{
-  content:"View Full Certificate";
-  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 20px;
-  background:rgba(20,18,16,.55);color:#fff;font-size:.8rem;font-weight:600;
-  opacity:0;transition:opacity .2s ease;
+/* Same bottom-to-top red-to-amber gradient wipe as .why / .grid--services
+   .card, scoped to just the details section (not the certificate image,
+   which already has its own zoom-in "View Full Certificate" hover cue) —
+   the outer card border also picks up the accent color on hover above.
+   flex:1 — .cert-card is a grid item stretched to match the tallest card in
+   its row (e.g. ISO 45001's two-line description), but .cert-card__body's
+   own height is otherwise just its content; without flex:1 that leftover
+   stretched space sits below the body as a blank gap the gradient (inset:0
+   on ::before, sized to .cert-card__body's own box) never reaches. */
+.cert-card__body{padding:16px 18px;border-top:1px solid var(--line);position:relative;overflow:hidden;z-index:0;flex:1;}
+.cert-card__body::before{
+  content:'';position:absolute;inset:0;z-index:-1;
+  background:linear-gradient(to bottom, var(--red-600), var(--amber-500));
+  transform:scaleY(0);transform-origin:bottom;
+  transition:transform .25s ease;
 }
-.cert-card__img:hover::after{opacity:1;}
-/* Touch devices have no :hover — show the affordance persistently there so
-   touch users get a visual cue the thumbnail opens the full certificate,
-   without changing the desktop hover-reveal behavior. */
-@media (hover:none){
-  .cert-card__img::after{opacity:1;}
-}
-.cert-card__body{padding:16px 18px;border-top:1px solid var(--line);}
-.cert-card__body h3{font-size:1rem;margin:0 0 4px;}
-.cert-card__body p{font-size:.85rem;color:var(--ink-600);margin:0 0 6px;}
-.cert-card__meta{font-size:.78rem;color:var(--ink-400);font-weight:600;}
+.cert-card:hover .cert-card__body::before{transform:scaleY(1);}
+.cert-card__body h3{font-size:1rem;margin:0 0 4px;transition:color .25s ease;}
+.cert-card__body p{font-size:.85rem;color:var(--ink-600);margin:0 0 6px;transition:color .25s ease;}
+.cert-card__meta{font-size:.78rem;color:var(--ink-400);font-weight:600;transition:color .25s ease;}
+.cert-card:hover .cert-card__body h3,
+.cert-card:hover .cert-card__body p,
+.cert-card:hover .cert-card__meta{color:#000;}
 
 .lead-tabs{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px;}
 .lead-tab{

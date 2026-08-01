@@ -87,3 +87,25 @@ def malicious_svg_onload_upload(make_svg_upload):
 @pytest.fixture
 def malicious_svg_js_href_upload(make_svg_upload):
     return make_svg_upload(MALICIOUS_SVG_JS_HREF, name='evil.svg')
+
+
+@pytest.fixture
+def make_pdf_upload():
+    """Factory producing a genuinely openable single-page PDF via PyMuPDF
+    itself, not just bytes labeled as one — mirrors make_png_upload's real
+    Pillow-decodable image above."""
+    def _make(name='test.pdf', pages=1):
+        import fitz
+        doc = fitz.open()
+        for _ in range(pages):
+            page = doc.new_page(width=200, height=280)
+            page.insert_text((20, 20), 'Test Certificate')
+        pdf_bytes = doc.tobytes()
+        doc.close()
+        return SimpleUploadedFile(name, pdf_bytes, content_type='application/pdf')
+    return _make
+
+
+@pytest.fixture
+def pdf_upload(make_pdf_upload):
+    return make_pdf_upload()

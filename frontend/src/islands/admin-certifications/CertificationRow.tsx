@@ -18,10 +18,14 @@ export default function CertificationRow({ certification, onDeleted }: Props) {
     if (await remove()) onDeleted(certification.id)
   }
 
+  // A PDF-uploaded certificate still shows its auto-rendered page-1 image as
+  // the thumbnail, but "View Full Certificate" should open the real PDF.
+  const fullDocumentHref = certification.pdf || certification.image
+
   return (
     <tr>
       <td className="cert-table__preview">
-        <a href={certification.image} target="_blank" rel="noopener" aria-label={`View full ${certification.name} certificate`}>
+        <a href={fullDocumentHref} target="_blank" rel="noopener" aria-label={`View full ${certification.name} certificate`}>
           <img src={certification.image} alt={certification.name} />
         </a>
       </td>

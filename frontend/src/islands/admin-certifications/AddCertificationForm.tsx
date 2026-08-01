@@ -35,12 +35,14 @@ export default function AddCertificationForm({ onAdded }: Props) {
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    const created = await submit({ name, description, meta, image: file }, (data) => {
+    const created = await submit({ name, description, meta, file }, (data) => {
       const formData = new FormData()
       formData.append('name', data.name)
       formData.append('description', data.description)
       formData.append('meta', data.meta)
-      formData.append('image', data.image)
+      // PDFs and images go to different serializer fields — the backend
+      // renders a PDF's first page into the thumbnail automatically.
+      formData.append(data.file.type === 'application/pdf' ? 'pdf' : 'image', data.file)
       return formData
     })
     if (created) {
@@ -93,16 +95,17 @@ export default function AddCertificationForm({ onAdded }: Props) {
             {errors.meta && <p className="form-note">{errors.meta}</p>}
           </div>
           <div className="field">
-            <label htmlFor="new-cert-file">Certificate Image</label>
+            <label htmlFor="new-cert-file">Certificate File (Image or PDF)</label>
             <input
               id="new-cert-file"
               type="file"
-              accept="image/*"
+              accept="image/png,image/jpeg,image/webp,application/pdf"
               onChange={handleFileChange}
               disabled={state === 'submitting'}
             />
+            <p className="form-note">Uploading a PDF automatically uses its first page as the certificate image.</p>
             {file && <p className="form-note form-note--success">Selected: {file.name}</p>}
-            {errors.image && <p className="form-note">{errors.image}</p>}
+            {errors.file && <p className="form-note">{errors.file}</p>}
           </div>
 
           {serverError && <p className="form-note">{serverError}</p>}

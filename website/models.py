@@ -125,7 +125,13 @@ class Certification(models.Model):
     name = models.CharField(max_length=120)
     description = models.CharField(max_length=200)
     meta = models.CharField(max_length=200)
+    # Always populated — either uploaded directly, or auto-rendered from
+    # `pdf`'s first page (see CertificationSerializer.create()) — so every
+    # template can keep just rendering `image` unconditionally.
     image = models.ImageField(upload_to='certifications/')
+    # Optional: only set when the admin uploaded a PDF instead of an image.
+    # When present, "View Full Certificate" links here instead of `image`.
+    pdf = models.FileField(upload_to='certifications/pdfs/', blank=True, null=True)
     order = models.PositiveIntegerField(default=0)
 
     class Meta:
@@ -136,6 +142,7 @@ class Certification(models.Model):
 
 
 register_file_cleanup_signals(Certification, with_replace=False)
+register_file_cleanup_signals(Certification, field_name='pdf', with_replace=False)
 
 
 class SiteSetting(models.Model):

@@ -1,10 +1,12 @@
 import re
 import xml.etree.ElementTree as ET
 
+from django.utils.text import slugify
 from PIL import Image, UnidentifiedImageError
 from rest_framework import serializers
 
 from .models import Brand, Certification, ClientLogo, FireRiskAssessmentItem, MissionVisionItem, Product, Service, SiteSetting
+from .pdf_utils import render_pdf_first_page_to_png
 
 MAX_LOGO_SIZE_BYTES = 5 * 1024 * 1024  # 5MB
 ACCEPTED_ICON_CONTENT_TYPES = {'image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'}
@@ -147,6 +149,30 @@ def validate_image_size_and_type(value, max_bytes=MAX_LOGO_SIZE_BYTES):
     return value
 
 
+MAX_PDF_SIZE_BYTES = 10 * 1024 * 1024  # 10MB — comfortably covers a scanned multi-page certificate
+PDF_CONTENT_TYPE = 'application/pdf'
+PDF_MAGIC_BYTES = b'%PDF-'
+
+
+def validate_pdf_file(value):
+    """Same 'never trust Content-Type alone' treatment as
+    validate_image_size_and_type() above — a real PDF always starts with the
+    '%PDF-' magic bytes, so a mislabeled non-PDF file is rejected here
+    instead of only failing later inside PyMuPDF."""
+    if value.size > MAX_PDF_SIZE_BYTES:
+        raise serializers.ValidationError(f'PDF is too large (max {MAX_PDF_SIZE_BYTES // (1024 * 1024)}MB).')
+    if getattr(value, 'content_type', None) != PDF_CONTENT_TYPE:
+        raise serializers.ValidationError('Unsupported file type. Upload a PDF.')
+
+    value.seek(0)
+    header = value.read(len(PDF_MAGIC_BYTES))
+    value.seek(0)
+    if header != PDF_MAGIC_BYTES:
+        raise serializers.ValidationError('This file is not a valid PDF.')
+
+    return value
+
+
 class MissionVisionItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = MissionVisionItem
@@ -219,9 +245,18 @@ class ServiceSerializer(serializers.ModelSerializer):
 
 
 class CertificationSerializer(serializers.ModelSerializer):
+    # Both optional at the serializer level (the model field itself is still
+    # required — see create() below, which always fills `image` in one way
+    # or another before saving) — validate() requires at least one of the
+    # two from the client. Uploading only a PDF renders its first page into
+    # `image` automatically, so every template can keep rendering `image`
+    # unconditionally regardless of which one the admin actually provided.
+    image = serializers.ImageField(required=False)
+    pdf = serializers.FileField(required=False)
+
     class Meta:
         model = Certification
-        fields = ['id', 'name', 'description', 'meta', 'image', 'order']
+        fields = ['id', 'name', 'description', 'meta', 'image', 'pdf', 'order']
         read_only_fields = ['order']  # server-assigned on create — see perform_create
 
     def validate_name(self, value):
@@ -241,6 +276,24 @@ class CertificationSerializer(serializers.ModelSerializer):
 
     def validate_image(self, value):
         return validate_image_size(value)
+
+    def validate_pdf(self, value):
+        return validate_pdf_file(value)
+
+    def validate(self, attrs):
+        if not attrs.get('image') and not attrs.get('pdf'):
+            raise serializers.ValidationError({'image': 'Upload either a certificate image or a PDF.'})
+        return attrs
+
+    def create(self, validated_data):
+        pdf_file = validated_data.get('pdf')
+        if pdf_file and not validated_data.get('image'):
+            base_name = slugify(validated_data.get('name') or 'certificate') or 'certificate'
+            try:
+                validated_data['image'] = render_pdf_first_page_to_png(pdf_file, base_name)
+            except ValueError as exc:
+                raise serializers.ValidationError({'pdf': str(exc)})
+        return super().create(validated_data)
 
 
 class SiteSettingSerializer(serializers.ModelSerializer):

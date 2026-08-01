@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% load django_vite %}
+{% load website_extras %}
 
 {% block title %}Certifications | Iconic Techno Service{% endblock %}
 {% block meta_description %}Iconic Techno Service is ISO 9001:2015 and ISO 45001:2018 certified, GST-registered and Udyam (MSME) registered — verified compliance for every project we deliver.{% endblock %}
@@ -22,50 +23,20 @@
         <p class="section__sub">Our management systems and business registrations are independently audited and verified &mdash; here's the paperwork behind the promise.</p>
       </div>
 
+      {% get_certifications as certifications %}
       <div class="cert-grid">
+        {% for certification in certifications %}
         <div class="cert-card">
-          <a class="cert-card__img" href="{% static 'image/cert-iso-9001.jpg' %}" target="_blank" rel="noopener" aria-label="View full ISO 9001:2015 certificate">
-            <img src="{% static 'image/cert-iso-9001.jpg' %}" alt="ISO 9001:2015 Certificate of Registration issued to Iconic Techno Service" width="1080" height="1523" loading="lazy">
+          <a class="cert-card__img" href="{% if certification.pdf %}{{ certification.pdf.url }}{% else %}{{ certification.image.url }}{% endif %}" target="_blank" rel="noopener" aria-label="View full {{ certification.name }} certificate">
+            <img src="{{ certification.image.url }}" alt="{{ certification.name }} Certificate for Iconic Techno Service" loading="lazy">
           </a>
           <div class="cert-card__body">
-            <h3>ISO 9001:2015</h3>
-            <p>Quality Management Systems</p>
-            <span class="cert-card__meta">Valid till 15 Jul 2029</span>
+            <h3>{{ certification.name }}</h3>
+            <p>{{ certification.description }}</p>
+            <span class="cert-card__meta">{{ certification.meta }}</span>
           </div>
         </div>
-
-        <div class="cert-card">
-          <a class="cert-card__img" href="{% static 'image/cert-iso-45001.jpg' %}" target="_blank" rel="noopener" aria-label="View full ISO 45001:2018 certificate">
-            <img src="{% static 'image/cert-iso-45001.jpg' %}" alt="ISO 45001:2018 Certificate of Registration issued to Iconic Techno Service" width="1080" height="1527" loading="lazy">
-          </a>
-          <div class="cert-card__body">
-            <h3>ISO 45001:2018</h3>
-            <p>Occupational Health &amp; Safety Management Systems</p>
-            <span class="cert-card__meta">Valid till 15 Jul 2029</span>
-          </div>
-        </div>
-
-        <div class="cert-card">
-          <a class="cert-card__img" href="{% static 'image/cert-gst-registration.jpg' %}" target="_blank" rel="noopener" aria-label="View full GST registration certificate">
-            <img src="{% static 'image/cert-gst-registration.jpg' %}" alt="GST Registration Certificate for Iconic Techno Service" width="1785" height="2526" loading="lazy">
-          </a>
-          <div class="cert-card__body">
-            <h3>GST Registration</h3>
-            <p>Goods &amp; Services Tax, Government of India</p>
-            <span class="cert-card__meta">GSTIN 26AVPPB0819A1Z3</span>
-          </div>
-        </div>
-
-        <div class="cert-card">
-          <a class="cert-card__img" href="{% static 'image/cert-udyam-registration.jpg' %}" target="_blank" rel="noopener" aria-label="View full Udyam (MSME) registration certificate">
-            <img src="{% static 'image/cert-udyam-registration.jpg' %}" alt="Udyam (MSME) Registration Certificate for Iconic Techno Service" width="1785" height="2526" loading="lazy">
-          </a>
-          <div class="cert-card__body">
-            <h3>Udyam Registration</h3>
-            <p>Ministry of MSME, Government of India</p>
-            <span class="cert-card__meta">UDYAM-DD-03-0011602</span>
-          </div>
-        </div>
+        {% endfor %}
       </div>
     </div>
   </section>
