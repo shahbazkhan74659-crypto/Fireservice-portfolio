@@ -1,4 +1,4 @@
-{% load static %}
+{% load website_extras %}
 <!-- ===== Available Brands ===== -->
 <section class="section section--tint">
   <div class="container">
@@ -7,12 +7,13 @@
       <h2>Brands We Work With</h2>
     </div>
 
+    {% get_brands as brands %}
     <div class="logo-grid">
-      <div class="logo-card"><img src="{% static 'image/brand-apollo.png' %}" alt="Apollo" width="577" height="371" loading="lazy"></div>
-      <div class="logo-card"><img src="{% static 'image/brand-logos-honeywell-group.png' %}" alt="System Sensor, Gamewell FCI, Fire-Lite Alarms, Honeywell, Notifier, Silent Knight" width="1214" height="755" loading="lazy"></div>
-      <div class="logo-card"><img src="{% static 'image/brand-mitras.png' %}" alt="Mitras" width="639" height="147" loading="lazy"></div>
-      <div class="logo-card"><img src="{% static 'image/brand-newage.png' %}" alt="NewAge Group of Companies" width="649" height="164" loading="lazy"></div>
-      <div class="logo-card"><img src="{% static 'image/brand-ravel.png' %}" alt="Ravel" width="573" height="160" loading="lazy"></div>
+      {% for brand in brands %}
+      <div class="logo-card">
+        <img src="{{ brand.image.url }}" alt="{{ brand.name }}" loading="lazy">
+      </div>
+      {% endfor %}
     </div>
   </div>
 </section>
