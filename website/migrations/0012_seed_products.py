@@ -32,7 +32,7 @@ PRODUCTS = [
 
 def seed_products(apps, schema_editor):
     Product = apps.get_model('website', 'Product')
-    source_dir = Path(settings.BASE_DIR) / 'static' / 'image'
+    source_dir = Path(settings.BASE_DIR) / 'static' / 'SeedImages'
 
     for order, (filename, name) in enumerate(PRODUCTS, start=1):
         src = source_dir / filename

@@ -40,7 +40,7 @@ CERTIFICATIONS = [
 
 def seed_certifications(apps, schema_editor):
     Certification = apps.get_model('website', 'Certification')
-    source_dir = Path(settings.BASE_DIR) / 'static' / 'image'
+    source_dir = Path(settings.BASE_DIR) / 'static' / 'SeedImages'
 
     for order, (filename, name, description, meta) in enumerate(CERTIFICATIONS, start=1):
         src = source_dir / filename

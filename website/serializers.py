@@ -5,7 +5,7 @@ from django.utils.text import slugify
 from PIL import Image, UnidentifiedImageError
 from rest_framework import serializers
 
-from .models import Brand, Certification, ClientLogo, FireRiskAssessmentItem, MissionVisionItem, Product, Service, SiteSetting
+from .models import Brand, Certification, ClientLogo, FireRiskAssessmentItem, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting
 from .pdf_utils import render_pdf_first_page_to_png
 
 MAX_LOGO_SIZE_BYTES = 5 * 1024 * 1024  # 5MB
@@ -349,6 +349,24 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
+        fields = ['id', 'name', 'image', 'order']
+        read_only_fields = ['order']  # server-assigned on create — see perform_create
+
+    def validate_name(self, value):
+        return validate_entity_name(value)
+
+    def validate_image(self, value):
+        return validate_image_size_and_type(value)
+
+
+class ProcessPhaseSerializer(serializers.ModelSerializer):
+    # Declared explicitly as FileField (not the ModelSerializer-inferred
+    # ImageField) so SVG uploads (allowed by the frontend schema) aren't
+    # rejected by Pillow — see validate_image_size_and_type() above.
+    image = serializers.FileField()
+
+    class Meta:
+        model = ProcessPhase
         fields = ['id', 'name', 'image', 'order']
         read_only_fields = ['order']  # server-assigned on create — see perform_create
 

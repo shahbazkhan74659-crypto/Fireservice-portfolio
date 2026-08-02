@@ -39,7 +39,7 @@ LOGOS = [
 
 def seed_client_logos(apps, schema_editor):
     ClientLogo = apps.get_model('website', 'ClientLogo')
-    source_dir = Path(settings.BASE_DIR) / 'static' / 'image'
+    source_dir = Path(settings.BASE_DIR) / 'static' / 'SeedImages'
 
     for order, (filename, name) in enumerate(LOGOS, start=1):
         src = source_dir / filename

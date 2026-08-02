@@ -32,7 +32,8 @@ class TestFileCleanupSignals:
     """register_file_cleanup_signals() (website/models.py) is real, easy-to-
     get-wrong logic — without it, deleted/replaced rows leave orphaned files
     in media/ forever. Brand stands in for every model that uses it
-    (ClientLogo, Product, Service, Certification all wire it up the same way)."""
+    (ClientLogo, Product, ProcessPhase, Service, Certification all wire it up
+    the same way)."""
 
     def test_deleting_a_row_deletes_its_image_file(self, png_upload):
         brand = Brand.objects.create(name='Test Brand', image=png_upload)

@@ -19,7 +19,7 @@ BRANDS = [
 
 def seed_brands(apps, schema_editor):
     Brand = apps.get_model('website', 'Brand')
-    source_dir = Path(settings.BASE_DIR) / 'static' / 'image'
+    source_dir = Path(settings.BASE_DIR) / 'static' / 'SeedImages'
 
     for order, (filename, name) in enumerate(BRANDS, start=1):
         src = source_dir / filename

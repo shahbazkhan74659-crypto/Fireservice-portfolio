@@ -22,6 +22,7 @@ from website.models import (
     FireRiskAssessmentItem,
     MissionVisionItem,
     Product,
+    ProcessPhase,
     Service,
     SiteSetting,
 )
@@ -111,6 +112,15 @@ class ClienteleView(TemplateView):
 
 class ProcessView(TemplateView):
     template_name = 'process.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Ordered 1-7 by ProcessPhase.order; process.html looks each phase's
+        # photo up positionally (process_phases.0 .. .6) since the phase
+        # titles/taglines/cards below each image stay hardcoded copy, not
+        # DB-driven — see the ProcessPhase model docstring.
+        context['process_phases'] = ProcessPhase.objects.all()
+        return context
 
 
 class ServicesView(TemplateView):

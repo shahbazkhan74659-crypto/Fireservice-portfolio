@@ -1,6 +1,6 @@
 from django import template
 
-from website.models import Brand, Certification, ClientLogo, Product, Service, SiteSetting
+from website.models import Brand, Certification, ClientLogo, Product, ProcessPhase, Service, SiteSetting
 
 register = template.Library()
 
@@ -18,6 +18,11 @@ def get_brands():
 @register.simple_tag
 def get_products():
     return Product.objects.all()
+
+
+@register.simple_tag
+def get_process_phases():
+    return ProcessPhase.objects.all()
 
 
 @register.simple_tag

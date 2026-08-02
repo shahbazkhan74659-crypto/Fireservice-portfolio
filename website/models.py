@@ -121,6 +121,25 @@ class Product(models.Model):
 register_file_cleanup_signals(Product)
 
 
+class ProcessPhase(models.Model):
+    # `name` doubles as the image's alt text on the Process page (same
+    # convention as Product/Brand/ClientLogo's `name`), not a phase title —
+    # the phase titles/taglines/cards are hardcoded copy in process.html,
+    # out of scope for this model.
+    name = models.CharField(max_length=200)
+    image = models.ImageField(upload_to='process-phases/')
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['order', 'id']
+
+    def __str__(self):
+        return self.name
+
+
+register_file_cleanup_signals(ProcessPhase)
+
+
 class Certification(models.Model):
     name = models.CharField(max_length=120)
     description = models.CharField(max_length=200)

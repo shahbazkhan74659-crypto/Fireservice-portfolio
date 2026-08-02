@@ -517,8 +517,9 @@ class TestBrandListCreateViewPermissions:
 
 class TestBrandOrderAutoIncrement:
     """perform_create()'s select_for_update()+aggregate(Max('order')) pattern
-    is duplicated across six endpoints (Brand/ClientLogo/Service/Product/
-    Certification/FireRiskAssessmentItem) — Brand is the representative."""
+    is duplicated across seven endpoints (Brand/ClientLogo/Service/Product/
+    ProcessPhase/Certification/FireRiskAssessmentItem) — Brand is the
+    representative."""
 
     url = '/api/admin-hub/brands/'
 

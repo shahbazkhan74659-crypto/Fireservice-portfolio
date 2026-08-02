@@ -33,9 +33,9 @@ class TestValidateImageSize:
 
 class TestValidateImageSizeAndType:
     """validate_image_size_and_type() is the real security boundary for every
-    Admin Hub image/icon upload (Brand/ClientLogo/Product/Service icons) —
-    it never trusts the client-supplied Content-Type on its own, decoding
-    raster bytes with Pillow and parsing SVG as XML instead."""
+    Admin Hub image/icon upload (Brand/ClientLogo/Product/ProcessPhase/Service
+    icons) — it never trusts the client-supplied Content-Type on its own,
+    decoding raster bytes with Pillow and parsing SVG as XML instead."""
 
     def test_valid_png_is_accepted(self, png_upload):
         assert validate_image_size_and_type(png_upload) is png_upload

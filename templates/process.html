@@ -33,7 +33,7 @@
             <h3>Initial Inquiry &amp; Technical Risk Assessment</h3>
             <p class="phase__tagline">Customer Inquiry to On-Site Survey</p>
             <div class="phase__body">
-              <img class="phase__image" src="{% static 'image/process-phase1-site-survey.jpg' %}" alt="Field engineer conducting an on-site fire safety survey">
+              <img class="phase__image" src="{{ process_phases.0.image.url }}" alt="{{ process_phases.0.name }}">
               <div class="phase__cards">
                 <div class="phase__card">
                   <h4>Inquiry &amp; Site Survey</h4>
@@ -58,7 +58,7 @@
             <h3>Design Engineering &amp; Commercial Proposal</h3>
             <p class="phase__tagline">Calculations, Modeling &amp; Budgeting</p>
             <div class="phase__body">
-              <img class="phase__image" src="{% static 'image/process-phase2-engineering-design.jpg' %}" alt="Engineers reviewing CAD/BIM fire system design drawings">
+              <img class="phase__image" src="{{ process_phases.1.image.url }}" alt="{{ process_phases.1.name }}">
               <div class="phase__cards">
                 <div class="phase__card">
                   <h4>Engineering &amp; Design</h4>
@@ -83,7 +83,7 @@
             <h3>Code Approvals &amp; Regulatory Permitting</h3>
             <p class="phase__tagline">AHJ &amp; Civil Defence Submission</p>
             <div class="phase__body">
-              <img class="phase__image" src="{% static 'image/process-phase3-documentation-submission.jpg' %}" alt="Fire safety shop drawings and permit documentation compiled for submission">
+              <img class="phase__image" src="{{ process_phases.2.image.url }}" alt="{{ process_phases.2.name }}">
               <div class="phase__cards">
                 <div class="phase__card">
                   <h4>Documentation &amp; Submission</h4>
@@ -108,7 +108,7 @@
             <h3>Procurement, Quality Assurance &amp; Off-Site Prep</h3>
             <p class="phase__tagline">Material Sourcing &amp; Fabrication</p>
             <div class="phase__body">
-              <img class="phase__image" src="{% static 'image/process-phase4-procurement-testing.jpg' %}" alt="Fire pump testing and equipment staged at the warehouse ahead of installation">
+              <img class="phase__image" src="{{ process_phases.3.image.url }}" alt="{{ process_phases.3.name }}">
               <div class="phase__cards">
                 <div class="phase__card">
                   <h4>Procurement &amp; Testing</h4>
@@ -133,7 +133,7 @@
             <h3>Site Installation &amp; MEP Integration</h3>
             <p class="phase__tagline">Execution &amp; Physical Civil/Electrical Work</p>
             <div class="phase__body">
-              <img class="phase__image" src="{% static 'image/process-phase5-installation.jpg' %}" alt="Fire mains, sprinkler risers and fire alarm control panels installed on-site">
+              <img class="phase__image" src="{{ process_phases.4.image.url }}" alt="{{ process_phases.4.name }}">
               <div class="phase__cards">
                 <div class="phase__card">
                   <h4>Mechanical &amp; Electrical Installation</h4>
@@ -158,7 +158,7 @@
             <h3>Testing, Commissioning (T&amp;C) &amp; Inspection</h3>
             <p class="phase__tagline">Hydrostatic, Cause-and-Effect &amp; Final AHJ Sign-Off</p>
             <div class="phase__body">
-              <img class="phase__image" src="{% static 'image/process-phase6-testing.jpg' %}" alt="Live fire pump and sprinkler system test being witnessed by officials">
+              <img class="phase__image" src="{{ process_phases.5.image.url }}" alt="{{ process_phases.5.name }}">
               <div class="phase__cards">
                 <div class="phase__card">
                   <h4>Pressure &amp; System Testing</h4>
@@ -183,7 +183,7 @@
             <h3>Handover, Training &amp; Ongoing AMC</h3>
             <p class="phase__tagline">As-Built Documentation &amp; Preventive Maintenance</p>
             <div class="phase__body">
-              <img class="phase__image" src="{% static 'image/process-phase7-handover-amc.jpg' %}" alt="Client handover, staff training and ongoing AMC maintenance checks">
+              <img class="phase__image" src="{{ process_phases.6.image.url }}" alt="{{ process_phases.6.name }}">
               <div class="phase__cards">
                 <div class="phase__card">
                   <h4>Handover &amp; Training</h4>

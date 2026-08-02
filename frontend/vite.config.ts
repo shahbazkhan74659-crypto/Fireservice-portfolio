@@ -32,6 +32,7 @@ export default defineConfig({
         'admin-services': resolve(__dirname, 'src/islands/admin-services/main.tsx'),
         'admin-fire-risk-items': resolve(__dirname, 'src/islands/admin-fire-risk-items/main.tsx'),
         'admin-products': resolve(__dirname, 'src/islands/admin-products/main.tsx'),
+        'admin-process-phases': resolve(__dirname, 'src/islands/admin-process-phases/main.tsx'),
         'admin-certifications': resolve(__dirname, 'src/islands/admin-certifications/main.tsx'),
         'admin-site-settings': resolve(__dirname, 'src/islands/admin-site-settings/main.tsx'),
       },

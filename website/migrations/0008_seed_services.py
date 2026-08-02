@@ -59,7 +59,7 @@ SERVICES = [
 
 def seed_services(apps, schema_editor):
     Service = apps.get_model('website', 'Service')
-    source_dir = Path(settings.BASE_DIR) / 'static' / 'image'
+    source_dir = Path(settings.BASE_DIR) / 'static' / 'SeedImages'
 
     for order, (filename, name, description) in enumerate(SERVICES, start=1):
         src = source_dir / filename

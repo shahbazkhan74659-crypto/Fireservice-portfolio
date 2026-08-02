@@ -38,13 +38,14 @@ from leads.serializers import (
     ContactMessageSerializer,
     SurveyRequestSerializer,
 )
-from website.models import Brand, Certification, ClientLogo, FireRiskAssessmentItem, MissionVisionItem, Product, Service, SiteSetting
+from website.models import Brand, Certification, ClientLogo, FireRiskAssessmentItem, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting
 from website.serializers import (
     BrandSerializer,
     CertificationSerializer,
     ClientLogoSerializer,
     FireRiskAssessmentItemSerializer,
     MissionVisionItemSerializer,
+    ProcessPhaseSerializer,
     ProductSerializer,
     ServiceSerializer,
     SiteSettingSerializer,
@@ -731,6 +732,25 @@ class ProductListCreateView(ListCreateAPIView):
 class ProductDetailView(RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [IsAdminUser]
+
+
+class ProcessPhaseListCreateView(ListCreateAPIView):
+    queryset = ProcessPhase.objects.all()
+    serializer_class = ProcessPhaseSerializer
+    parser_classes = [MultiPartParser, FormParser]  # uploads arrive as multipart, not JSON
+    permission_classes = [IsAdminUser]
+
+    def perform_create(self, serializer):
+        with transaction.atomic():
+            next_order = (ProcessPhase.objects.select_for_update().aggregate(Max('order'))['order__max'] or 0) + 1
+            serializer.save(order=next_order)
+
+
+class ProcessPhaseDetailView(RetrieveUpdateDestroyAPIView):
+    queryset = ProcessPhase.objects.all()
+    serializer_class = ProcessPhaseSerializer
     parser_classes = [MultiPartParser, FormParser]
     permission_classes = [IsAdminUser]
 
