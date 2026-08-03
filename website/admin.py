@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Brand, Certification, ClientLogo, FireRiskAssessmentItem, HeroSlide, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting
+from .models import Brand, Brochure, Certification, ClientLogo, FireRiskAssessmentItem, HeroSlide, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting
 
 
 @admin.register(MissionVisionItem)
@@ -68,6 +68,18 @@ class SiteSettingAdmin(admin.ModelAdmin):
         # Singleton — the seed migration already created pk=1, adding
         # another row would just be an orphaned, never-read duplicate.
         return not SiteSetting.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(Brochure)
+class BrochureAdmin(admin.ModelAdmin):
+    # Singleton, same pattern as SiteSettingAdmin above.
+    list_display = ('__str__',)
+
+    def has_add_permission(self, request):
+        return not Brochure.objects.exists()
 
     def has_delete_permission(self, request, obj=None):
         return False

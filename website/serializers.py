@@ -5,7 +5,7 @@ from django.utils.text import slugify
 from PIL import Image, UnidentifiedImageError
 from rest_framework import serializers
 
-from .models import Brand, Certification, ClientLogo, FireRiskAssessmentItem, HeroSlide, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting
+from .models import Brand, Brochure, Certification, ClientLogo, FireRiskAssessmentItem, HeroSlide, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting
 from .pdf_utils import render_pdf_first_page_to_png
 
 MAX_LOGO_SIZE_BYTES = 5 * 1024 * 1024  # 5MB
@@ -303,6 +303,28 @@ class CertificationSerializer(serializers.ModelSerializer):
             except ValueError as exc:
                 raise serializers.ValidationError({'pdf': str(exc)})
         return super().create(validated_data)
+
+
+class BrochureSerializer(serializers.ModelSerializer):
+    # Read-only — always auto-rendered from `pdf` in update() below, never
+    # accepted directly from the client.
+    image = serializers.ImageField(read_only=True)
+
+    class Meta:
+        model = Brochure
+        fields = ['pdf', 'image']
+
+    def validate_pdf(self, value):
+        return validate_pdf_file(value)
+
+    def update(self, instance, validated_data):
+        pdf_file = validated_data.get('pdf')
+        if pdf_file:
+            try:
+                validated_data['image'] = render_pdf_first_page_to_png(pdf_file, 'its-brochure')
+            except ValueError as exc:
+                raise serializers.ValidationError({'pdf': str(exc)})
+        return super().update(instance, validated_data)
 
 
 class SiteSettingSerializer(serializers.ModelSerializer):

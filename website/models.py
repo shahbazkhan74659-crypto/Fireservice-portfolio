@@ -227,6 +227,37 @@ class SiteSetting(models.Model):
         return 'Site Settings'
 
 
+class Brochure(models.Model):
+    # Singleton row (always pk=1), same convention as SiteSetting — there's
+    # only ever one current company brochure PDF, linked from the nav's "Get
+    # Brochure" button and the /brochure/ page itself.
+    pdf = models.FileField(upload_to='brochure/')
+    # Auto-rendered from `pdf`'s first page (BrochureSerializer, same
+    # render_pdf_first_page_to_png() Certification uses) — the Admin Hub's
+    # Brochure modal shows this as a preview instead of embedding the PDF.
+    image = models.ImageField(upload_to='brochure/', default='')
+
+    class Meta:
+        verbose_name = 'Brochure'
+        verbose_name_plural = 'Brochure'
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def load(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
+
+    def __str__(self):
+        return 'Brochure'
+
+
+register_file_cleanup_signals(Brochure, field_name='pdf')
+register_file_cleanup_signals(Brochure, field_name='image')
+
+
 class FireRiskAssessmentItem(models.Model):
     text = models.CharField(max_length=200)
     order = models.PositiveIntegerField(default=0)

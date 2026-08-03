@@ -14,6 +14,7 @@ from core.api_views import (
     AdminHubLoginAPIView,
     BrandDetailView,
     BrandListCreateView,
+    BrochureDetailView,
     CertificationDeleteView,
     CertificationListCreateView,
     ClientLogoDetailView,
@@ -113,4 +114,5 @@ urlpatterns = [
     path('api/admin-hub/certifications/', CertificationListCreateView.as_view(), name='api-adminhub-certifications-list'),
     path('api/admin-hub/certifications/<int:pk>/', CertificationDeleteView.as_view(), name='api-adminhub-certifications-detail'),
     path('api/admin-hub/site-settings/', SiteSettingDetailView.as_view(), name='api-adminhub-site-settings-detail'),
+    path('api/admin-hub/brochure/', BrochureDetailView.as_view(), name='api-adminhub-brochure-detail'),
 ]

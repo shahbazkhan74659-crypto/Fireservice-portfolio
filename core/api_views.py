@@ -38,9 +38,10 @@ from leads.serializers import (
     ContactMessageSerializer,
     SurveyRequestSerializer,
 )
-from website.models import Brand, Certification, ClientLogo, FireRiskAssessmentItem, HeroSlide, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting
+from website.models import Brand, Brochure, Certification, ClientLogo, FireRiskAssessmentItem, HeroSlide, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting
 from website.serializers import (
     BrandSerializer,
+    BrochureSerializer,
     CertificationSerializer,
     ClientLogoSerializer,
     FireRiskAssessmentItemSerializer,
@@ -826,3 +827,14 @@ class SiteSettingDetailView(RetrieveUpdateAPIView):
 
     def get_object(self):
         return SiteSetting.load()
+
+
+class BrochureDetailView(RetrieveUpdateAPIView):
+    # Singleton, same pattern as SiteSettingDetailView — get_object always
+    # resolves to the one pk=1 row rather than a URL pk.
+    serializer_class = BrochureSerializer
+    parser_classes = [MultiPartParser, FormParser]  # uploads arrive as multipart, not JSON
+    permission_classes = [IsAdminUser]
+
+    def get_object(self):
+        return Brochure.load()

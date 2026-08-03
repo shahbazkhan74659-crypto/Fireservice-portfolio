@@ -915,8 +915,13 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
 .command-center__brand-text{display:flex;flex-direction:column;}
 .command-center__title{font-family:var(--ff-display);font-weight:700;font-size:1.3rem;color:var(--cc-text);}
 .command-center__subtitle{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--cc-cyan);}
-.cc-header-stats{display:flex;flex-wrap:wrap;align-items:center;gap:14px 18px;}
-.cc-header-stats [data-stat-editor]{padding-right:18px;border-right:1px solid var(--cc-line);}
+/* flex-wrap:nowrap (not wrap) + min-width:0 on both this row and each stat
+   item — a flex item's default min-width:auto keeps it at its content's
+   natural width, which is what was letting this row overflow its share of
+   .command-center__header and wrap its last item (Team Members) onto a
+   second line instead of everything shrinking to fit one row. */
+.cc-header-stats{display:flex;flex-wrap:nowrap;align-items:center;gap:10px 14px;min-width:0;}
+.cc-header-stats [data-stat-editor]{padding-right:14px;border-right:1px solid var(--cc-line);min-width:0;}
 .cc-header-stats [data-stat-editor]:last-child{padding-right:0;border-right:none;}
 .cc-years-exp{display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
 .cc-years-exp__value{
@@ -932,12 +937,23 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
    controls placed inside it (e.g. the Hero Slideshow button) use this
    instead, matching the cyan accent used throughout this section. */
 .cc-btn{
-  display:inline-flex;align-items:center;flex-shrink:0;
-  padding:9px 18px;border-radius:999px;border:1px solid var(--cc-line);
-  background:transparent;color:var(--cc-text);font-family:var(--ff-body);font-size:.82rem;font-weight:600;
-  cursor:pointer;transition:border-color .15s ease,color .15s ease;
+  display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+  box-sizing:border-box;width:160px;margin:0;padding:9px 18px;
+  border-radius:999px;border:1px solid var(--cc-line);
+  background:transparent;color:var(--cc-text);font-family:var(--ff-body);font-size:.82rem;font-weight:600;line-height:normal;
+  text-align:center;cursor:pointer;appearance:none;-webkit-appearance:none;
+  transition:border-color .15s ease,color .15s ease;
 }
+/* Firefox draws an extra inner border/padding on <button> that box-sizing
+   alone doesn't remove — Hero Slideshow (a <button>) would otherwise render
+   fractionally narrower than Brochure (a plain <a>) despite identical CSS. */
+.cc-btn::-moz-focus-inner{border:0;padding:0;}
 .cc-btn:hover{border-color:var(--cc-cyan);color:var(--cc-cyan);}
+
+/* Stacks the Hero Slideshow button and the Brochure button (and whatever
+   else lands in this header slot next) in a column between the brand and
+   the stats row, instead of them fighting for the same row. */
+.cc-header-actions{display:flex;flex-direction:column;align-items:flex-start;gap:8px;}
 
 /* ---- Meters ---- */
 .command-center__meters{display:flex;flex-wrap:wrap;gap:20px;margin-bottom:28px;}
@@ -1079,6 +1095,13 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
   border:1px solid var(--line);border-radius:var(--radius);padding:8px 10px;
 }
 .hero-slide-row img{width:72px;height:44px;object-fit:cover;border-radius:6px;flex-shrink:0;}
+
+/* ---- Brochure admin modal ---- */
+.brochure-preview{
+  max-height:320px;overflow:hidden;border:1px solid var(--line);border-radius:var(--radius);
+  margin-bottom:20px;background:var(--tint);display:flex;justify-content:center;
+}
+.brochure-preview img{width:100%;height:auto;object-fit:contain;display:block;}
 
 /* ---- Lead detail modal — deliberately larger than the standard confirm-dialog
    .modal, per the request for a "giant" pop-up presenting the full message ---- */

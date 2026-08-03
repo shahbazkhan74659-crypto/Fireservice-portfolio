@@ -17,6 +17,7 @@ from django.views.generic import TemplateView
 from leads.models import ConsultationRequest, ContactMessage, SurveyRequest
 from website.models import (
     Brand,
+    Brochure,
     Certification,
     ClientLogo,
     FireRiskAssessmentItem,
@@ -174,6 +175,11 @@ class ServicesView(TemplateView):
 class BrochureView(TemplateView):
     template_name = 'brochure.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['brochure'] = Brochure.load()
+        return context
+
 
 @method_decorator(ensure_csrf_cookie, name='dispatch')
 class CertificationsView(TemplateView):
@@ -259,6 +265,7 @@ class AdminHubHomeView(StaffRequiredMixin, TemplateView):
         context['emergency_support'] = site_setting.emergency_support
         context['team_members'] = site_setting.team_members
         context['hero_slide_duration'] = site_setting.hero_slide_duration_seconds
+        context['brochure'] = Brochure.load()
 
         populated_types = sum(1 for model in CONTENT_MODELS if model.objects.exists())
         context['content_completeness_pct'] = round((populated_types / len(CONTENT_MODELS)) * 100)
