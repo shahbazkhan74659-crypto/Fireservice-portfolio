@@ -1,6 +1,6 @@
 from django import template
 
-from website.models import Brand, Certification, ClientLogo, Product, ProcessPhase, Service, SiteSetting
+from website.models import Brand, Certification, ClientLogo, HeroSlide, Product, ProcessPhase, Service, SiteSetting
 
 register = template.Library()
 
@@ -23,6 +23,11 @@ def get_products():
 @register.simple_tag
 def get_process_phases():
     return ProcessPhase.objects.all()
+
+
+@register.simple_tag
+def get_hero_slides():
+    return HeroSlide.objects.all()
 
 
 @register.simple_tag
@@ -58,3 +63,8 @@ def get_emergency_support():
 @register.simple_tag
 def get_team_members():
     return SiteSetting.load().team_members
+
+
+@register.simple_tag
+def get_hero_slide_duration():
+    return SiteSetting.load().hero_slide_duration_seconds

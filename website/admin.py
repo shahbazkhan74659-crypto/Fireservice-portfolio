@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Brand, Certification, ClientLogo, FireRiskAssessmentItem, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting
+from .models import Brand, Certification, ClientLogo, FireRiskAssessmentItem, HeroSlide, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting
 
 
 @admin.register(MissionVisionItem)
@@ -42,6 +42,12 @@ class ProductAdmin(admin.ModelAdmin):
 @admin.register(ProcessPhase)
 class ProcessPhaseAdmin(admin.ModelAdmin):
     list_display = ('name', 'order')
+    ordering = ('order', 'id')
+
+
+@admin.register(HeroSlide)
+class HeroSlideAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'order')
     ordering = ('order', 'id')
 
 

@@ -110,16 +110,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const statsSection = document.querySelector('.stats');
   if (statsSection) statsObserver.observe(statsSection);
 
-  // Hero background slideshow (home page only — querySelectorAll returns
-  // an empty list on every other page, so this is a harmless no-op there)
+  // Hero background slideshow — DB-driven (HeroSlide) slide count and
+  // interval (SiteSetting.hero_slide_duration_seconds, read off .hero__bg's
+  // data-interval), reused on Home/About/Services; a page with no
+  // slideshow include just has an empty NodeList here, a harmless no-op.
+  const heroBg = document.querySelector('.hero__bg');
   const heroBgSlides = document.querySelectorAll('.hero__bg-slide');
   if (heroBgSlides.length > 1) {
+    const heroBgIntervalMs = (Number(heroBg && heroBg.dataset.interval) || 5) * 1000;
     let heroBgIndex = 0;
     setInterval(() => {
       heroBgSlides[heroBgIndex].classList.remove('is-active');
       heroBgIndex = (heroBgIndex + 1) % heroBgSlides.length;
       heroBgSlides[heroBgIndex].classList.add('is-active');
-    }, 5000);
+    }, heroBgIntervalMs);
   }
 
 });

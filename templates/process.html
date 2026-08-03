@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}Our Process | Iconic Techno Service{% endblock %}
-{% block meta_description %}From initial inquiry to handover and AMC &mdash; the 7-phase process Iconic Techno Service follows to design, approve, install and commission every fire &amp; life-safety project.{% endblock %}
+{% block meta_description %}From initial inquiry to handover and AMC &mdash; the {{ process_phases|length }}-phase process Iconic Techno Service follows to design, approve, install and commission every fire &amp; life-safety project.{% endblock %}
 {% block og_image %}{{ site_origin }}{% static 'image/process-intro-bg.jpg' %}{% endblock %}
 
 {% block content %}
@@ -14,189 +14,41 @@
     <div class="container section__head process-intro__content">
       <p class="eyebrow">Our Process</p>
       <h1>Our Project Execution Process</h1>
-      <p class="section__sub">Every project moves through the same seven phases &mdash; from first inquiry to handover and ongoing maintenance &mdash; so nothing gets missed along the way.</p>
+      <p class="section__sub">Every project moves through the same {{ process_phases|length }} phases &mdash; from first inquiry to handover and ongoing maintenance &mdash; so nothing gets missed along the way.</p>
     </div>
   </section>
 
-  {% include "includes/consultationstats.html" %}
+  {% include "includes/consultationstats.html" with stat2_count=process_phases|length stat2_label="Process Phases" %}
 
   <section class="section">
     <div class="container">
       <div class="phase-list">
+        {% for phase in process_phases %}
         <div class="phase">
           <div class="phase__marker">
             <svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><rect x="9" y="2" width="6" height="3" rx="1"/><path d="M8 13l2.5 2.5L16 10"/></svg>
-            <span class="phase__marker-num">01</span>
+            <span class="phase__marker-num">{{ forloop.counter|stringformat:"02d" }}</span>
           </div>
           <div class="phase__content">
-            <p class="phase__label">Phase 1</p>
-            <h3>Initial Inquiry &amp; Technical Risk Assessment</h3>
-            <p class="phase__tagline">Customer Inquiry to On-Site Survey</p>
+            <p class="phase__label">Phase {{ forloop.counter }}</p>
+            <h3>{{ phase.title }}</h3>
+            <p class="phase__tagline">{{ phase.tagline }}</p>
             <div class="phase__body">
-              <img class="phase__image" src="{{ process_phases.0.image.url }}" alt="{{ process_phases.0.name }}">
+              <img class="phase__image" src="{{ phase.image.url }}" alt="{{ phase.name }}">
               <div class="phase__cards">
                 <div class="phase__card">
-                  <h4>Inquiry &amp; Site Survey</h4>
-                  <p>Every inquiry is logged with building type, hazard classification and timeline, then verified on-site &mdash; field engineers assess dimensions, water pressure/flow, electrical infrastructure and fire load.</p>
+                  <h4>{{ phase.card1_title }}</h4>
+                  <p>{{ phase.card1_text }}</p>
                 </div>
                 <div class="phase__card">
-                  <h4>Hazard Classification</h4>
-                  <p>Occupancy hazard level is classified under applicable codes (NFPA 13/14/72, NBC, local Civil Defence standards) to determine the right system design approach.</p>
+                  <h4>{{ phase.card2_title }}</h4>
+                  <p>{{ phase.card2_text }}</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
-
-        <div class="phase">
-          <div class="phase__marker">
-            <svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><rect x="9" y="2" width="6" height="3" rx="1"/><path d="M8 13l2.5 2.5L16 10"/></svg>
-            <span class="phase__marker-num">02</span>
-          </div>
-          <div class="phase__content">
-            <p class="phase__label">Phase 2</p>
-            <h3>Design Engineering &amp; Commercial Proposal</h3>
-            <p class="phase__tagline">Calculations, Modeling &amp; Budgeting</p>
-            <div class="phase__body">
-              <img class="phase__image" src="{{ process_phases.1.image.url }}" alt="{{ process_phases.1.name }}">
-              <div class="phase__cards">
-                <div class="phase__card">
-                  <h4>Engineering &amp; Design</h4>
-                  <p>Pipe sizing (Hazen-Williams) and voltage-drop calculations feed into 2D/3D CAD-BIM layouts, routing sprinklers, detectors and panels while coordinating with MEP and structural teams.</p>
-                </div>
-                <div class="phase__card">
-                  <h4>Costing &amp; Proposal</h4>
-                  <p>A detailed Bill of Quantities covers piping, valves, pumps, detectors, panels and labor &mdash; submitted as a techno-commercial proposal for client sign-off.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="phase">
-          <div class="phase__marker">
-            <svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><rect x="9" y="2" width="6" height="3" rx="1"/><path d="M8 13l2.5 2.5L16 10"/></svg>
-            <span class="phase__marker-num">03</span>
-          </div>
-          <div class="phase__content">
-            <p class="phase__label">Phase 3</p>
-            <h3>Code Approvals &amp; Regulatory Permitting</h3>
-            <p class="phase__tagline">AHJ &amp; Civil Defence Submission</p>
-            <div class="phase__body">
-              <img class="phase__image" src="{{ process_phases.2.image.url }}" alt="{{ process_phases.2.name }}">
-              <div class="phase__cards">
-                <div class="phase__card">
-                  <h4>Documentation &amp; Submission</h4>
-                  <p>Shop drawings, riser diagrams, cause-and-effect matrix and equipment datasheets are compiled and formally submitted to local authorities for permit review.</p>
-                </div>
-                <div class="phase__card">
-                  <h4>Approval &amp; Revisions</h4>
-                  <p>Reviewer feedback is incorporated into the drawing set and resubmitted until final permit approval is secured.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="phase">
-          <div class="phase__marker">
-            <svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><rect x="9" y="2" width="6" height="3" rx="1"/><path d="M8 13l2.5 2.5L16 10"/></svg>
-            <span class="phase__marker-num">04</span>
-          </div>
-          <div class="phase__content">
-            <p class="phase__label">Phase 4</p>
-            <h3>Procurement, Quality Assurance &amp; Off-Site Prep</h3>
-            <p class="phase__tagline">Material Sourcing &amp; Fabrication</p>
-            <div class="phase__body">
-              <img class="phase__image" src="{{ process_phases.3.image.url }}" alt="{{ process_phases.3.name }}">
-              <div class="phase__cards">
-                <div class="phase__card">
-                  <h4>Procurement &amp; Testing</h4>
-                  <p>UL-listed / FM-approved components &mdash; pumps, panels, sprinklers, clean-agent cylinders, detectors &mdash; are ordered, with critical equipment like main fire pumps factory-tested before dispatch.</p>
-                </div>
-                <div class="phase__card">
-                  <h4>Off-Site Pre-fabrication</h4>
-                  <p>Header pipes, grooved pipe spools and structural supports are cut and prepared off-site in advance to accelerate on-site installation.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="phase">
-          <div class="phase__marker">
-            <svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><rect x="9" y="2" width="6" height="3" rx="1"/><path d="M8 13l2.5 2.5L16 10"/></svg>
-            <span class="phase__marker-num">05</span>
-          </div>
-          <div class="phase__content">
-            <p class="phase__label">Phase 5</p>
-            <h3>Site Installation &amp; MEP Integration</h3>
-            <p class="phase__tagline">Execution &amp; Physical Civil/Electrical Work</p>
-            <div class="phase__body">
-              <img class="phase__image" src="{{ process_phases.4.image.url }}" alt="{{ process_phases.4.name }}">
-              <div class="phase__cards">
-                <div class="phase__card">
-                  <h4>Mechanical &amp; Electrical Installation</h4>
-                  <p>Fire mains, risers, zone valves, sprinkler drops and hose cabinets go in alongside fire alarm panels, addressable detectors, call points and voice evacuation systems.</p>
-                </div>
-                <div class="phase__card">
-                  <h4>MEP Interlocking</h4>
-                  <p>Systems are integrated with building services &mdash; HVAC trip-signals, stairwell pressurization, elevator recall, door release and access-control override &mdash; for coordinated emergency response.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="phase">
-          <div class="phase__marker">
-            <svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><rect x="9" y="2" width="6" height="3" rx="1"/><path d="M8 13l2.5 2.5L16 10"/></svg>
-            <span class="phase__marker-num">06</span>
-          </div>
-          <div class="phase__content">
-            <p class="phase__label">Phase 6</p>
-            <h3>Testing, Commissioning (T&amp;C) &amp; Inspection</h3>
-            <p class="phase__tagline">Hydrostatic, Cause-and-Effect &amp; Final AHJ Sign-Off</p>
-            <div class="phase__body">
-              <img class="phase__image" src="{{ process_phases.5.image.url }}" alt="{{ process_phases.5.name }}">
-              <div class="phase__cards">
-                <div class="phase__card">
-                  <h4>Pressure &amp; System Testing</h4>
-                  <p>Piping is pressure-tested (typically 200 psi for 2 hours per NFPA) for leaks, then real fire scenarios are simulated to confirm detection, HVAC shutdown, agent release and pump start-up all trigger correctly.</p>
-                </div>
-                <div class="phase__card">
-                  <h4>Final Inspection &amp; Certification</h4>
-                  <p>Civil Defence / Fire Department officials inspect the site, witness live tests and issue the Fire Safety Completion Certificate or Occupancy Permit.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="phase">
-          <div class="phase__marker">
-            <svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><rect x="9" y="2" width="6" height="3" rx="1"/><path d="M8 13l2.5 2.5L16 10"/></svg>
-            <span class="phase__marker-num">07</span>
-          </div>
-          <div class="phase__content">
-            <p class="phase__label">Phase 7</p>
-            <h3>Handover, Training &amp; Ongoing AMC</h3>
-            <p class="phase__tagline">As-Built Documentation &amp; Preventive Maintenance</p>
-            <div class="phase__body">
-              <img class="phase__image" src="{{ process_phases.6.image.url }}" alt="{{ process_phases.6.name }}">
-              <div class="phase__cards">
-                <div class="phase__card">
-                  <h4>Handover &amp; Training</h4>
-                  <p>As-built drawings, O&amp;M manuals, warranty certificates and test reports are handed over, and facility staff are trained on panel operation, resets, manual releases and basic troubleshooting.</p>
-                </div>
-                <div class="phase__card">
-                  <h4>Ongoing AMC</h4>
-                  <p>Transition into scheduled quarterly, bi-annual and annual maintenance checks to keep the system compliant and audit-ready year-round.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        {% endfor %}
       </div>
     </div>
   </section>

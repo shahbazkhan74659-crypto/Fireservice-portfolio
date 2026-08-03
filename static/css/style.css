@@ -221,19 +221,15 @@ a.whatsapp-icon:hover{color:#1ebe5b;}
 /* ============ Hero (brand strip + intro share one bg image) ============ */
 .hero{position:relative;color:#fff;padding-top:10px;overflow:hidden;}
 .hero__bg{position:absolute;inset:0;}
-/* Background slideshow: 4 stacked layers crossfaded by site.js on a 5s
-   interval (see the hero background slideshow block there). Each layer
-   carries its own image so this is CSS-driven like every other section
-   background in this file, not an inline style per slide. */
+/* Background slideshow: stacked layers crossfaded by site.js on a 5s
+   interval (see the hero background slideshow block there). Each layer's
+   image is DB-driven (HeroSlide), set as an inline background-image style
+   by includes/hero-bg-slideshow.html rather than a fixed --N rule here. */
 .hero__bg-slide{
   position:absolute;inset:0;background-position:center;background-size:cover;
   background-repeat:no-repeat;opacity:0;transition:opacity 1.2s ease;
 }
 .hero__bg-slide.is-active{opacity:1;}
-.hero__bg-slide--1{background-image:url(../image/bg-image.jpg);}
-.hero__bg-slide--2{background-image:url(../image/achievements-growth-illustration.jpg);}
-.hero__bg-slide--3{background-image:url(../image/brochure-fire-safety-training.jpg);}
-.hero__bg-slide--4{background-image:url(../image/about-fire-extinguishers.jpg);}
 .hero__overlay{
   position:absolute;inset:0;
   background:linear-gradient(120deg, rgba(16,18,21,.92) 30%, rgba(122,14,14,.75));
@@ -351,8 +347,9 @@ a.whatsapp-icon:hover{color:#1ebe5b;}
 
 /* ============ Mission & Vision ============ */
 /* Reuses includes/hero-bg-slideshow.html verbatim (same .hero__bg/
-   .hero__bg-slide classes, same 4 photos as the Home hero) — this section
-   just needs position:relative to anchor it and its own dark overlay +
+   .hero__bg-slide classes, same DB-driven HeroSlide photos as the Home
+   hero) — this section just needs position:relative to anchor it and its
+   own dark overlay +
    z-index:2 content wrapper, mirroring .hero's own working stacking order
    (bg, then overlay, both z-index:auto painted in DOM order; content
    explicitly raised above both) rather than inventing a new pattern. */
@@ -881,6 +878,18 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
 
 .logo-add-form{width:100%;}
 
+/* ============ Admin Hub — Process Phases (row-per-phase layout) ============
+   Reuses the public Process page's .phase__body/.phase__image/.phase__cards/
+   .phase__card (black gradient-hover cards) for visual consistency between
+   what the admin edits and what the public page renders — only the
+   surrounding row chrome (border, header with the phase number + actions) is
+   admin-specific. */
+.phase-admin-list{display:flex;flex-direction:column;gap:28px;margin-bottom:50px;}
+.phase-admin-row{border:1px solid var(--line);border-radius:var(--radius);padding:20px;}
+.phase-admin-row__head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.phase-admin-row__label{font-weight:700;font-size:.95rem;color:var(--ink-800);margin:0;}
+.phase-admin-row .phase__body{margin-top:0;}
+
 /* ============ Admin Home dashboard (command center) ============
    Scoped dark theme + accent tokens — deliberately local to .command-center,
    not merged into :root, since the rest of Admin Hub (login, other admin
@@ -906,8 +915,8 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
 .command-center__brand-text{display:flex;flex-direction:column;}
 .command-center__title{font-family:var(--ff-display);font-weight:700;font-size:1.3rem;color:var(--cc-text);}
 .command-center__subtitle{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--cc-cyan);}
-.cc-header-stats{display:flex;flex-wrap:wrap;align-items:center;gap:16px 28px;}
-.cc-header-stats [data-stat-editor]{padding-right:28px;border-right:1px solid var(--cc-line);}
+.cc-header-stats{display:flex;flex-wrap:wrap;align-items:center;gap:14px 18px;}
+.cc-header-stats [data-stat-editor]{padding-right:18px;border-right:1px solid var(--cc-line);}
 .cc-header-stats [data-stat-editor]:last-child{padding-right:0;border-right:none;}
 .cc-years-exp{display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
 .cc-years-exp__value{
@@ -917,6 +926,18 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
 .cc-years-exp__value:hover{color:var(--cc-cyan);}
 .cc-years-exp__suffix{color:var(--cc-cyan);}
 .cc-years-exp__label{font-size:.78rem;color:var(--cc-muted);margin:0;}
+
+/* Dark-theme button variant — .btn--outline's ink-800 border/text reads as
+   near-invisible against the command-center's navy background, so header
+   controls placed inside it (e.g. the Hero Slideshow button) use this
+   instead, matching the cyan accent used throughout this section. */
+.cc-btn{
+  display:inline-flex;align-items:center;flex-shrink:0;
+  padding:9px 18px;border-radius:999px;border:1px solid var(--cc-line);
+  background:transparent;color:var(--cc-text);font-family:var(--ff-body);font-size:.82rem;font-weight:600;
+  cursor:pointer;transition:border-color .15s ease,color .15s ease;
+}
+.cc-btn:hover{border-color:var(--cc-cyan);color:var(--cc-cyan);}
 
 /* ---- Meters ---- */
 .command-center__meters{display:flex;flex-wrap:wrap;gap:20px;margin-bottom:28px;}
@@ -1037,6 +1058,27 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
   display:flex;justify-content:flex-end;gap:12px;
   margin-top:28px;padding-top:20px;border-top:1px solid var(--line);
 }
+
+/* ---- Hero Slideshow admin modal ---- */
+.hero-slideshow-preview{
+  position:relative;height:160px;border-radius:var(--radius);overflow:hidden;
+  margin-bottom:20px;background:var(--tint);
+}
+.hero-slideshow-preview__slide{
+  position:absolute;inset:0;background-position:center;background-size:cover;
+  background-repeat:no-repeat;opacity:0;transition:opacity 1s ease;
+}
+.hero-slideshow-preview__slide.is-active{opacity:1;}
+.hero-slideshow-preview__empty{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  color:var(--ink-600);font-size:.85rem;margin:0;
+}
+.hero-slide-list{display:flex;flex-direction:column;gap:10px;margin:16px 0;}
+.hero-slide-row{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  border:1px solid var(--line);border-radius:var(--radius);padding:8px 10px;
+}
+.hero-slide-row img{width:72px;height:44px;object-fit:cover;border-radius:6px;flex-shrink:0;}
 
 /* ---- Lead detail modal — deliberately larger than the standard confirm-dialog
    .modal, per the request for a "giant" pop-up presenting the full message ---- */
@@ -1259,4 +1301,8 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
      nowrap, with no per-column exception, is what makes auto table-layout
      assign each column its own non-overlapping natural width. */
   .cert-table th,.cert-table td{padding:12px 16px;white-space:nowrap;}
+  /* "Leads — Daily Breakdown — <month>" (#breakdownTable's h2) uses the
+     browser-default h2 size — no site-wide h2 font-size rule exists — which
+     reads oversized and wraps awkwardly at phone widths. */
+  #breakdownTable h2{font-size:1.2rem;}
 }

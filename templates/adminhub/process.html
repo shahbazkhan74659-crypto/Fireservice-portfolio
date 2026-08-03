@@ -1,0 +1,23 @@
+{% extends "adminhub/base.html" %}
+{% load django_vite %}
+
+{% block title %}Process | Admin Hub | Iconic Techno Service{% endblock %}
+
+{% block extra_head %}
+  {% vite_asset 'src/islands/admin-process-phases/main.tsx' %}
+{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="section__head">
+      <p class="eyebrow">Our Process</p>
+      <h2>Process Phase Photos</h2>
+      <p class="section__sub">These 7 photos fill the Process page's phases in order (1st photo &rarr; Phase 1, 2nd &rarr; Phase 2, etc.). Keep exactly 7, in this order &mdash; removing one or reordering shifts every phase's photo after it.</p>
+    </div>
+    <div id="admin-process-phases-root">
+      <noscript>Please enable JavaScript to manage process phase photos.</noscript>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -5,7 +5,7 @@ from django.utils.text import slugify
 from PIL import Image, UnidentifiedImageError
 from rest_framework import serializers
 
-from .models import Brand, Certification, ClientLogo, FireRiskAssessmentItem, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting
+from .models import Brand, Certification, ClientLogo, FireRiskAssessmentItem, HeroSlide, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting
 from .pdf_utils import render_pdf_first_page_to_png
 
 MAX_LOGO_SIZE_BYTES = 5 * 1024 * 1024  # 5MB
@@ -101,6 +101,15 @@ def validate_entity_name(value):
     value = value.strip()
     if len(value) < 2:
         raise serializers.ValidationError('Name is required.')
+    return value
+
+
+def validate_card_text(value):
+    """Shared validation for ProcessPhase's two explanation-card bodies —
+    strips whitespace and requires at least 10 characters."""
+    value = value.strip()
+    if len(value) < 10:
+        raise serializers.ValidationError('This field is required.')
     return value
 
 
@@ -299,7 +308,10 @@ class CertificationSerializer(serializers.ModelSerializer):
 class SiteSettingSerializer(serializers.ModelSerializer):
     class Meta:
         model = SiteSetting
-        fields = ['years_experience', 'clients_served', 'installations', 'emergency_support', 'team_members']
+        fields = [
+            'years_experience', 'clients_served', 'installations', 'emergency_support', 'team_members',
+            'hero_slide_duration_seconds',
+        ]
         # No max_value set on the model fields, so cap them here.
         extra_kwargs = {
             'years_experience': {'max_value': 999},
@@ -307,6 +319,7 @@ class SiteSettingSerializer(serializers.ModelSerializer):
             'installations': {'max_value': 999999},
             'emergency_support': {'max_value': 999},
             'team_members': {'max_value': 9999},
+            'hero_slide_duration_seconds': {'min_value': 1, 'max_value': 60},
         }
 
 
@@ -364,14 +377,57 @@ class ProcessPhaseSerializer(serializers.ModelSerializer):
     # ImageField) so SVG uploads (allowed by the frontend schema) aren't
     # rejected by Pillow — see validate_image_size_and_type() above.
     image = serializers.FileField()
+    # The model's title/tagline/card fields all carry default='' (needed so
+    # their schema migrations could add them to existing rows) which would
+    # otherwise make DRF infer required=False — declared explicitly so they
+    # stay required on every create/update instead.
+    title = serializers.CharField()
+    tagline = serializers.CharField()
+    card1_title = serializers.CharField()
+    card1_text = serializers.CharField()
+    card2_title = serializers.CharField()
+    card2_text = serializers.CharField()
 
     class Meta:
         model = ProcessPhase
-        fields = ['id', 'name', 'image', 'order']
+        fields = ['id', 'name', 'image', 'order', 'title', 'tagline', 'card1_title', 'card1_text', 'card2_title', 'card2_text']
         read_only_fields = ['order']  # server-assigned on create — see perform_create
 
     def validate_name(self, value):
         return validate_entity_name(value)
+
+    def validate_image(self, value):
+        return validate_image_size_and_type(value)
+
+    def validate_title(self, value):
+        return validate_entity_name(value)
+
+    def validate_tagline(self, value):
+        return validate_entity_name(value)
+
+    def validate_card1_title(self, value):
+        return validate_entity_name(value)
+
+    def validate_card2_title(self, value):
+        return validate_entity_name(value)
+
+    def validate_card1_text(self, value):
+        return validate_card_text(value)
+
+    def validate_card2_text(self, value):
+        return validate_card_text(value)
+
+
+class HeroSlideSerializer(serializers.ModelSerializer):
+    # Declared explicitly as FileField (not the ModelSerializer-inferred
+    # ImageField) so SVG uploads (allowed by the frontend schema) aren't
+    # rejected by Pillow — see validate_image_size_and_type() above.
+    image = serializers.FileField()
+
+    class Meta:
+        model = HeroSlide
+        fields = ['id', 'image', 'order']
+        read_only_fields = ['order']  # server-assigned on create — see perform_create
 
     def validate_image(self, value):
         return validate_image_size_and_type(value)

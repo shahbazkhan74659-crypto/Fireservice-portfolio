@@ -115,10 +115,9 @@ class ProcessView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Ordered 1-7 by ProcessPhase.order; process.html looks each phase's
-        # photo up positionally (process_phases.0 .. .6) since the phase
-        # titles/taglines/cards below each image stay hardcoded copy, not
-        # DB-driven — see the ProcessPhase model docstring.
+        # process.html loops over these in order — every phase's content
+        # (image, title, tagline, both cards) is DB-driven, so adding or
+        # removing a row changes how many phases render, no template edits.
         context['process_phases'] = ProcessPhase.objects.all()
         return context
 
@@ -259,6 +258,7 @@ class AdminHubHomeView(StaffRequiredMixin, TemplateView):
         context['installations'] = site_setting.installations
         context['emergency_support'] = site_setting.emergency_support
         context['team_members'] = site_setting.team_members
+        context['hero_slide_duration'] = site_setting.hero_slide_duration_seconds
 
         populated_types = sum(1 for model in CONTENT_MODELS if model.objects.exists())
         context['content_completeness_pct'] = round((populated_types / len(CONTENT_MODELS)) * 100)
@@ -509,6 +509,14 @@ class AdminHubServicesView(StaffRequiredMixin, TemplateView):
     # Assessment management React islands, which POST/PATCH/DELETE with an
     # X-CSRFToken header.
     template_name = 'adminhub/services.html'
+
+
+@method_decorator(ensure_csrf_cookie, name='dispatch')
+class AdminHubProcessView(StaffRequiredMixin, TemplateView):
+    # ensure_csrf_cookie needed — this page hosts the Process Phase Photos
+    # management React island, which POSTs/PATCHes/DELETEs with an
+    # X-CSRFToken header.
+    template_name = 'adminhub/process.html'
 
 
 @method_decorator(ensure_csrf_cookie, name='dispatch')

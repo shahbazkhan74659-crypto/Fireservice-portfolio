@@ -4,6 +4,6 @@
 <div class="stats">
   <div class="container stats__grid stats__grid--2">
     <div class="stat">{% if static_stats %}<span class="stat__num">{{ years_experience }}</span>{% else %}<span class="stat__num" data-count="{{ years_experience }}">0</span>{% endif %}<span class="stat__suffix">+</span><span class="stat__label">Years Experience</span></div>
-    <div class="stat">{% if static_stats %}<span class="stat__num">{{ services_list|length }}</span>{% else %}<span class="stat__num" data-count="{{ services_list|length }}">0</span>{% endif %}<span class="stat__label">Services Offered</span></div>
+    <div class="stat">{% if static_stats %}<span class="stat__num">{% if stat2_count is not None %}{{ stat2_count }}{% else %}{{ services_list|length }}{% endif %}</span>{% else %}<span class="stat__num" data-count="{% if stat2_count is not None %}{{ stat2_count }}{% else %}{{ services_list|length }}{% endif %}">0</span>{% endif %}<span class="stat__label">{{ stat2_label|default:"Services Offered" }}</span></div>
   </div>
 </div>

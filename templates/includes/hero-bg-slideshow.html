@@ -1,10 +1,19 @@
 <!-- ===== Hero background slideshow ===== -->
-<!-- 4 stacked layers crossfaded by site.js on a 5s interval (see the hero
-     background slideshow block there); each layer's image is set via its
-     own .hero__bg-slide--N rule in style.css. -->
-<div class="hero__bg">
-  <div class="hero__bg-slide hero__bg-slide--1 is-active"></div>
-  <div class="hero__bg-slide hero__bg-slide--2"></div>
-  <div class="hero__bg-slide hero__bg-slide--3"></div>
-  <div class="hero__bg-slide hero__bg-slide--4"></div>
+<!-- Stacked layers crossfaded by site.js on a data-driven interval (see the
+     hero background slideshow block there). Slides and the interval are
+     both DB-driven (HeroSlide / SiteSetting.hero_slide_duration_seconds) —
+     each layer's image comes from its own row's inline background-image
+     instead of a fixed .hero__bg-slide--N rule in style.css, so adding,
+     removing or reordering a slide (or changing the pace) needs no
+     template/CSS/JS changes. Fetches its own data via templatetags (not a
+     view-supplied variable) since this partial is reused across
+     pages/includes with different view contexts — see CLAUDE.md on the
+     include tag's own context frame. -->
+{% load website_extras %}
+{% get_hero_slides as hero_slides %}
+{% get_hero_slide_duration as hero_slide_duration %}
+<div class="hero__bg" data-interval="{{ hero_slide_duration }}">
+  {% for slide in hero_slides %}
+  <div class="hero__bg-slide{% if forloop.first %} is-active{% endif %}" style="background-image:url('{{ slide.image.url }}')"></div>
+  {% endfor %}
 </div>

@@ -11,14 +11,17 @@ export default function ProcessPhaseManager() {
 
   if (loadState === 'loading') {
     return (
-      <div className="logo-grid" aria-hidden="true">
+      <div className="phase-admin-list" aria-hidden="true">
         {Array.from({ length: 7 }).map((_, i) => (
-          <div className="logo-card logo-card--admin" key={i}>
-            <Skeleton style={{ width: '100%', height: 50 }} />
-            <div className="logo-card__admin-actions">
-              <Skeleton style={{ width: 38, height: 38, borderRadius: 10 }} />
-              <Skeleton style={{ width: 38, height: 38, borderRadius: 10 }} />
+          <div className="phase-admin-row" key={i}>
+            <div className="phase-admin-row__head">
+              <Skeleton style={{ width: 70, height: 18 }} />
+              <div className="logo-card__admin-actions">
+                <Skeleton style={{ width: 38, height: 38, borderRadius: 10 }} />
+                <Skeleton style={{ width: 38, height: 38, borderRadius: 10 }} />
+              </div>
             </div>
+            <Skeleton style={{ width: '100%', height: 140 }} />
           </div>
         ))}
       </div>
@@ -35,7 +38,7 @@ export default function ProcessPhaseManager() {
       {phases.length === 0 ? (
         <p className="section__sub">No process phase photos yet.</p>
       ) : (
-        <div className="logo-grid">
+        <div className="phase-admin-list">
           {phases.map((phase) => (
             <ProcessPhaseCard key={phase.id} phase={phase} onUpdated={update} onDeleted={remove} />
           ))}

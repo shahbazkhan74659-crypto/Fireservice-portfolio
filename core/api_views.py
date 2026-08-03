@@ -38,12 +38,13 @@ from leads.serializers import (
     ContactMessageSerializer,
     SurveyRequestSerializer,
 )
-from website.models import Brand, Certification, ClientLogo, FireRiskAssessmentItem, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting
+from website.models import Brand, Certification, ClientLogo, FireRiskAssessmentItem, HeroSlide, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting
 from website.serializers import (
     BrandSerializer,
     CertificationSerializer,
     ClientLogoSerializer,
     FireRiskAssessmentItemSerializer,
+    HeroSlideSerializer,
     MissionVisionItemSerializer,
     ProcessPhaseSerializer,
     ProductSerializer,
@@ -752,6 +753,27 @@ class ProcessPhaseDetailView(RetrieveUpdateDestroyAPIView):
     queryset = ProcessPhase.objects.all()
     serializer_class = ProcessPhaseSerializer
     parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [IsAdminUser]
+
+
+class HeroSlideListCreateView(ListCreateAPIView):
+    queryset = HeroSlide.objects.all()
+    serializer_class = HeroSlideSerializer
+    parser_classes = [MultiPartParser, FormParser]  # uploads arrive as multipart, not JSON
+    permission_classes = [IsAdminUser]
+
+    def perform_create(self, serializer):
+        with transaction.atomic():
+            next_order = (HeroSlide.objects.select_for_update().aggregate(Max('order'))['order__max'] or 0) + 1
+            serializer.save(order=next_order)
+
+
+class HeroSlideDeleteView(DestroyAPIView):
+    # DestroyAPIView only, not RetrieveUpdateDestroyAPIView — a slide is
+    # swapped by deleting and re-adding, no Edit exposed, same as
+    # Certification.
+    queryset = HeroSlide.objects.all()
+    serializer_class = HeroSlideSerializer
     permission_classes = [IsAdminUser]
 
 

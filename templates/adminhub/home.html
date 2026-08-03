@@ -5,6 +5,7 @@
 
 {% block extra_head %}
   {% vite_asset 'src/islands/admin-site-settings/main.tsx' %}
+  {% vite_asset 'src/islands/admin-hero-slideshow/main.tsx' %}
 {% endblock %}
 
 {% block content %}
@@ -17,6 +18,7 @@
         <span class="command-center__subtitle">Dashboard Overview</span>
       </div>
     </div>
+    <div data-hero-slideshow-root data-duration="{{ hero_slide_duration }}"></div>
     <div class="cc-header-stats">
       <div data-stat-editor data-field="years_experience" data-label="Years Experience" data-suffix="+" data-value="{{ years_experience }}">
         <noscript>{{ years_experience }}+ Years Experience</noscript>
