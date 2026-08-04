@@ -1,6 +1,10 @@
 # Claude Code local settings (machine-specific permission allowlist)
 .claude/settings.local.json
 
+# SEO agent team — local-only, not shared project source
+agent-seo-manager-memory.md
+.claude/agents/agent-seo-*.md
+
 # Python / Django
 venv/
 __pycache__/
