@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from .models import Brand, Brochure, Certification, ClientLogo, FireRiskAssessmentItem, HeroSlide, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting
+from .pdf_utils import render_pdf_first_page_to_png
 
 
 @admin.register(MissionVisionItem)
@@ -77,9 +78,21 @@ class SiteSettingAdmin(admin.ModelAdmin):
 class BrochureAdmin(admin.ModelAdmin):
     # Singleton, same pattern as SiteSettingAdmin above.
     list_display = ('__str__',)
+    # `image` is server-computed from `pdf` (see save_model below), same
+    # contract as BrochureSerializer where it's declared read_only — editing
+    # it directly here would let it drift out of sync with the PDF.
+    readonly_fields = ('image',)
 
     def has_add_permission(self, request):
         return not Brochure.objects.exists()
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+    def save_model(self, request, obj, form, change):
+        # This admin bypasses BrochureSerializer.update(), which is the only
+        # other place the PDF-first-page render normally happens — without
+        # this, replacing the PDF here leaves the preview image stale.
+        if 'pdf' in form.changed_data:
+            obj.image = render_pdf_first_page_to_png(obj.pdf, 'its-brochure')
+        super().save_model(request, obj, form, change)
