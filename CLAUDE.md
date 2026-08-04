@@ -12,7 +12,9 @@ A static single-page prototype exists at the sibling folder `C:\FireService\` (n
 
 ## Stack & commands
 
-Django 5.2 (server-rendered templates) + MySQL (local dev, via `django-environ`/`.env`) + React "islands" in TypeScript (Vite, mounted only into specific DOM nodes, not a full SPA) + Zod (client-side UX validation only — DRF serializers are the real trust boundary) + DRF for the API + `django-vite` to inject built JS into templates.
+Django 5.2 (server-rendered templates) + PostgreSQL (local dev and prod both, via `django-environ`/`.env` and `psycopg`) + React "islands" in TypeScript (Vite, mounted only into specific DOM nodes, not a full SPA) + Zod (client-side UX validation only — DRF serializers are the real trust boundary) + DRF for the API + `django-vite` to inject built JS into templates.
+
+Deploys to **Render**, which offers Postgres as its only managed DB option — this project ran on MySQL early on and was migrated to Postgres for that reason (see git history around the migration commit if MySQL-era assumptions ever need double-checking).
 
 To run locally, start both (React islands render blank without the Vite dev server):
 ```
@@ -48,7 +50,9 @@ No linter/formatter configured — match existing style.
 - `overflow-x:hidden` on both `html` and `body` (top of `style.css`) is **load-bearing** — the off-canvas mobile nav (`position:fixed` + `transform`) inflates `document.body.scrollWidth` in Chromium without it, letting mobile users scroll into empty space.
 - That same `overflow-x:hidden` forces browsers to auto-compute `overflow-y:auto`, which silently breaks `position:sticky` for descendants — both the public and Admin Hub headers use `position:fixed` (with JS measuring real header height into `body`'s `padding-top`) instead of `sticky`.
 - `django-vite` needs `'django_vite'` in `INSTALLED_APPS` in addition to the `DJANGO_VITE` settings dict, or `{% load django_vite %}` fails.
-- MySQL + `TIME_ZONE='Asia/Kolkata'`/`USE_TZ=True`: date-filtered queries (`created_at__date=...`) generate `CONVERT_TZ(col, 'UTC', 'Asia/Kolkata')`, which silently returns `NULL` unless **both** the `'UTC'` and `'Asia/Kolkata'` named zones are loaded into `mysql.time_zone*`. `mysql_tzinfo_to_sql.exe` is broken on this Windows install regardless of input — the zones were inserted manually. MySQL also caches a negative zone lookup per-process, surviving `FLUSH TABLES` — a real service restart was needed after fixing the data. Watch for this class of "the data is right but the query still returns nothing" symptom.
+- PostgreSQL + `TIME_ZONE='Asia/Kolkata'`/`USE_TZ=True`: date-filtered queries (`created_at__date=...`) just work — Postgres ships its own IANA tz database, unlike the MySQL setup this project used briefly, which needed the `'UTC'`/`'Asia/Kolkata'` zone tables loaded manually (`mysql_tzinfo_to_sql.exe` was broken on that Windows install) and a service restart to clear a cached negative zone lookup. That whole class of "data is right but the query returns nothing" symptom doesn't apply here anymore.
+- `manage.py dumpdata -o <file>` on Windows: the `-o` flag opens the output file with the console's locale codepage (cp1252), not UTF-8, so any non-ASCII character (e.g. an em dash) in the data corrupts the dump. Set `PYTHONUTF8=1` in the environment before running `dumpdata`/`loaddata` on Windows, or redirect stdout instead of using `-o`.
+- The `fireservice_app` Postgres role needs `CREATEDB` — `pytest-django` creates/drops a `test_fireservice` database per run and fails with a permissions error otherwise (`ALTER ROLE fireservice_app CREATEDB;` as a superuser).
 - A DRF `APIView.as_view()` is `csrf_exempt` by default, and `SessionAuthentication.enforce_csrf()` only runs once a user is already attached to the request — so any endpoint that must run **before** authentication (login, forgot-password OTP flows) is a plain Django `View` to keep real CSRF enforcement; once a request is already authenticated (change-password/username/email), an ordinary DRF `APIView` is safe.
 - DRF's auto-inferred `ImageField` validates uploads by opening them with Pillow, which can't open SVG — any upload field that must accept SVG (e.g. service icons) needs an explicit `FileField` with its own content-type allowlist instead.
 - CSS cascade: a longhand property override only wins if declared **after** any later shorthand rule of equal-or-lower specificity that also touches that property — declaring it earlier in the file loses silently regardless of how logically grouped the CSS looks.
@@ -74,8 +78,19 @@ No linter/formatter configured — match existing style.
 
 ## Custom agents
 
-`.claude/agents/{agent-cleancode,agent-refactor,agent-security,agent-responsive,agent-seo}.md` — project-scoped FIND/FIX specialists (readability/reliability, cross-file duplication & dead code, security, mobile/responsive UX, technical SEO). FIND is read-only and reports findings; FIX only runs on an explicit follow-up command and never auto-triggers from a FIND report.
+`.claude/agents/{agent-cleancode,agent-refactor,agent-security,agent-responsive}.md` — project-scoped FIND/FIX specialists (readability/reliability, cross-file duplication & dead code, security, mobile/responsive UX). FIND is read-only and reports findings; FIX only runs on an explicit follow-up command and never auto-triggers from a FIND report.
+
+**SEO team (local-only, not in this list's git history):** `.claude/agents/agent-seo-*.md` — an
+8-agent SEO team (`agent-seo-manager` orchestrating `agent-seo-strategist`,
+`agent-seo-Technical-Architect`, `agent-seo-keyword`, `agent-seo-OP-optimization`,
+`agent-seo-content-cluster-and-blog`, `agent-seo-SEO-GBP`, `agent-seo-link-building-outreach`) plus
+its running activity log at `agent-seo-manager-memory.md` (repo root). Both the agent files and the
+log are gitignored by request — deliberately local-only, not shared via this repo. If you're
+reading this on a fresh clone, these files won't be present; ask whoever set them up for copies if
+you need them.
 
 ## Current state
 
-All work through commit `94c2410` is on `main`, working tree clean. 162 backend tests / 58 frontend tests passing; a Playwright e2e suite (`e2e/`, 6 spec files) runs against the real dev DB using a tagged-data cleanup convention (`core/management/commands/e2e_data.py`) — see `e2e/README.md` for scope and what isn't covered yet. Only one contact phone number remains sitewide (`+91 73592 29129`).
+All work through commit `94c2410` is on `main`; `website/admin.py` has an uncommitted in-progress change (Brochure admin PDF-preview wiring) as of this writing. 162 backend tests / 58 frontend tests passing; a Playwright e2e suite (`e2e/`, 6 spec files) runs against the real dev DB using a tagged-data cleanup convention (`core/management/commands/e2e_data.py`) — see `e2e/README.md` for scope and what isn't covered yet. Only one contact phone number remains sitewide (`+91 73592 29129`).
+
+Migrated local dev + prod from MySQL to PostgreSQL (Render only offers Postgres as a managed DB). All real data (leads, admin user, content edits) was carried over via `dumpdata`/`loaddata`, not a fresh reseed — the MySQL server and its `fireservice` database were left untouched as a backup, not dropped.

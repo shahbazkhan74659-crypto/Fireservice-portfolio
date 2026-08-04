@@ -73,7 +73,8 @@ WSGI_APPLICATION = 'fireservice.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-# SQLite for local dev, MySQL later — swap is DATABASE_URL only, no code change.
+# SQLite fallback for a bare clone; real dev/prod both run on PostgreSQL via
+# DATABASE_URL — swap is DATABASE_URL only, no code change.
 
 DATABASES = {
     'default': env.db(
