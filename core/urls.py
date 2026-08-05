@@ -12,6 +12,8 @@ from core.api_views import (
     AdminHubForgotPasswordResetView,
     AdminHubForgotPasswordVerifyOTPView,
     AdminHubLoginAPIView,
+    BlogPostDetailView,
+    BlogPostListCreateView,
     BrandDetailView,
     BrandListCreateView,
     BrochureDetailView,
@@ -36,9 +38,10 @@ from core.api_views import (
     SiteSettingDetailView,
     SurveyRequestCreateView,
 )
-from core.sitemaps import StaticViewSitemap
+from core.sitemaps import BlogPostSitemap, LocationSitemap, StaticViewSitemap
 from core.views import (
     AboutView,
+    AdminHubBlogView,
     AdminHubCertificationsView,
     AdminHubClienteleView,
     AdminHubHomeView,
@@ -47,19 +50,22 @@ from core.views import (
     AdminHubProcessView,
     AdminHubResolveLeadView,
     AdminHubServicesView,
+    BlogDetailView,
+    BlogListView,
     BrochureView,
     CertificationsView,
     ClienteleView,
     ConsultationView,
     ContactPageView,
     HomeView,
+    LocationView,
     ProcessView,
     RobotsTxtView,
     ServicesView,
     SurveyPageView,
 )
 
-sitemaps = {'static': StaticViewSitemap()}
+sitemaps = {'static': StaticViewSitemap(), 'blog': BlogPostSitemap(), 'locations': LocationSitemap()}
 
 urlpatterns = [
     path('', HomeView.as_view(), name='home'),
@@ -71,6 +77,9 @@ urlpatterns = [
     path('process/', ProcessView.as_view(), name='process'),
     path('brochure/', BrochureView.as_view(), name='brochure'),
     path('certifications/', CertificationsView.as_view(), name='certifications'),
+    path('blog/', BlogListView.as_view(), name='blog'),
+    path('blog/<slug:slug>/', BlogDetailView.as_view(), name='blog-detail'),
+    path('locations/<slug:slug>/', LocationView.as_view(), name='location'),
     path('survey/', SurveyPageView.as_view(), name='survey'),
     path('api/survey/', SurveyRequestCreateView.as_view(), name='api-survey'),
     path('contact/', ContactPageView.as_view(), name='contact'),
@@ -89,6 +98,7 @@ urlpatterns = [
     path('admin-hub/services/', AdminHubServicesView.as_view(), name='adminhub-services'),
     path('admin-hub/process/', AdminHubProcessView.as_view(), name='adminhub-process'),
     path('admin-hub/certifications/', AdminHubCertificationsView.as_view(), name='adminhub-certifications'),
+    path('admin-hub/blog/', AdminHubBlogView.as_view(), name='adminhub-blog'),
     path('admin-hub/logout/', LogoutView.as_view(next_page='adminhub-login'), name='adminhub-logout'),
     path('api/admin-hub/change-password/', AdminHubChangePasswordView.as_view(), name='api-adminhub-change-password'),
     path('api/admin-hub/change-username/', AdminHubChangeUsernameView.as_view(), name='api-adminhub-change-username'),
@@ -113,6 +123,8 @@ urlpatterns = [
     path('api/admin-hub/hero-slides/<int:pk>/', HeroSlideDeleteView.as_view(), name='api-adminhub-hero-slides-detail'),
     path('api/admin-hub/certifications/', CertificationListCreateView.as_view(), name='api-adminhub-certifications-list'),
     path('api/admin-hub/certifications/<int:pk>/', CertificationDeleteView.as_view(), name='api-adminhub-certifications-detail'),
+    path('api/admin-hub/blog/', BlogPostListCreateView.as_view(), name='api-adminhub-blog-list'),
+    path('api/admin-hub/blog/<int:pk>/', BlogPostDetailView.as_view(), name='api-adminhub-blog-detail'),
     path('api/admin-hub/site-settings/', SiteSettingDetailView.as_view(), name='api-adminhub-site-settings-detail'),
     path('api/admin-hub/brochure/', BrochureDetailView.as_view(), name='api-adminhub-brochure-detail'),
 ]

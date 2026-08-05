@@ -4,6 +4,7 @@ from datetime import date, datetime, timedelta
 
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.views import redirect_to_login
+from django.core.paginator import Paginator
 from django.db.models import Count
 from django.db.models.functions import TruncDate
 from django.http import Http404, JsonResponse
@@ -14,8 +15,10 @@ from django.views import View
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import TemplateView
 
+from core.locations import get_location
 from leads.models import ConsultationRequest, ContactMessage, SurveyRequest
 from website.models import (
+    BlogPost,
     Brand,
     Brochure,
     Certification,
@@ -168,6 +171,122 @@ class ServicesView(TemplateView):
                     for service in services
                 ],
             },
+        })
+        return context
+
+
+class LocationView(TemplateView):
+    # One parametrized view backing all 4 corridor-town landing pages (see
+    # core/locations.py) rather than 4 near-duplicate view classes — the 4
+    # pages share ~90% identical structure (same 8 real Service rows, same
+    # credential block, same CTA, same map, same JSON-LD shape except
+    # areaServed), only H1/intro/meta/slug vary per town. Same reasoning as
+    # BlogDetailView being one view handling many posts, not one per post.
+    template_name = 'location.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        location = get_location(kwargs['slug'])
+        if location is None:
+            raise Http404
+        context['location'] = location
+        context['services'] = Service.objects.all()
+
+        # Service JSON-LD with areaServed set to this specific town — same
+        # pattern ServicesView already uses (see services_jsonld there),
+        # extended per the Technical-Architect's own recommendation that
+        # areaServed should eventually cover the corridor towns, not just
+        # 'Silvassa'. Built with json.dumps() for the same admin-editable-
+        # free-text reason ServicesView's own JSON-LD is.
+        origin = 'https' if self.request.is_secure() else 'http'
+        origin = f'{origin}://{self.request.get_host()}'
+        context['location_jsonld'] = json.dumps({
+            '@context': 'https://schema.org',
+            '@type': 'Service',
+            'name': 'Fire & Life-Safety Systems',
+            'provider': {
+                '@type': 'LocalBusiness',
+                'name': 'Iconic Techno Service',
+                'url': f'{origin}/',
+            },
+            'areaServed': location['town'],
+            'hasOfferCatalog': {
+                '@type': 'OfferCatalog',
+                'name': 'Fire & Life-Safety Services',
+                'itemListElement': [
+                    {
+                        '@type': 'Offer',
+                        'itemOffered': {
+                            '@type': 'Service',
+                            'name': service.name,
+                            'description': service.description,
+                        },
+                    }
+                    for service in context['services']
+                ],
+            },
+        })
+
+        # Per-town 3-level breadcrumb (Home > {Town} Fire Safety > ...) —
+        # same reasoning as BlogDetailView's blog_breadcrumb_jsonld: these 4
+        # pages all share one url_name ('location'), so the sitewide
+        # BREADCRUMB_NAMES dict (keyed by url_name, one static label per
+        # name) structurally can't distinguish between them. Rendered under
+        # a distinct context key from this template's own extra_head block,
+        # not added to BREADCRUMB_NAMES at all — same pattern, same reason.
+        context['location_breadcrumb_jsonld'] = json.dumps({
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            'itemListElement': [
+                {'@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': f'{origin}/'},
+                {'@type': 'ListItem', 'position': 2, 'name': location['h1'], 'item': f'{origin}{self.request.path}'},
+            ],
+        })
+        return context
+
+
+class BlogListView(TemplateView):
+    template_name = 'blog-list.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        posts = BlogPost.objects.filter(is_published=True)
+        paginator = Paginator(posts, 9)
+        page_number = self.request.GET.get('page')
+        context['page_obj'] = paginator.get_page(page_number)
+        return context
+
+
+class BlogDetailView(TemplateView):
+    template_name = 'blog-detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        post = get_object_or_404(BlogPost, slug=kwargs['slug'], is_published=True)
+        context['post'] = post
+        context['meta_description_override'] = post.meta_description or post.excerpt
+
+        # Per-post 3-level breadcrumb (Home > Blog > {post.title}) — the
+        # sitewide breadcrumb_jsonld in core/context_processors.py is a
+        # static 2-level dict lookup keyed by url_name and structurally
+        # cannot produce a per-object dynamic title. Rendered under a
+        # distinct context key (not `breadcrumb_jsonld`) and only from this
+        # template's own extra_head block, deliberately avoiding any
+        # same-key collision with the context processor's value — 'blog-
+        # detail' is intentionally NOT added to BREADCRUMB_NAMES, so the
+        # sitewide processor naturally emits nothing for this page's
+        # url_name and there's no duplicate/conflicting BreadcrumbList
+        # JSON-LD on the same page.
+        origin = 'https' if self.request.is_secure() else 'http'
+        origin = f'{origin}://{self.request.get_host()}'
+        context['blog_breadcrumb_jsonld'] = json.dumps({
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            'itemListElement': [
+                {'@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': f'{origin}/'},
+                {'@type': 'ListItem', 'position': 2, 'name': 'Blog', 'item': f'{origin}/blog/'},
+                {'@type': 'ListItem', 'position': 3, 'name': post.title, 'item': f'{origin}{self.request.path}'},
+            ],
         })
         return context
 
@@ -531,3 +650,10 @@ class AdminHubCertificationsView(StaffRequiredMixin, TemplateView):
     # ensure_csrf_cookie needed — this page hosts the Certifications
     # management React island, which POSTs/DELETEs with an X-CSRFToken header.
     template_name = 'adminhub/certifications.html'
+
+
+@method_decorator(ensure_csrf_cookie, name='dispatch')
+class AdminHubBlogView(StaffRequiredMixin, TemplateView):
+    # ensure_csrf_cookie needed — this page hosts the Blog management React
+    # island, which POSTs/PATCHes/DELETEs with an X-CSRFToken header.
+    template_name = 'adminhub/blog.html'

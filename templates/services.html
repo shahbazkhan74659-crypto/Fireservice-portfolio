@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Our Services | Iconic Techno Service, Silvassa{% endblock %}
-{% block meta_description %}Fire detection, suppression, extinguishers, safety equipment and more &mdash; the full range of fire &amp; life-safety services Iconic Techno Service designs, supplies and maintains for clients in Silvassa and beyond.{% endblock %}
+{% block title %}Fire Detection, Suppression &amp; Safety Services | Silvassa{% endblock %}
+{% block meta_description %}Fire detection, CO2 flooding, CCTV/PA, HVWS, extinguishers &amp; fire pump house systems &mdash; design, install &amp; AMC in Silvassa and beyond. Get a quote today.{% endblock %}
 {% block og_image %}{{ site_origin }}{% static 'image/services-intro-bg.jpg' %}{% endblock %}
 
 {% block extra_head %}
@@ -17,8 +17,8 @@
     <div class="services-intro__overlay"></div>
     <div class="container section__head services-intro__content">
       <p class="eyebrow">Our Services</p>
-      <h1>Complete Fire &amp; Life-Safety Solutions</h1>
-      <p class="section__sub">One partner for detection, suppression, extinguishers, safety equipment and electrical work &mdash; sales, installation and ongoing service, all under one roof.</p>
+      <h1>Complete Fire &amp; Life-Safety Solutions in Silvassa</h1>
+      <p class="section__sub">One partner for detection, suppression, extinguishers, safety equipment and electrical work &mdash; sales, installation and ongoing service, all under one roof. Start with a <a href="/survey/" class="inline-link">free site survey</a> or <a href="/consultation/" class="inline-link">book a free consultation</a>.</p>
     </div>
   </section>
 
@@ -30,10 +30,11 @@
     {% include "includes/hero-bg-slideshow.html" %}
     <div class="services-cards__overlay"></div>
     <div class="container services-cards__content">
+      <h2 class="text-light">Our Fire &amp; Life-Safety Services in Silvassa</h2>
       <div class="grid grid--services">
         {% for service in services %}
         <div class="card">
-          <div class="card__icon"><img src="{{ service.icon.url }}" alt=""></div>
+          <div class="card__icon"><img src="{{ service.icon.url }}" alt="{{ service.name }} icon" width="{{ service.icon.width }}" height="{{ service.icon.height }}"></div>
           <h3>{{ service.name }}</h3>
           <p>{{ service.description }}</p>
         </div>

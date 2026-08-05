@@ -1,15 +1,83 @@
 import io
+import os
+import shutil
+from pathlib import Path
 
 import pytest
+from django.conf import settings as django_settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from PIL import Image
 
 
+def _link_or_copy(src, dst):
+    """copytree's copy_function: hard-link instead of duplicating file bytes
+    (media/ is ~5,000 files / 571MB in this project — see _media_root_seed
+    below) — falls back to a real copy (copytree's own default behavior) if
+    the link can't be created, e.g. a cross-device OSError on a CI
+    environment where the destination and the real media/ folder aren't on
+    the same volume/drive."""
+    try:
+        os.link(src, dst)
+    except OSError:
+        shutil.copy2(src, dst)
+
+
+@pytest.fixture(scope='session')
+def _media_root_seed(tmp_path_factory, django_db_setup):
+    """Session-scoped: does the expensive media/ copy exactly once for the
+    whole test run, not once per test function.
+
+    Depends on django_db_setup (otherwise unused) purely to force fixture
+    ordering: django_db_setup is what actually applies migrations
+    0004/0006/0008/0012/0014, which are what write the seeded image files to
+    the real MEDIA_ROOT in the first place — without this dependency,
+    session-scoped instantiate-on-first-use gives no guarantee this copy
+    runs after those files exist, causing a real FileNotFoundError race.
+
+    Seeded ClientLogo/Brand/Product/Certification/ProcessPhase rows (from
+    website/migrations/0004,0006,0008,0012,0014) reference real image files
+    that live under the real project MEDIA_ROOT. `.url` never touches disk
+    (string concatenation only), but `.width`/`.height` open the file via
+    Pillow and need a real file to exist under whatever MEDIA_ROOT is active
+    when a test runs — so seeded rows need this tree available under the
+    test MEDIA_ROOT.
+
+    This used to run per-test (function-scoped, copying into each test's own
+    tmp_path), which was correct but was ~803,000 total file operations
+    across the suite (real project media/ is ~5,000 files / 571MB, times 162
+    tests) — the actual cost, independent of copy-vs-hardlink strategy.
+    Hoisting the copy to run once per session and having every test just
+    point MEDIA_ROOT at this one already-populated directory (see
+    _media_root below) is safe because: no test in this suite lists/walks
+    MEDIA_ROOT contents directly (no os.listdir/os.walk/glob/raw MEDIA_ROOT
+    reference — confirmed by grepping the whole suite) or asserts on its
+    file count, and Django's storage backend always writes a test's own
+    upload under a fresh, uniquely-suffixed filename
+    (FileSystemStorage.get_available_name()), so uploads from different
+    tests accumulate in this shared directory across the session without
+    colliding with each other or with the seeded files. pytest tears down
+    the whole tmp_path_factory session directory at the end of the run
+    either way, so there's no cleanup gap.
+
+    Hard-linked (via _link_or_copy) rather than byte-copied since this
+    directory and the real media/ folder are on the same drive in this dev
+    environment — a directory-entry link is effectively free next to
+    copying real file bytes.
+    """
+    real_media_root = Path(django_settings.MEDIA_ROOT)
+    seed_dir = tmp_path_factory.mktemp('media_seed')
+    if real_media_root.is_dir():
+        shutil.copytree(real_media_root, seed_dir, dirs_exist_ok=True, copy_function=_link_or_copy)
+    return seed_dir
+
+
 @pytest.fixture(autouse=True)
-def _media_root(settings, tmp_path):
-    """Every test that touches an ImageField/FileField writes into a fresh
-    per-test temp directory instead of the real media/ folder."""
-    settings.MEDIA_ROOT = str(tmp_path)
+def _media_root(settings, _media_root_seed):
+    """Every test points MEDIA_ROOT at the one session-seeded directory
+    (built once by _media_root_seed above) instead of getting its own fresh
+    copy — see that fixture's docstring for why sharing one directory across
+    the whole session is safe here."""
+    settings.MEDIA_ROOT = str(_media_root_seed)
 
 
 @pytest.fixture

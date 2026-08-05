@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Blog | Iconic Techno Service{% endblock %}
+{% block meta_description %}Fire safety compliance guidance, maintenance tips and industry updates for residential, commercial and industrial clients in Silvassa and Dadra &amp; Nagar Haveli, from Iconic Techno Service.{% endblock %}
+
+{% block content %}
+
+  <!-- ===== Blog list ===== -->
+  <section class="section section--tint" id="blog">
+    <div class="container">
+      <div class="section__head">
+        <p class="eyebrow">Blog</p>
+        <h1>Fire Safety Insights &amp; Updates</h1>
+        <p class="section__sub">Compliance guidance, maintenance tips and industry updates from our team in Silvassa.</p>
+      </div>
+
+      {% if not page_obj.object_list %}
+      <p class="section__sub blog-empty">No posts published yet &mdash; check back soon.</p>
+      {% else %}
+      <div class="blog-grid">
+        {% for post in page_obj %}
+        <div class="blog-card">
+          {% if post.image %}
+          <a href="{% url 'blog-detail' post.slug %}" class="blog-card__img">
+            <img src="{{ post.image.url }}" alt="{{ post.title }}" width="{{ post.image.width }}" height="{{ post.image.height }}" loading="lazy">
+          </a>
+          {% endif %}
+          <div class="blog-card__body">
+            <h3><a href="{% url 'blog-detail' post.slug %}">{{ post.title }}</a></h3>
+            <p>{{ post.excerpt }}</p>
+            <a href="{% url 'blog-detail' post.slug %}" class="inline-link">Read more</a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      {% if page_obj.has_previous or page_obj.has_next %}
+      <nav class="pagination" aria-label="Blog pagination">
+        {% if page_obj.has_previous %}
+        <a class="btn btn--outline" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+        {% endif %}
+        <span class="pagination__status">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+        <a class="btn btn--outline" href="?page={{ page_obj.next_page_number }}">Next</a>
+        {% endif %}
+      </nav>
+      {% endif %}
+      {% endif %}
+    </div>
+  </section>
+
+  {% include "includes/survey-cta.html" with cta_eyebrow="Stay Informed" cta_heading="Have a Fire Safety Question?" cta_lead="Get a free, no-obligation site survey and talk to our team about your facility's compliance needs." %}
+
+{% endblock %}

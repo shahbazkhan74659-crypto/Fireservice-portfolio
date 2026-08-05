@@ -38,8 +38,9 @@ from leads.serializers import (
     ContactMessageSerializer,
     SurveyRequestSerializer,
 )
-from website.models import Brand, Brochure, Certification, ClientLogo, FireRiskAssessmentItem, HeroSlide, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting
+from website.models import BlogPost, Brand, Brochure, Certification, ClientLogo, FireRiskAssessmentItem, HeroSlide, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting
 from website.serializers import (
+    BlogPostSerializer,
     BrandSerializer,
     BrochureSerializer,
     CertificationSerializer,
@@ -838,3 +839,24 @@ class BrochureDetailView(RetrieveUpdateAPIView):
 
     def get_object(self):
         return Brochure.load()
+
+
+class BlogPostListCreateView(ListCreateAPIView):
+    # Shows every post (published and draft) — this is the authoring view,
+    # not the public BlogListView (which filters is_published=True), so
+    # drafts need to stay visible/editable here.
+    queryset = BlogPost.objects.all()
+    serializer_class = BlogPostSerializer
+    parser_classes = [MultiPartParser, FormParser]  # uploads arrive as multipart, not JSON
+    permission_classes = [IsAdminUser]
+    # No perform_create() override, unlike the order-based content models
+    # above — BlogPost has no `order` field; it orders by -published_at, -id
+    # instead (see website.models.BlogPost.Meta), which needs no server-
+    # assigned value on create.
+
+
+class BlogPostDetailView(RetrieveUpdateDestroyAPIView):
+    queryset = BlogPost.objects.all()
+    serializer_class = BlogPostSerializer
+    parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [IsAdminUser]

@@ -3,13 +3,15 @@
 {% load django_vite %}
 {% load website_extras %}
 
-{% block title %}Certifications | Iconic Techno Service{% endblock %}
-{% block meta_description %}Iconic Techno Service is ISO 9001:2015 and ISO 45001:2018 certified, GST-registered and Udyam (MSME) registered — verified compliance for every project we deliver.{% endblock %}
+{% block title %}ISO 9001 &amp; 45001 Certified Fire Safety Contractor Silvassa{% endblock %}
+{% block meta_description %}Iconic Techno Service is ISO 9001:2015 and ISO 45001:2018 certified, GST-registered and Udyam (MSME) registered — verified compliance for every project.{% endblock %}
 
 {% block extra_head %}
   {% vite_hmr_client %}
   {% vite_react_refresh %}
   {% vite_asset 'src/islands/contact-form/main.tsx' %}
+  {% get_certifications_jsonld as certifications_jsonld %}
+  <script type="application/ld+json">{{ certifications_jsonld|safe }}</script>
 {% endblock %}
 
 {% block content %}
@@ -20,7 +22,7 @@
       <div class="section__head">
         <p class="eyebrow">Certifications</p>
         <h1>Compliant &amp; Certified</h1>
-        <p class="section__sub">Our management systems and business registrations are independently audited and verified &mdash; here's the paperwork behind the promise.</p>
+        <p class="section__sub">Our management systems and business registrations are independently audited and verified &mdash; here's the paperwork behind the promise. <a href="/services/" class="inline-link">See the full range of services we deliver under these certifications</a>.</p>
       </div>
 
       {% get_certifications as certifications %}
@@ -28,7 +30,7 @@
         {% for certification in certifications %}
         <div class="cert-card">
           <a class="cert-card__img" href="{% if certification.pdf %}{{ certification.pdf.url }}{% else %}{{ certification.image.url }}{% endif %}" target="_blank" rel="noopener" aria-label="View full {{ certification.name }} certificate">
-            <img src="{{ certification.image.url }}" alt="{{ certification.name }} Certificate for Iconic Techno Service" loading="lazy">
+            <img src="{{ certification.image.url }}" alt="{{ certification.name }} Certificate for Iconic Techno Service" width="{{ certification.image.width }}" height="{{ certification.image.height }}" loading="lazy">
           </a>
           <div class="cert-card__body">
             <h3>{{ certification.name }}</h3>

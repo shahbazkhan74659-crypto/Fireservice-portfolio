@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ post.title }} | Iconic Techno Service{% endblock %}
+{% block meta_description %}{{ meta_description_override }}{% endblock %}
+{% block og_image %}{% if post.image %}{{ site_origin }}{{ post.image.url }}{% else %}{{ og_image_default }}{% endif %}{% endblock %}
+
+{% block extra_head %}
+  <script type="application/ld+json">{{ blog_breadcrumb_jsonld|safe }}</script>
+{% endblock %}
+
+{% block content %}
+
+  <!-- ===== Blog post ===== -->
+  <section class="section">
+    <div class="container blog-post">
+      <div class="section__head blog-post__head">
+        <p class="eyebrow"><a href="{% url 'blog' %}" class="inline-link">Blog</a></p>
+        <h1>{{ post.title }}</h1>
+        <p class="blog-post__meta">{{ post.published_at|date:"F j, Y" }}</p>
+      </div>
+
+      {% if post.image %}
+      <img class="blog-post__image" src="{{ post.image.url }}" alt="{{ post.title }}" width="{{ post.image.width }}" height="{{ post.image.height }}">
+      {% endif %}
+
+      <div class="blog-body">
+        {{ post.body|linebreaks }}
+      </div>
+    </div>
+  </section>
+
+  {% include "includes/survey-cta.html" with cta_eyebrow="Stay Informed" cta_heading="Have a Fire Safety Question?" cta_lead="Get a free, no-obligation site survey and talk to our team about your facility's compliance needs." %}
+
+{% endblock %}

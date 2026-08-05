@@ -11,7 +11,7 @@
     <div class="logo-grid">
       {% for brand in brands %}
       <div class="logo-card">
-        <img src="{{ brand.image.url }}" alt="{{ brand.name }}" loading="lazy">
+        <img src="{{ brand.image.url }}" alt="{{ brand.name }}" width="{{ brand.image.width }}" height="{{ brand.image.height }}" loading="lazy">
       </div>
       {% endfor %}
     </div>

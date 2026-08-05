@@ -5,7 +5,7 @@ from django.utils.text import slugify
 from PIL import Image, UnidentifiedImageError
 from rest_framework import serializers
 
-from .models import Brand, Brochure, Certification, ClientLogo, FireRiskAssessmentItem, HeroSlide, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting
+from .models import BlogPost, Brand, Brochure, Certification, ClientLogo, FireRiskAssessmentItem, HeroSlide, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting
 from .pdf_utils import render_pdf_first_page_to_png
 
 MAX_LOGO_SIZE_BYTES = 5 * 1024 * 1024  # 5MB
@@ -453,3 +453,41 @@ class HeroSlideSerializer(serializers.ModelSerializer):
 
     def validate_image(self, value):
         return validate_image_size_and_type(value)
+
+
+class BlogPostSerializer(serializers.ModelSerializer):
+    # Blog photos are raster-only (no SVG requirement like the icon/logo
+    # fields above), so the ModelSerializer-inferred ImageField (Pillow-
+    # backed) is fine as-is — no FileField-plus-manual-validation workaround
+    # needed here.
+    class Meta:
+        model = BlogPost
+        fields = [
+            'id', 'title', 'slug', 'excerpt', 'body', 'meta_description', 'image',
+            'published_at', 'is_published', 'created_at', 'updated_at',
+        ]
+        # slug: server-controlled only (BlogPost.save() auto-generates it from
+        # title when blank) — this feature deliberately doesn't expose manual
+        # slug editing in v1, keeping the form simpler and avoiding duplicate/
+        # invalid-slug edge cases. created_at/updated_at are auto_now_add/
+        # auto_now on the model, so they're never client-writable either.
+        read_only_fields = ['slug', 'created_at', 'updated_at']
+        extra_kwargs = {'image': {'required': False}}
+
+    def validate_title(self, value):
+        value = value.strip()
+        if not value:
+            raise serializers.ValidationError('Title is required.')
+        return value
+
+    def validate_excerpt(self, value):
+        value = value.strip()
+        if not value:
+            raise serializers.ValidationError('Excerpt is required.')
+        return value
+
+    def validate_body(self, value):
+        value = value.strip()
+        if not value:
+            raise serializers.ValidationError('Body is required.')
+        return value

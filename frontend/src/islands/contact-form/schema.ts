@@ -5,7 +5,7 @@ export const SERVICE_OPTIONS = [
   { value: 'fire_detection', label: 'Fire Detection System' },
   { value: 'co2_gas_flooding', label: 'Co2 Gas Flooding' },
   { value: 'cctv_pa', label: 'CCTV & PA System' },
-  { value: 'hvws_mvms', label: 'HVWS / MVMS System' },
+  { value: 'hvws_mvms', label: 'HVWS / MVWS System' },
   { value: 'fire_extinguisher', label: 'All Type Fire Extinguisher' },
   { value: 'safety_equipment', label: 'Safety Equipment' },
   { value: 'fire_pump_house', label: 'Fire Pump House' },

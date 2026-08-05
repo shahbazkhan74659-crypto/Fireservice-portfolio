@@ -12,7 +12,7 @@
     <div class="logo-grid">
       {% for logo in client_logos %}
       <div class="logo-card">
-        <img src="{{ logo.image.url }}" alt="{{ logo.name }}" loading="lazy">
+        <img src="{{ logo.image.url }}" alt="{{ logo.name }}" width="{{ logo.image.width }}" height="{{ logo.image.height }}" loading="lazy">
       </div>
       {% endfor %}
     </div>

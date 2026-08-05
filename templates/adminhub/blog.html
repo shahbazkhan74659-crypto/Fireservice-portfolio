@@ -1,0 +1,22 @@
+{% extends "adminhub/base.html" %}
+{% load django_vite %}
+
+{% block title %}Blog | Admin Hub | Iconic Techno Service{% endblock %}
+
+{% block extra_head %}
+  {% vite_asset 'src/islands/admin-blog/main.tsx' %}
+{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="section__head">
+      <p class="eyebrow">Blog</p>
+      <h2>Blog Posts</h2>
+    </div>
+    <div id="admin-blog-root">
+      <noscript>Please enable JavaScript to manage blog posts.</noscript>
+    </div>
+  </div>
+</section>
+{% endblock %}

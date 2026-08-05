@@ -1,7 +1,16 @@
 from django.contrib import admin
 
-from .models import Brand, Brochure, Certification, ClientLogo, FireRiskAssessmentItem, HeroSlide, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting
+from .models import BlogPost, Brand, Brochure, Certification, ClientLogo, FireRiskAssessmentItem, HeroSlide, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting
 from .pdf_utils import render_pdf_first_page_to_png
+
+
+@admin.register(BlogPost)
+class BlogPostAdmin(admin.ModelAdmin):
+    list_display = ('title', 'is_published', 'published_at')
+    list_filter = ('is_published',)
+    search_fields = ('title', 'excerpt', 'body')
+    prepopulated_fields = {'slug': ('title',)}
+    ordering = ('-published_at',)
 
 
 @admin.register(MissionVisionItem)

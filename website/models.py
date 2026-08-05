@@ -1,5 +1,7 @@
 from django.db import models
 from django.db.models.signals import post_delete, pre_save
+from django.utils import timezone
+from django.utils.text import slugify
 
 
 def register_file_cleanup_signals(model, field_name='image', with_replace=True):
@@ -267,3 +269,41 @@ class FireRiskAssessmentItem(models.Model):
 
     def __str__(self):
         return self.text
+
+
+class BlogPost(models.Model):
+    # Authored via the Admin Hub's Blog React island (see
+    # frontend/src/islands/admin-blog/), mirroring the Service/Certification
+    # Add/Edit/Delete CRUD pattern. Django's own /admin/ registration (see
+    # website/admin.py) still works too, same fallback every other content
+    # model in this project has.
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=220, unique=True, blank=True)
+    excerpt = models.CharField(max_length=300)
+    body = models.TextField()
+    # Optional SEO override — when blank, the view falls back to `excerpt`
+    # (see core.views.BlogDetailView.get_context_data()), not handled here.
+    meta_description = models.CharField(max_length=160, blank=True)
+    image = models.ImageField(upload_to='blog/', blank=True)
+    published_at = models.DateTimeField(default=timezone.now)
+    is_published = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-published_at', '-id']
+
+    def save(self, *args, **kwargs):
+        # Safety-net fallback for any programmatic creation — the admin
+        # registration below primarily drives slug entry via
+        # prepopulated_fields (JS-driven, doesn't call save() server-side),
+        # so both mechanisms are needed, not redundant.
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.title
+
+
+register_file_cleanup_signals(BlogPost)

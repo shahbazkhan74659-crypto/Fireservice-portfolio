@@ -538,3 +538,33 @@ class TestBrandOrderAutoIncrement:
         assert res2.status_code == 201
         assert res1.json()['order'] == baseline + 1
         assert res2.json()['order'] == baseline + 2
+
+
+class TestBlogPostIsPublishedMultipartParsing:
+    """is_published is the first client-writable BooleanField submitted via
+    multipart form data anywhere in this codebase (leads.resolved is only
+    ever set server-side, never accepted from a client request) — so unlike
+    the IsAdminUser-permission pattern above, there's no existing test this
+    would duplicate. Pins DRF's documented 'true'/'false' string parsing for
+    this specific endpoint rather than trusting it by inspection."""
+
+    url = '/api/admin-hub/blog/'
+
+    def _create(self, admin_client, is_published_value):
+        return admin_client.post(self.url, {
+            'title': 'Parsing Check',
+            'excerpt': 'Excerpt text here.',
+            'body': 'Body text here.',
+            'published_at': '2026-08-05',
+            'is_published': is_published_value,
+        })
+
+    def test_true_string_parses_as_published(self, admin_client):
+        res = self._create(admin_client, 'true')
+        assert res.status_code == 201
+        assert res.json()['is_published'] is True
+
+    def test_false_string_parses_as_draft(self, admin_client):
+        res = self._create(admin_client, 'false')
+        assert res.status_code == 201
+        assert res.json()['is_published'] is False

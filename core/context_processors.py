@@ -17,6 +17,7 @@ BREADCRUMB_NAMES = {
     'survey': 'Free Site Survey',
     'consultation': 'Free Consultation',
     'brochure': 'Brochure',
+    'blog': 'Blog',
 }
 
 # Real NAP data already used elsewhere in the project (topbar/footer via

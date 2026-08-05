@@ -34,6 +34,7 @@ export default defineConfig({
         'admin-products': resolve(__dirname, 'src/islands/admin-products/main.tsx'),
         'admin-process-phases': resolve(__dirname, 'src/islands/admin-process-phases/main.tsx'),
         'admin-certifications': resolve(__dirname, 'src/islands/admin-certifications/main.tsx'),
+        'admin-blog': resolve(__dirname, 'src/islands/admin-blog/main.tsx'),
         'admin-site-settings': resolve(__dirname, 'src/islands/admin-site-settings/main.tsx'),
         'admin-hero-slideshow': resolve(__dirname, 'src/islands/admin-hero-slideshow/main.tsx'),
         'admin-brochure': resolve(__dirname, 'src/islands/admin-brochure/main.tsx'),

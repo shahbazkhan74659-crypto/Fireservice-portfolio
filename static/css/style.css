@@ -179,14 +179,14 @@ a.whatsapp-icon:hover{color:#1ebe5b;}
   backdrop-filter:blur(8px);
   border-bottom:1px solid var(--line);
 }
-.header__inner{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;gap:20px;transition:padding .25s ease;}
-.site-header.is-scrolled .header__inner{padding:8px 24px;}
+.header__inner{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;gap:20px;transition:padding .25s ease;}
+.site-header.is-scrolled .header__inner{padding:8px 16px;}
 .logo{display:flex;align-items:center;gap:10px;}
 .logo__img{height:42px;width:auto;display:block;transition:height .25s ease;}
 .logo--footer .logo__img{height:44px;}
 .site-header.is-scrolled .logo__img{height:32px;}
 
-.nav{display:flex;gap:28px;}
+.nav{display:flex;gap:20px;margin-left:32px;}
 .nav a{font-weight:500;font-size:.95rem;color:var(--ink-600);position:relative;padding:4px 0;}
 .nav a:hover{color:var(--red-600);}
 .nav a::after{content:'';position:absolute;left:0;bottom:-2px;width:0;height:2px;background:var(--red-600);transition:width .2s ease;}
@@ -642,6 +642,68 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
 .cert-card:hover .cert-card__body p,
 .cert-card:hover .cert-card__meta{color:#000;}
 
+/* ============ Blog ============ */
+.blog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;}
+/* Black card with the same bottom-to-top red-to-amber gradient wipe on
+   hover as .grid--services .card/.phase__card/.why — matches this site's
+   established "black card in a light section" language rather than the
+   plain white .cert-card/.product-card style this used before. Reused
+   as-is by the Admin Hub's blog list (see admin-blog/BlogPostCard.tsx),
+   same as .grid--services .card is already shared between the public
+   Services page and its own Admin Hub management cards. */
+.blog-card{
+  display:flex;flex-direction:column;background:#000;border:1px solid #000;border-radius:var(--radius);
+  position:relative;overflow:hidden;z-index:0;
+  transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+.blog-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:var(--amber-500);}
+.blog-card::before{
+  content:'';position:absolute;inset:0;z-index:-1;
+  background:linear-gradient(to bottom, var(--red-600), var(--amber-500));
+  transform:scaleY(0);transform-origin:bottom;transition:transform .3s ease;
+}
+.blog-card:hover::before{transform:scaleY(1);}
+/* Same aspect-ratio + object-fit:contain box as .cert-card__img — a fixed
+   ratio container with the real photo letterboxed inside it, rather than
+   .phase__image's object-fit:cover crop (which relies on a sibling-driven
+   CSS Grid height and caused a real visual regression on the Process page
+   earlier in this project — see the CSS Grid percentage-height gotcha in
+   CLAUDE.md). Blog post photos are arbitrary admin uploads with no
+   guaranteed aspect ratio, so contain (never cropping) is the safe default.
+   Letterbox background is a faint white wash (matching .why's own
+   rgba(255,255,255,.04) dark-card convention) rather than the light
+   var(--tint) this used before — var(--tint) reads as a mismatched pale
+   patch against the card's own black background. */
+.blog-card__img{position:relative;aspect-ratio:16/9;background:rgba(255,255,255,.05);}
+.blog-card__img img{width:100%;height:100%;object-fit:contain;display:block;}
+.blog-card__body{padding:20px 22px;flex:1;display:flex;flex-direction:column;}
+.blog-card__body h3{font-size:1.15rem;margin:0 0 8px;color:#fff;transition:color .25s ease;}
+.blog-card__body h3 a{color:inherit;}
+.blog-card__body p{color:#fff;font-size:.92rem;flex:1;transition:color .25s ease;}
+.blog-card:hover .blog-card__body h3{color:#000;}
+.blog-card:hover .blog-card__body p{color:#000;}
+/* .inline-link's own color:var(--red-600) (red text) would sit against the
+   card's own red-to-amber gradient wash during hover otherwise — poor
+   contrast, unlike its normal red-on-black default. Flips to black here for
+   the same reason h3/p do above. */
+.blog-card:hover .blog-card__body .inline-link{color:#000;}
+.blog-empty{text-align:center;}
+
+.pagination{display:flex;align-items:center;justify-content:center;gap:20px;margin-top:50px;}
+.pagination__status{color:var(--ink-600);font-size:.9rem;}
+
+.blog-post{max-width:760px;}
+.blog-post__head{max-width:none;margin:0 0 30px;text-align:left;}
+.blog-post__meta{color:var(--ink-400);font-size:.85rem;font-weight:600;}
+/* No forced CSS aspect-ratio here, unlike .blog-card__img above — the
+   native width/height attributes on this <img> (see blog-detail.html)
+   already give the browser its intrinsic aspect ratio for CLS purposes,
+   and width:100%;height:auto scales it proportionally with nothing else
+   competing to override that ratio. */
+.blog-post__image{width:100%;height:auto;border-radius:var(--radius);box-shadow:var(--shadow-md);margin-bottom:30px;}
+.blog-body{color:var(--ink-800);font-size:1rem;line-height:1.75;}
+.blog-body p{margin:0 0 1.3em;}
+
 .lead-tabs{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px;}
 .lead-tab{
   padding:10px 20px;border-radius:999px;border:2px solid var(--ink-800);
@@ -732,6 +794,12 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
 .map{margin-top:24px;width:100%;aspect-ratio:16/10;border:1px solid var(--ink-400);border-radius:var(--radius);}
 .map-open-link{display:inline-block;margin-top:10px;font-size:.85rem;font-weight:600;color:var(--red-600);text-decoration:none;}
 .map-open-link:hover{text-decoration:underline;}
+
+/* A same-size text link embedded inside body copy (e.g. a sentence in a
+   <p>) — distinct from .map-open-link/.btn--link, which are both smaller
+   standalone UI links, not inline with surrounding paragraph text. */
+.inline-link{color:var(--red-600);text-decoration:underline;}
+.inline-link:hover{color:var(--red-700);}
 
 .contact__form{background:#fff;border:1px solid var(--ink-400);border-radius:var(--radius);padding:32px;box-shadow:var(--shadow-md);}
 .contact__form h3{margin-bottom:20px;}
@@ -834,9 +902,24 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
 /* position:fixed, not sticky — same reason as .site-header above: the
    load-bearing overflow-x:hidden on html/body breaks position:sticky. */
 .adminhub-header{position:fixed;top:0;left:0;width:100%;z-index:100;background:#fff;border-bottom:1px solid var(--line);}
-.adminhub-header__inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:16px 24px;gap:12px;}
+.adminhub-header__inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:16px 16px;gap:12px;transition:padding .25s ease;}
+/* Same shrink-on-scroll treatment as .site-header.is-scrolled (public site)
+   — .adminhub-header never had this until now (adminhub.js had no scroll
+   listener at all), just the static/js/header-offset.js height-sync every
+   fixed header needs regardless of whether it shrinks. No topbar to collapse
+   here (Admin Hub's header is a single row, unlike the public site's
+   topbar+header pair), so only padding/logo shrink, not a topbar toggle. */
+.adminhub-header.is-scrolled .adminhub-header__inner{padding:8px 16px;}
+.adminhub-header.is-scrolled .logo__img{height:32px;}
 .adminhub-header__brand{display:flex;align-items:center;flex-wrap:wrap;gap:16px 40px;}
-.adminhub-header__actions{display:flex;align-items:center;flex-wrap:wrap;gap:16px;}
+/* .nav is the same shared class the public header uses, where it needs its
+   own margin-left for logo-to-nav spacing (see .nav's base rule) — here
+   .adminhub-header__brand's own gap:16px 40px already provides that
+   spacing, so the public header's margin-left would just stack on top of
+   it unnecessarily, eating into the room this row needs to fit all 7 nav
+   links + Blog without wrapping onto a second line. */
+.adminhub-header__brand .nav{margin-left:0;}
+.adminhub-header__actions{display:flex;align-items:center;flex-wrap:wrap;gap:12px;}
 .adminhub-header__user{font-weight:600;font-size:.9rem;color:var(--ink-600);}
 .adminhub-header__actions form{margin:0;}
 /* Above the same 1150px breakpoint where the public nav goes off-canvas,
@@ -889,6 +972,27 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
 .phase-admin-row__head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
 .phase-admin-row__label{font-weight:700;font-size:.95rem;color:var(--ink-800);margin:0;}
 .phase-admin-row .phase__body{margin-top:0;}
+
+/* ============ Admin Hub — Blog ============
+   Reuses the public Blog page's .blog-card/.blog-card__img/.blog-card__body
+   (same convention as Admin Hub — Process Phases above, which reuses the
+   public Process page's classes) — only the status badge and the
+   Edit/Delete actions layered into the card body are admin-specific. */
+.blog-status{
+  display:inline-block;padding:4px 12px;border-radius:999px;font-size:.72rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.03em;margin-bottom:10px;
+}
+/* No existing green/success color token in this project (even
+   .form-note--success above uses ink-600, not green) — Published reuses the
+   site's own amber accent instead of introducing a new color. */
+.blog-status--published{background:rgba(245,165,36,.15);color:var(--amber-500);}
+.blog-status--draft{background:var(--tint);color:var(--ink-400);}
+.blog-card__body .logo-card__admin-actions{margin-top:16px;}
+/* Same flex/gap treatment as .account-email-section .field--checkbox
+   (Account Settings) — scoped to .modal instead, since the Blog Add and Edit
+   forms' checkbox lives inside two different modals (Add Blog Post, Edit
+   Blog Post), not one shared wrapper class. */
+.modal .field--checkbox{display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:20px;}
 
 /* ============ Admin Home dashboard (command center) ============
    Scoped dark theme + accent tokens — deliberately local to .command-center,
@@ -1133,7 +1237,16 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
 @media (max-width:1150px){
   .nav{
     position:fixed;top:0;right:0;height:100vh;width:260px;background:#fff;flex-direction:column;
-    padding:24px 28px 28px;gap:22px;box-shadow:-8px 0 24px rgba(0,0,0,.12);
+    padding:20px 28px;gap:16px;margin-left:0;box-shadow:-8px 0 24px rgba(0,0,0,.12);
+    /* overflow-y:auto is a safety net, not the fix itself — the
+       padding/gap values above are sized to fit all 8 links + logo row +
+       Get Brochure button within real mobile viewport heights without
+       needing to scroll (body.nav-open locks page scroll while this is
+       open, so unlike before, there was no way to reach content that
+       overflowed height:100vh — it was genuinely unreachable, not just
+       hidden behind a scroll). This only activates on unusually short
+       viewports (e.g. landscape phones) as a fallback. */
+    overflow-y:auto;
     transform:translateX(100%);transition:transform .25s ease;z-index:99;
   }
   .nav.open{transform:translateX(0);}
@@ -1159,7 +1272,7 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
      from the shared .btn classes. */
   .nav .nav__brochure-link{
     display:flex;align-items:center;justify-content:center;gap:8px;
-    margin-top:12px;padding:12px 22px;border-radius:999px;
+    margin-top:6px;padding:10px 22px;border-radius:999px;
     border:2px solid var(--red-600);color:var(--red-600);
     font-weight:600;font-size:.95rem;
   }
@@ -1171,7 +1284,7 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
      padding-top was shrunk from 100px to 24px (above) so this sits right at
      the top instead of appearing further down near the first link. */
   .nav__brand{
-    display:flex;align-items:center;padding-bottom:20px;margin-bottom:6px;
+    display:flex;align-items:center;padding-bottom:14px;margin-bottom:4px;
     border-bottom:1px solid var(--line);
   }
   .nav__brand .logo__img{height:32px;}
@@ -1225,6 +1338,7 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
   .cert-grid{grid-template-columns:repeat(2,1fr);}
   .product-grid{grid-template-columns:repeat(4,1fr);}
   .footer__grid{grid-template-columns:1fr 1fr;}
+  .blog-grid{grid-template-columns:repeat(2,1fr);}
 }
 @media (max-width:860px){
   .about,.contact{grid-template-columns:1fr;}
@@ -1257,7 +1371,7 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
      photo's corner. */
   .about__badge{top:-48px;left:-16px;padding:18px 22px;}
   .about__badge strong{font-size:1.8rem;}
-  .grid--services,.grid--why,.grid--mission,.cert-grid{grid-template-columns:1fr;}
+  .grid--services,.grid--why,.grid--mission,.cert-grid,.blog-grid{grid-template-columns:1fr;}
   .product-grid{grid-template-columns:repeat(2,1fr);}
   .phase{grid-template-columns:52px 1fr;gap:16px;}
   .phase__marker{width:52px;height:52px;}

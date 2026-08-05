@@ -35,6 +35,7 @@
         <a href="{% url 'adminhub-services' %}" class="{% if request.resolver_match.url_name == 'adminhub-services' %}active{% endif %}">Services</a>
         <a href="{% url 'adminhub-process' %}" class="{% if request.resolver_match.url_name == 'adminhub-process' %}active{% endif %}">Process</a>
         <a href="{% url 'adminhub-certifications' %}" class="{% if request.resolver_match.url_name == 'adminhub-certifications' %}active{% endif %}">Certifications</a>
+        <a href="{% url 'adminhub-blog' %}" class="{% if request.resolver_match.url_name == 'adminhub-blog' %}active{% endif %}">Blog</a>
         <!-- Drawer-only copy of username + Log Out, pinned to the bottom via
              .nav__footer (margin-top:auto) — hidden above 1150px, where the
              copy in .adminhub-header__actions below is shown instead. -->

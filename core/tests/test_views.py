@@ -7,11 +7,27 @@ pytestmark = pytest.mark.django_db
 
 @pytest.mark.parametrize('url_name', [
     'home', 'about', 'clientele', 'services', 'process', 'brochure',
-    'certifications', 'survey', 'contact', 'consultation',
+    'certifications', 'survey', 'contact', 'consultation', 'blog',
 ])
 def test_public_pages_return_200(client, url_name):
     res = client.get(reverse(url_name))
     assert res.status_code == 200
+
+
+@pytest.mark.parametrize('slug', [
+    'fire-safety-company-vapi',
+    'fire-safety-systems-valsad-gidc',
+    'fire-safety-company-umbergaon',
+    'fire-safety-company-sarigam',
+])
+def test_location_pages_return_200(client, slug):
+    res = client.get(reverse('location', args=[slug]))
+    assert res.status_code == 200
+
+
+def test_location_page_404s_for_unknown_slug(client):
+    res = client.get(reverse('location', args=['does-not-exist']))
+    assert res.status_code == 404
 
 
 def test_csrf_cookie_set_on_a_form_hosting_page(client):
@@ -19,6 +35,57 @@ def test_csrf_cookie_set_on_a_form_hosting_page(client):
     # readable csrftoken cookie to set X-CSRFToken on its POST.
     res = client.get(reverse('contact'))
     assert 'csrftoken' in res.cookies
+
+
+class TestBlogViews:
+    """BlogPost is authored via Django's own /admin/ (see website/admin.py),
+    but access control on the public blog pages — published-only gating —
+    is real user-facing behavior worth pinning directly, not just trusting
+    by inspection."""
+
+    def test_published_post_detail_returns_200(self, client):
+        from website.models import BlogPost
+
+        post = BlogPost.objects.create(
+            title='A Published Post', excerpt='Excerpt text.', body='Body text.',
+            is_published=True,
+        )
+        res = client.get(reverse('blog-detail', args=[post.slug]))
+        assert res.status_code == 200
+        assert res.context['post'] == post
+
+    def test_unpublished_post_detail_404s_even_though_the_row_exists(self, client):
+        from website.models import BlogPost
+
+        post = BlogPost.objects.create(
+            title='A Draft Post', excerpt='Excerpt text.', body='Body text.',
+            is_published=False,
+        )
+        res = client.get(reverse('blog-detail', args=[post.slug]))
+        assert res.status_code == 404
+
+    def test_blog_list_only_shows_published_posts(self, client):
+        # Membership, not exact-list equality — 0037_seed_blog_posts.py
+        # data-migrates 10 real published posts into every freshly-migrated
+        # database, test databases included, same reason
+        # TestBrandOrderAutoIncrement above doesn't assert order==1: a
+        # brand-new environment never actually starts at an empty table.
+        from website.models import BlogPost
+
+        published = BlogPost.objects.create(
+            title='Published Post', excerpt='Excerpt text.', body='Body text.',
+            is_published=True,
+        )
+        draft = BlogPost.objects.create(
+            title='Draft Post', excerpt='Excerpt text.', body='Body text.',
+            is_published=False,
+        )
+
+        res = client.get(reverse('blog'))
+        posts = list(res.context['page_obj'])
+
+        assert published in posts
+        assert draft not in posts
 
 
 class TestAdminHubAccessControl:

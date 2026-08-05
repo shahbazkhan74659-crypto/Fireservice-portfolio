@@ -12,7 +12,7 @@
     <div class="product-grid">
       {% for product in products %}
       <div class="product-card">
-        <div class="product-card__img"><img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy"></div>
+        <div class="product-card__img"><img src="{{ product.image.url }}" alt="{{ product.name }}" width="{{ product.image.width }}" height="{{ product.image.height }}" loading="lazy"></div>
         <p class="product-card__caption">{{ product.name }}</p>
       </div>
       {% endfor %}

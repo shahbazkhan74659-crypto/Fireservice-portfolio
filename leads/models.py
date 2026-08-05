@@ -22,7 +22,7 @@ SERVICE_CHOICES = [
     ('fire_detection', 'Fire Detection System'),
     ('co2_gas_flooding', 'Co2 Gas Flooding'),
     ('cctv_pa', 'CCTV & PA System'),
-    ('hvws_mvms', 'HVWS / MVMS System'),
+    ('hvws_mvms', 'HVWS / MVWS System'),
     ('fire_extinguisher', 'All Type Fire Extinguisher'),
     ('safety_equipment', 'Safety Equipment'),
     ('fire_pump_house', 'Fire Pump House'),
