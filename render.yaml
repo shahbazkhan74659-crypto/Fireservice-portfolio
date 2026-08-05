@@ -1,22 +1,19 @@
-# Render Blueprint — deploys the web service + managed Postgres together.
-# See https://render.com/docs/blueprint-spec.
+# Render Blueprint. See https://render.com/docs/blueprint-spec.
+#
+# Deliberately no `databases:` block — Render has no free Postgres tier, and
+# any database resource here (even the smallest paid one) forces a card on
+# file for the whole Blueprint. DATABASE_URL instead points at an external
+# free Postgres (e.g. Neon) filled in by hand below.
 #
 # Env vars marked `sync: false` must be filled in via the Render dashboard
 # after the first Blueprint sync (they're secrets/deployment-specific and
 # deliberately not in this file). See .env.example for what each one is.
 
-databases:
-  - name: fireservice-db
-    databaseName: fireservice
-    user: fireservice_app
-    plan: basic-256mb
-    region: oregon
-
 services:
   - type: web
     name: iconic-techno-service
     runtime: python
-    plan: starter
+    plan: free
     region: oregon
     buildCommand: "bash build.sh"
     startCommand: "python manage.py migrate --noinput && gunicorn fireservice.wsgi:application"
@@ -32,9 +29,7 @@ services:
       - key: CSRF_TRUSTED_ORIGINS
         sync: false
       - key: DATABASE_URL
-        fromDatabase:
-          name: fireservice-db
-          property: connectionString
+        sync: false
       - key: SENDGRID_API_KEY
         sync: false
       - key: DEFAULT_FROM_EMAIL
