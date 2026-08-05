@@ -16,7 +16,7 @@ services:
     plan: free
     region: oregon
     buildCommand: "bash build.sh"
-    startCommand: "python manage.py migrate --noinput && gunicorn fireservice.wsgi:application"
+    startCommand: "python manage.py migrate --noinput && python manage.py ensure_admin && gunicorn fireservice.wsgi:application"
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9
@@ -29,6 +29,12 @@ services:
       - key: CSRF_TRUSTED_ORIGINS
         sync: false
       - key: DATABASE_URL
+        sync: false
+      - key: DJANGO_SUPERUSER_USERNAME
+        sync: false
+      - key: DJANGO_SUPERUSER_PASSWORD
+        sync: false
+      - key: DJANGO_SUPERUSER_EMAIL
         sync: false
       - key: SENDGRID_API_KEY
         sync: false
