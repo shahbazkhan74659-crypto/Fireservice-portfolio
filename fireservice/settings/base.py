@@ -32,6 +32,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'django_vite',
+    'anymail',
 
     'core',
     'leads',
@@ -150,12 +151,20 @@ LOGIN_URL = '/admin-hub/'
 LOGIN_REDIRECT_URL = '/admin-hub/home/'
 
 
-# Email — used for the Admin Hub "Forgot Password" OTP flow.
-# Sender is the client's real company address, not a personal account.
-EMAIL_BACKEND = env('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
-EMAIL_HOST = env('EMAIL_HOST', default='smtp.gmail.com')
-EMAIL_PORT = env.int('EMAIL_PORT', default=587)
-EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
-EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
-DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default=EMAIL_HOST_USER)
+# Email — used for the Admin Hub "Forgot Password" and "Change Email" OTP
+# flows. Sent via SendGrid (through django-anymail) rather than raw SMTP.
+# `send_mail()` call sites in core/api_views.py are unchanged — Anymail is a
+# drop-in Django EmailBackend, so only this config swap was needed.
+# DEFAULT_FROM_EMAIL must be an address verified in SendGrid (Single Sender
+# Verification or domain authentication) or sends will be rejected.
+EMAIL_BACKEND = 'anymail.backends.sendgrid.EmailBackend'
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='iconictechnoservice.in@gmail.com')
+
+ANYMAIL = {
+    'SENDGRID_API_KEY': env('SENDGRID_API_KEY', default=''),
+}
+
+# Anymail's SendGrid backend lost official upstream support in 2025 (Twilio
+# revoked Anymail's test account) but still works and has no removal planned
+# — accepted knowingly, see anymail.W003. Silenced so deploy logs stay clean.
+SILENCED_SYSTEM_CHECKS = ['anymail.W003']
