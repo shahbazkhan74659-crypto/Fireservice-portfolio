@@ -282,6 +282,31 @@ class TestAdminHubLeadsPage:
         resolved_names = [lead['name'] for lead in res.context['resolved_requests']]
         assert resolved_names == [resolved_lead.name]
 
+    def test_visiting_the_page_purges_resolved_leads_past_the_retention_window(self, admin_client):
+        from datetime import timedelta
+
+        from leads.models import SurveyRequest
+
+        stale_lead = SurveyRequest.objects.create(
+            name='Stale', email='stale@example.com', address='123 Some Long Enough Street Address',
+            problem='A problem description that is definitely long enough.',
+            why_survey='A reason that is definitely long enough for validation.',
+            resolved=True, resolved_at=timezone.now() - timedelta(days=61),
+        )
+        recent_lead = SurveyRequest.objects.create(
+            name='Recent', email='recent@example.com', address='123 Some Long Enough Street Address',
+            problem='A problem description that is definitely long enough.',
+            why_survey='A reason that is definitely long enough for validation.',
+            resolved=True, resolved_at=timezone.now() - timedelta(days=59),
+        )
+
+        res = admin_client.get(reverse('adminhub-leads'))
+
+        assert not SurveyRequest.objects.filter(pk=stale_lead.pk).exists()
+        assert SurveyRequest.objects.filter(pk=recent_lead.pk).exists()
+        resolved_names = [lead['name'] for lead in res.context['resolved_requests']]
+        assert resolved_names == [recent_lead.name]
+
 
 class TestAdminHubResolveLeadView:
     def test_resolving_a_lead_marks_it_resolved_and_responds_with_json(self, admin_client):

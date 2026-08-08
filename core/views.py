@@ -17,6 +17,7 @@ from django.views.generic import TemplateView
 
 from core.locations import get_location
 from leads.models import ConsultationRequest, ContactMessage, SurveyRequest
+from leads.services import RESOLVED_LEAD_RETENTION_DAYS, purge_resolved_leads
 from website.models import (
     BlogPost,
     Brand,
@@ -561,6 +562,12 @@ class AdminHubLeadsView(StaffRequiredMixin, TemplateView):
     template_name = 'adminhub/leads.html'
 
     def get_context_data(self, **kwargs):
+        # No background worker/cron exists in this stack (Render free plan
+        # — see CLAUDE.md), so the 60-day resolved-lead retention window is
+        # enforced opportunistically here, the one page admins actually
+        # visit to review resolved leads. See leads.services.purge_resolved_leads.
+        purge_resolved_leads()
+
         context = super().get_context_data(**kwargs)
         context['survey_requests'] = SurveyRequest.objects.filter(resolved=False)
         context['contact_messages'] = ContactMessage.objects.filter(resolved=False)
@@ -571,23 +578,36 @@ class AdminHubLeadsView(StaffRequiredMixin, TemplateView):
         # the dashboard's own cross-type Recent Activity pattern) since each
         # lead type has different fields and there's a single "Resolved
         # Requests" table, not three parallel ones.
+        # Days left before purge_resolved_leads() auto-deletes each row —
+        # same 60-day window, computed here rather than as a template filter
+        # since it needs `now` fixed once for the whole list, not re-evaluated
+        # per row on every render.
+        now = timezone.now()
+
+        def days_remaining(resolved_at):
+            elapsed = (now - resolved_at).days
+            return max(0, RESOLVED_LEAD_RETENTION_DAYS - elapsed)
+
         resolved = []
         for obj in SurveyRequest.objects.filter(resolved=True):
             resolved.append({
                 'type': 'Survey Request', 'pk': obj.pk, 'name': obj.name,
                 'email': obj.email, 'address': obj.address, 'problem': obj.problem,
                 'why': obj.why_survey, 'received': obj.created_at, 'resolved_at': obj.resolved_at,
+                'days_remaining': days_remaining(obj.resolved_at),
             })
         for obj in ContactMessage.objects.filter(resolved=True):
             resolved.append({
                 'type': 'Contact Message', 'pk': obj.pk, 'name': obj.name,
                 'phone': obj.phone, 'email': obj.email, 'service': obj.get_service_display(),
                 'message': obj.message, 'received': obj.created_at, 'resolved_at': obj.resolved_at,
+                'days_remaining': days_remaining(obj.resolved_at),
             })
         for obj in ConsultationRequest.objects.filter(resolved=True):
             resolved.append({
                 'type': 'Consultation Request', 'pk': obj.pk, 'name': obj.name,
                 'phone': obj.phone, 'received': obj.created_at, 'resolved_at': obj.resolved_at,
+                'days_remaining': days_remaining(obj.resolved_at),
             })
         resolved.sort(key=lambda r: r['resolved_at'], reverse=True)
         context['resolved_requests'] = resolved

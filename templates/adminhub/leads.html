@@ -152,6 +152,7 @@
             <th class="cert-table__col--hide-mobile">Type</th>
             <th>Received</th>
             <th>Resolved</th>
+            <th>Auto-Delete In</th>
             <th></th>
           </tr>
         </thead>
@@ -162,6 +163,7 @@
             <td class="cert-table__meta cert-table__col--hide-mobile">{{ lead.type }}</td>
             <td class="cert-table__meta">{{ lead.received|timesince }} ago</td>
             <td class="cert-table__meta">{{ lead.resolved_at|timesince }} ago</td>
+            <td class="cert-table__meta">{{ lead.days_remaining }} day{{ lead.days_remaining|pluralize }} left</td>
             <td class="cert-table__action">
               <button type="button" class="btn btn--outline lead-view-btn"
                       data-type="{{ lead.type }}"
@@ -178,7 +180,7 @@
             </td>
           </tr>
           {% empty %}
-          <tr><td colspan="5" class="cert-table__desc">No resolved requests yet.</td></tr>
+          <tr><td colspan="6" class="cert-table__desc">No resolved requests yet.</td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -357,6 +359,7 @@ document.addEventListener('DOMContentLoaded', function () {
   var resolveForm = document.getElementById('leadResolveForm');
   var resolveBtn = document.getElementById('leadModalResolveBtn');
   var currentRow = null;
+  var currentBtn = null;
 
   var FIELD_LABELS = {
     email: 'Email',
@@ -391,6 +394,7 @@ document.addEventListener('DOMContentLoaded', function () {
       fieldsEl.appendChild(row);
     });
     currentRow = btn.closest('tr');
+    currentBtn = btn;
     // Already-resolved leads (Resolved Requests tab) carry no resolve-url —
     // nothing left to action, so the button is hidden rather than shown
     // disabled.
@@ -413,6 +417,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function closeModal() {
     overlay.hidden = true;
     currentRow = null;
+    currentBtn = null;
   }
 
   function showEmptyStateIfNeeded(tbody) {
@@ -423,12 +428,99 @@ document.addEventListener('DOMContentLoaded', function () {
     tbody.appendChild(row);
   }
 
+  // Undoes showEmptyStateIfNeeded (and the server-rendered "No X yet."
+  // placeholder, same shape) right before a row is inserted into a table
+  // that was previously empty — both variants are a single <td colspan>.
+  function removeEmptyStateRow(tbody) {
+    if (tbody.children.length !== 1) return;
+    var only = tbody.children[0];
+    if (only.children.length === 1 && only.children[0].hasAttribute('colspan')) {
+      only.remove();
+    }
+  }
+
+  function formatModalDate(date) {
+    var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    var hours = date.getHours();
+    var ampm = hours >= 12 ? 'PM' : 'AM';
+    var h12 = hours % 12 || 12;
+    var minutes = ('0' + date.getMinutes()).slice(-2);
+    return months[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear() + ', ' + h12 + ':' + minutes + ' ' + ampm;
+  }
+
+  // Mirrors the server-rendered resolved-table row (leads.html's
+  // leadPanel-resolved loop) so a lead appears there immediately on
+  // resolve, instead of only after the next full page load.
+  function addRowToResolvedTable(sourceBtn, receivedText) {
+    var resolvedPanel = document.querySelector('[data-lead-panel="resolved"]');
+    var resolvedTbody = resolvedPanel && resolvedPanel.querySelector('tbody');
+    var resolvedState = leadPagination.resolved;
+    if (!resolvedTbody || !resolvedState) return;
+
+    removeEmptyStateRow(resolvedTbody);
+
+    var row = document.createElement('tr');
+    row.className = 'lead-row';
+
+    var nameTd = document.createElement('td');
+    nameTd.className = 'cert-table__name';
+    nameTd.textContent = sourceBtn.dataset.name || '';
+    row.appendChild(nameTd);
+
+    var typeTd = document.createElement('td');
+    typeTd.className = 'cert-table__meta cert-table__col--hide-mobile';
+    typeTd.textContent = sourceBtn.dataset.type || '';
+    row.appendChild(typeTd);
+
+    var receivedTd = document.createElement('td');
+    receivedTd.className = 'cert-table__meta';
+    receivedTd.textContent = receivedText;
+    row.appendChild(receivedTd);
+
+    var resolvedTd = document.createElement('td');
+    resolvedTd.className = 'cert-table__meta';
+    resolvedTd.textContent = 'Just now';
+    row.appendChild(resolvedTd);
+
+    // Just resolved — the full retention window is left. Must match
+    // leads.services.RESOLVED_LEAD_RETENTION_DAYS.
+    var RESOLVED_LEAD_RETENTION_DAYS = 60;
+    var daysLeftTd = document.createElement('td');
+    daysLeftTd.className = 'cert-table__meta';
+    daysLeftTd.textContent = RESOLVED_LEAD_RETENTION_DAYS + ' days left';
+    row.appendChild(daysLeftTd);
+
+    var actionTd = document.createElement('td');
+    actionTd.className = 'cert-table__action';
+    var viewBtn = document.createElement('button');
+    viewBtn.type = 'button';
+    viewBtn.className = 'btn btn--outline lead-view-btn';
+    ['type', 'name', 'email', 'phone', 'address', 'problem', 'why', 'service', 'message'].forEach(function (key) {
+      if (sourceBtn.dataset[key]) viewBtn.dataset[key] = sourceBtn.dataset[key];
+    });
+    viewBtn.dataset.received = sourceBtn.dataset.received || '';
+    viewBtn.dataset.resolvedOn = formatModalDate(new Date());
+    // No data-resolve-url — already resolved, so openModal() hides the
+    // "Mark as Resolved" button for this row, same as the server-rendered case.
+    viewBtn.textContent = 'View';
+    viewBtn.addEventListener('click', function () { openModal(viewBtn); });
+    actionTd.appendChild(viewBtn);
+    row.appendChild(actionTd);
+
+    resolvedTbody.insertBefore(row, resolvedTbody.firstChild);
+    resolvedState.rows.unshift(row);
+    renderPagination(resolvedState);
+  }
+
   function resolveCurrentLead() {
     var url = resolveForm.dataset.resolveUrl;
-    if (!url || !currentRow) return;
+    if (!url || !currentRow || !currentBtn) return;
     var token = resolveForm.querySelector('[name=csrfmiddlewaretoken]').value;
     var row = currentRow;
+    var btn = currentBtn;
     var tbody = row.parentElement;
+    var receivedCell = row.querySelector('td.cert-table__meta:not(.cert-table__col--hide-mobile)');
+    var receivedText = receivedCell ? receivedCell.textContent : (btn.dataset.received || '');
     resolveBtn.disabled = true;
     fetch(url, {
       method: 'POST',
@@ -436,8 +528,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }).then(function (res) {
       if (!res.ok) throw new Error('Request failed');
       // Marked resolved server-side — remove the row from whichever
-      // per-type table it was in and close the modal, without any page
-      // navigation, so the admin stays exactly where they were working.
+      // per-type table it was in, add it to the Resolved Requests table,
+      // and close the modal, without any page navigation, so the admin
+      // stays exactly where they were working.
       var panel = tbody.closest('[data-lead-panel]');
       var state = panel && leadPagination[panel.dataset.leadPanel];
       if (state) {
@@ -447,6 +540,7 @@ document.addEventListener('DOMContentLoaded', function () {
       row.remove();
       showEmptyStateIfNeeded(tbody);
       if (state) renderPagination(state);
+      addRowToResolvedTable(btn, receivedText);
       closeModal();
     }).catch(function () {
       window.alert('Could not mark this request as resolved. Please try again.');
