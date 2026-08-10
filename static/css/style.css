@@ -594,10 +594,9 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
 /* ============ Services intro backdrop ============ */
 .services-intro{position:relative;overflow:hidden;min-height:382px;display:flex;align-items:center;}
 .services-intro__bg{position:absolute;inset:0;z-index:0;background:url(../image/services-intro-bg.jpg) center/cover no-repeat;}
-/* Same .services-intro banner as the main Services page, minus a real photo
-   — used on the 8 fixed service pages (templates/service-*.html) until each
-   gets its own background photo; swap this class for a real
-   background:url(...) per page once photos exist. */
+/* Same .services-intro banner as the main Services page; the placeholder
+   gradient below is unused now that every fixed service page
+   (templates/service-*.html) has a real background photo class. */
 .services-intro__bg--placeholder{background:linear-gradient(135deg, var(--dark), var(--ink-800));}
 .services-intro__bg--fire-alarm-system{background:url(../image/service-fire-detection-system-bg.png) center/cover no-repeat;}
 .services-intro__bg--gas-detection-system{background:url(../image/service-co2-gas-flooding-bg.png) center/cover no-repeat;}
