@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Gas Suppression System Installation in Silvassa | Iconic Techno Service{% endblock %}
+{% block meta_description %}Clean-agent gas suppression systems for server rooms, control rooms and critical equipment in Silvassa &amp; Dadra &amp; Nagar Haveli &mdash; design, installation and AMC.{% endblock %}
+
+{% block extra_head %}
+  <script type="application/ld+json">{{ service_breadcrumb_jsonld|safe }}</script>
+{% endblock %}
+
+{% block content %}
+
+  <!-- ===== Intro ===== -->
+  <section class="section services-intro">
+    <div class="services-intro__bg services-intro__bg--gas-suppression-system"></div>
+    <div class="services-intro__overlay"></div>
+    <div class="container section__head services-intro__content">
+      <a href="{% url 'services' %}" class="eyebrow">Services</a>
+      <h1>Gas Suppression System</h1>
+      <p class="section__sub">We design and engineer automatic fire suppression systems for areas where water-based firefighting may not be suitable, particularly for critical equipment and sensitive environments.</p>
+    </div>
+  </section>
+
+  <!-- ===== Detail ===== -->
+  <section class="section">
+    <div class="container service-detail">
+      <div>
+        <div class="service-detail__media-card">
+          <img class="service-detail__media" src="{% static 'image/service-gas-suppression-system-detail.jpg' %}" alt="Gas suppression cylinder bank and piping installed in a server room">
+        </div>
+        <div class="service-detail__included">
+          <h2>What's Included</h2>
+          <ul class="check-list">
+            <li>System design and calculations</li>
+            <li>Agent selection and system engineering</li>
+            <li>Cylinders and discharge systems</li>
+            <li>Detection and releasing systems</li>
+            <li>Control panels</li>
+            <li>Installation, testing and commissioning</li>
+          </ul>
+        </div>
+      </div>
+      <div class="service-detail__body">
+        <p>A gas suppression system is a total-flood fire suppression system that automatically discharges a clean extinguishing agent &mdash; CO2 or an alternative clean agent &mdash; into a protected space to suppress fire without leaving residue or water damage behind, making it the right fit for spaces where water-based firefighting isn't an option.</p>
+        <p>Electrical and control rooms, server and data centers, UPS and battery rooms, telecom facilities and other critical process areas all share the same problem: a water-based sprinkler would destroy the very equipment it's meant to protect, and downtime from water damage can be as costly as the fire itself.</p>
+        <p>We run the system design and calculations for your space, select the right suppression agent for the hazard and the room's volume, engineer the cylinder bank and discharge system, and integrate detection and releasing controls with a dedicated control panel &mdash; then install, commission and discharge-test the complete system.</p>
+        <p>Because these agents work by displacing or suppressing the oxygen a fire needs, every space needs a pre-discharge alarm and time-delay sequence so anyone inside can evacuate before the system releases &mdash; a safety step we build into every design, not an optional extra.</p>
+        <p>Cylinder pressure and agent quantity naturally drop over time even without a discharge, so a system that looks ready on paper can be under-charged when it's actually needed. Our AMC includes routine pressure and quantity checks specifically to catch that before it becomes a problem.</p>
+      </div>
+    </div>
+  </section>
+
+  {% include "includes/survey-cta.html" with cta_eyebrow="Get Started" cta_heading="Protecting Critical Equipment or a Sensitive Space?" cta_lead="Get a free, no-obligation site survey and see what a gas suppression system looks like for your facility." cta_button_text="Contact Us" cta_button_href="/contact/" %}
+
+{% endblock %}

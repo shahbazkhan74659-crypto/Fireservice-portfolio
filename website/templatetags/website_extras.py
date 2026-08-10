@@ -1,11 +1,37 @@
 import json
 
 from django import template
+from django.urls import reverse
 
 from core.context_processors import BUSINESS_NAME
 from website.models import Brand, Certification, ClientLogo, HeroSlide, Product, ProcessPhase, Service, SiteSetting
 
 register = template.Library()
+
+# Maps each seeded Service row's exact `name` (see
+# website/migrations/0008_seed_services.py) to its fixed public detail page
+# — these are hand-authored pages (core/views.py), not a DB-driven slug, so
+# the mapping lives here rather than on the model itself.
+SERVICE_PAGE_URL_NAMES = {
+    'Fire Alarm System': 'service-fire-alarm-system',
+    'Gas Detection System': 'service-gas-detection-system',
+    'Gas Suppression System': 'service-gas-suppression-system',
+    'HVWS / MVWS System': 'service-hvws-mvws-system',
+    'Fire Extinguishers': 'service-fire-extinguishers',
+    'Safety Equipment': 'service-safety-equipment',
+    'Fire Pump House': 'service-fire-pump-house',
+    'Fire Hydrant System': 'service-fire-hydrant-system',
+    'PAVA System': 'service-pava-system',
+}
+
+
+@register.filter
+def service_page_url(service_name):
+    """Falls back to the Services list page itself for any name without a
+    dedicated page yet (e.g. a new Service added via the Admin Hub CRUD
+    before its fixed page exists) — never a broken link."""
+    url_name = SERVICE_PAGE_URL_NAMES.get(service_name)
+    return reverse(url_name) if url_name else reverse('services')
 
 
 @register.simple_tag

@@ -4,12 +4,12 @@
 <div class="footer__services-grid">
   <div>
     {% for service in services_list|slice:":4" %}
-    <a href="/services/">{{ service.name }}</a>
+    <a href="{{ service.name|service_page_url }}">{{ service.name }}</a>
     {% endfor %}
   </div>
   <div>
     {% for service in services_list|slice:"4:" %}
-    <a href="/services/">{{ service.name }}</a>
+    <a href="{{ service.name|service_page_url }}">{{ service.name }}</a>
     {% endfor %}
   </div>
 </div>

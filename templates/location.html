@@ -31,7 +31,9 @@
       <div class="grid grid--services">
         {% for service in services %}
         <div class="card">
+          {% if service.icon %}
           <div class="card__icon"><img src="{{ service.icon.url }}" alt="{{ service.name }} icon" width="{{ service.icon.width }}" height="{{ service.icon.height }}"></div>
+          {% endif %}
           <h3>{{ service.name }}</h3>
           <p>{{ service.description }}</p>
         </div>

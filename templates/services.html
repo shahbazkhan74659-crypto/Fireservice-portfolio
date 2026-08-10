@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load website_extras %}
 
 {% block title %}Fire Detection, Suppression &amp; Safety Services | Silvassa{% endblock %}
 {% block meta_description %}Fire detection, CO2 flooding, CCTV/PA, HVWS, extinguishers &amp; fire pump house systems &mdash; design, install &amp; AMC in Silvassa and beyond. Get a quote today.{% endblock %}
@@ -24,28 +25,30 @@
 
   {% include "includes/consultationstats.html" %}
 
-  {% include "includes/brands.html" %}
-
   <section class="section services-cards">
-    {% include "includes/hero-bg-slideshow.html" %}
-    <div class="services-cards__overlay"></div>
     <div class="container services-cards__content">
-      <h2 class="text-light">Our Fire &amp; Life-Safety Services in Silvassa</h2>
+      <div class="section__head">
+        <p class="eyebrow">Our Fire &amp; Life-Safety Services in Silvassa</p>
+      </div>
       <div class="grid grid--services">
         {% for service in services %}
-        <div class="card">
-          <div class="card__icon"><img src="{{ service.icon.url }}" alt="{{ service.name }} icon" width="{{ service.icon.width }}" height="{{ service.icon.height }}"></div>
-          <h3>{{ service.name }}</h3>
+        <a class="card card-link" href="{{ service.name|service_page_url }}">
+          {% if service.icon %}
+          <div class="card__thumb"><img src="{{ service.icon.url }}" alt="{{ service.name }}"></div>
+          {% endif %}
+          <span class="card__phase">{{ service.name }}</span>
           <p>{{ service.description }}</p>
-        </div>
+        </a>
         {% endfor %}
       </div>
     </div>
   </section>
 
   <!-- ===== Fire Risk Assessment ===== -->
-  <section class="section section--dark">
-    <div class="container">
+  <section class="section fire-risk">
+    {% include "includes/hero-bg-slideshow.html" %}
+    <div class="fire-risk__overlay"></div>
+    <div class="container fire-risk__content">
       <div class="section__head">
         <p class="eyebrow eyebrow--light">Fire Risk Assessment</p>
         <h2 class="text-light">Know Exactly Where You Stand</h2>

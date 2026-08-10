@@ -68,8 +68,8 @@ export default function ServiceCard({ service, onUpdated, onDeleted }: Props) {
 
   return (
     <div className="card">
-      <div className="card__icon"><img src={service.icon} alt="" /></div>
-      <h3>{service.name}</h3>
+      {service.icon && <div className="card__thumb"><img src={service.icon} alt={service.name} /></div>}
+      <span className="card__phase">{service.name}</span>
       <p>{service.description}</p>
 
       <div className="logo-card__admin-actions">
@@ -106,7 +106,7 @@ export default function ServiceCard({ service, onUpdated, onDeleted }: Props) {
             {errors.description && <p className="form-note">{errors.description}</p>}
           </div>
           <div className="field">
-            <label htmlFor={`service-icon-${service.id}`}>Replace Icon (optional)</label>
+            <label htmlFor={`service-icon-${service.id}`}>Replace Image (optional)</label>
             <input
               id={`service-icon-${service.id}`}
               type="file"

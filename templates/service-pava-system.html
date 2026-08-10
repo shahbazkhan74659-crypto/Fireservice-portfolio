@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}PAVA System Design &amp; Installation | Iconic Techno Service{% endblock %}
+{% block meta_description %}Public Address and Voice Alarm (PAVA) system design, installation and AMC for emergency communication and evacuation in Silvassa &amp; Dadra &amp; Nagar Haveli.{% endblock %}
+
+{% block extra_head %}
+  <script type="application/ld+json">{{ service_breadcrumb_jsonld|safe }}</script>
+{% endblock %}
+
+{% block content %}
+
+  <!-- ===== Intro ===== -->
+  <section class="section services-intro">
+    <div class="services-intro__bg services-intro__bg--pava-system"></div>
+    <div class="services-intro__overlay"></div>
+    <div class="container section__head services-intro__content">
+      <a href="{% url 'services' %}" class="eyebrow">Services</a>
+      <h1>PAVA System</h1>
+      <p class="section__sub">We provide Public Address and Voice Alarm (PAVA) systems for emergency communication, evacuation, and public announcements.</p>
+    </div>
+  </section>
+
+  <!-- ===== Detail ===== -->
+  <section class="section">
+    <div class="container service-detail">
+      <div>
+        <div class="service-detail__media-card">
+          <img class="service-detail__media" src="{% static 'image/service-pava-system-detail.jpg' %}" alt="PAVA system equipment — amplifiers, controllers, horn speakers, ceiling speakers and emergency microphone">
+        </div>
+        <div class="service-detail__included">
+          <h2>What's Included</h2>
+          <ul class="check-list">
+            <li>PAVA system design and engineering</li>
+            <li>Voice evacuation systems</li>
+            <li>Amplifiers and controllers</li>
+            <li>Speakers and sounders</li>
+            <li>Emergency microphones</li>
+            <li>Zoned announcements</li>
+            <li>Fire alarm system integration</li>
+            <li>Testing and commissioning</li>
+          </ul>
+        </div>
+      </div>
+      <div class="service-detail__body">
+        <p>A PAVA (Public Address and Voice Alarm) system combines everyday public address announcements with a fire-alarm-integrated voice evacuation system &mdash; delivering clear, pre-recorded or live spoken instructions to specific zones of a building the moment an emergency is detected.</p>
+        <p>A siren tells people something is wrong; a voice alarm tells them what to do and where to go &mdash; and that difference measurably reduces panic and evacuation time in a real emergency, which is why voice alarm is increasingly expected alongside a conventional fire alarm rather than instead of it.</p>
+        <p>We design the zone layout and coverage around your facility, select and install amplifiers, controllers and speakers sized for the space, integrate the system with your fire alarm panel so it triggers automatically, and add emergency microphones for live override when staff need to speak directly to occupants.</p>
+        <p>Zoned messaging means only the affected area gets an evacuation instruction while adjacent zones receive a stand-by alert instead &mdash; avoiding the panic and bottlenecking that a facility-wide alarm can cause for what's actually a localized incident.</p>
+        <p>An amplifier or speaker circuit that's gone faulty often stays unnoticed during normal day-to-day PA use, since a single dead zone doesn't affect routine announcements elsewhere &mdash; which is exactly why we test every zone's audibility and the emergency microphone override on a schedule, not just at commissioning.</p>
+      </div>
+    </div>
+  </section>
+
+  {% include "includes/survey-cta.html" with cta_eyebrow="Get Started" cta_heading="Need a PAVA System?" cta_lead="Get a free, no-obligation site survey and see what a Public Address and Voice Alarm setup looks like for your facility." cta_button_text="Contact Us" cta_button_href="/contact/" %}
+
+{% endblock %}

@@ -77,7 +77,7 @@ export default function AddServiceForm({ onAdded }: Props) {
             {errors.description && <p className="form-note">{errors.description}</p>}
           </div>
           <div className="field">
-            <label htmlFor="new-service-icon">Icon Image</label>
+            <label htmlFor="new-service-icon">Image</label>
             <input
               id="new-service-icon"
               type="file"

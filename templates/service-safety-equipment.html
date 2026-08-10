@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Fire &amp; Life-Safety Equipment Supply | Iconic Techno Service{% endblock %}
+{% block meta_description %}PPE, SCBA sets, signage and life-safety equipment supply for facilities in Silvassa &amp; DNH, backed by our ISO-certified processes.{% endblock %}
+
+{% block extra_head %}
+  <script type="application/ld+json">{{ service_breadcrumb_jsonld|safe }}</script>
+{% endblock %}
+
+{% block content %}
+
+  <!-- ===== Intro ===== -->
+  <section class="section services-intro">
+    <div class="services-intro__bg services-intro__bg--safety-equipment"></div>
+    <div class="services-intro__overlay"></div>
+    <div class="container section__head services-intro__content">
+      <a href="{% url 'services' %}" class="eyebrow">Services</a>
+      <h1>Safety Equipment</h1>
+      <p class="section__sub">We supply and support a wide range of fire and personal safety equipment to help organizations maintain a safe working environment.</p>
+    </div>
+  </section>
+
+  <!-- ===== Detail ===== -->
+  <section class="section">
+    <div class="container service-detail">
+      <div>
+        <div class="service-detail__media-card">
+          <img class="service-detail__media" src="{% static 'image/service-safety-equipment-detail.jpg' %}" alt="Fire and personal safety equipment — helmets, coveralls, gloves, respirators, safety boots and a first aid kit">
+        </div>
+        <div class="service-detail__included">
+          <h2>What's Included</h2>
+          <ul class="check-list">
+            <li>Facility risk assessment for equipment needs</li>
+            <li>Supply of PPE, SCBA sets, hose reels and signage</li>
+            <li>Correct placement and mounting</li>
+            <li>Staff familiarization</li>
+            <li>AMC and replacement scheduling</li>
+          </ul>
+        </div>
+      </div>
+      <div class="service-detail__body">
+        <p>We supply and support a wide range of fire and personal safety equipment &mdash; personal protective equipment (PPE), self-contained breathing apparatus (SCBA) sets, fire safety signage and hose reels &mdash; the equipment staff and emergency responders rely on during an actual incident, not just paperwork sitting in a cupboard.</p>
+        <p>The right equipment, correctly placed and clearly signed, helps maintain a safe working environment day to day and reduces response time when it's actually needed, and it's commonly checked during Fire NOC inspections.</p>
+        <p>We assess your facility's risk profile to determine what's needed, supply and position the equipment correctly, and brief your staff on how to use it.</p>
+        <p>SCBA sets in particular need their air cylinders checked and refilled on a schedule, not just stored and forgotten &mdash; equipment that's been sitting unchecked for months is exactly the kind that fails when someone actually reaches for it.</p>
+        <p>Signage and equipment placement also need to hold up under an actual evacuation, not just a walkthrough inspection &mdash; clear sightlines to hose reels and exit signage that's visible through smoke matter more in practice than they do on a floor plan.</p>
+      </div>
+    </div>
+  </section>
+
+  {% include "includes/survey-cta.html" with cta_eyebrow="Get Started" cta_heading="Need Safety Equipment for Your Facility?" cta_lead="Get a free, no-obligation site survey and see what equipment your team needs." cta_button_text="Contact Us" cta_button_href="/contact/" %}
+
+{% endblock %}

@@ -8,6 +8,11 @@ pytestmark = pytest.mark.django_db
 @pytest.mark.parametrize('url_name', [
     'home', 'about', 'clientele', 'services', 'process', 'brochure',
     'certifications', 'survey', 'contact', 'consultation', 'blog',
+    'service-fire-alarm-system', 'service-gas-detection-system',
+    'service-gas-suppression-system', 'service-hvws-mvws-system',
+    'service-fire-extinguishers', 'service-safety-equipment',
+    'service-fire-pump-house', 'service-fire-hydrant-system',
+    'service-pava-system',
 ])
 def test_public_pages_return_200(client, url_name):
     res = client.get(reverse(url_name))

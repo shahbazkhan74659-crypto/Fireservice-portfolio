@@ -176,6 +176,118 @@ class ServicesView(TemplateView):
         return context
 
 
+def _service_page_breadcrumb_jsonld(request, service_name):
+    """Shared by every fixed per-service page below — a 3-level breadcrumb
+    (Home > Services > {service_name}) that the sitewide 2-level
+    breadcrumb_jsonld in core/context_processors.py can't produce. Same
+    reasoning as BlogDetailView.blog_breadcrumb_jsonld: rendered under its
+    own context key from each page's own extra_head block, and none of
+    these url names are added to BREADCRUMB_NAMES, so the sitewide
+    processor stays silent on these pages and there's no duplicate/
+    conflicting BreadcrumbList JSON-LD."""
+    origin = 'https' if request.is_secure() else 'http'
+    origin = f'{origin}://{request.get_host()}'
+    return json.dumps({
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        'itemListElement': [
+            {'@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': f'{origin}/'},
+            {'@type': 'ListItem', 'position': 2, 'name': 'Services', 'item': f'{origin}/services/'},
+            {'@type': 'ListItem', 'position': 3, 'name': service_name, 'item': f'{origin}{request.path}'},
+        ],
+    })
+
+
+class FireAlarmSystemView(TemplateView):
+    template_name = 'service-fire-alarm-system.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['service'] = Service.objects.filter(name='Fire Alarm System').first()
+        context['service_breadcrumb_jsonld'] = _service_page_breadcrumb_jsonld(self.request, 'Fire Alarm System')
+        return context
+
+
+class GasDetectionSystemView(TemplateView):
+    template_name = 'service-gas-detection-system.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['service'] = Service.objects.filter(name='Gas Detection System').first()
+        context['service_breadcrumb_jsonld'] = _service_page_breadcrumb_jsonld(self.request, 'Gas Detection System')
+        return context
+
+
+class GasSuppressionSystemView(TemplateView):
+    template_name = 'service-gas-suppression-system.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['service'] = Service.objects.filter(name='Gas Suppression System').first()
+        context['service_breadcrumb_jsonld'] = _service_page_breadcrumb_jsonld(self.request, 'Gas Suppression System')
+        return context
+
+
+class HvwsMvwsSystemView(TemplateView):
+    template_name = 'service-hvws-mvws-system.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['service'] = Service.objects.filter(name='HVWS / MVWS System').first()
+        context['service_breadcrumb_jsonld'] = _service_page_breadcrumb_jsonld(self.request, 'HVWS / MVWS System')
+        return context
+
+
+class FireExtinguishersView(TemplateView):
+    template_name = 'service-fire-extinguishers.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['service'] = Service.objects.filter(name='Fire Extinguishers').first()
+        context['service_breadcrumb_jsonld'] = _service_page_breadcrumb_jsonld(self.request, 'Fire Extinguishers')
+        return context
+
+
+class SafetyEquipmentView(TemplateView):
+    template_name = 'service-safety-equipment.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['service'] = Service.objects.filter(name='Safety Equipment').first()
+        context['service_breadcrumb_jsonld'] = _service_page_breadcrumb_jsonld(self.request, 'Safety Equipment')
+        return context
+
+
+class FirePumpHouseView(TemplateView):
+    template_name = 'service-fire-pump-house.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['service'] = Service.objects.filter(name='Fire Pump House').first()
+        context['service_breadcrumb_jsonld'] = _service_page_breadcrumb_jsonld(self.request, 'Fire Pump House')
+        return context
+
+
+class FireHydrantSystemView(TemplateView):
+    template_name = 'service-fire-hydrant-system.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['service'] = Service.objects.filter(name='Fire Hydrant System').first()
+        context['service_breadcrumb_jsonld'] = _service_page_breadcrumb_jsonld(self.request, 'Fire Hydrant System')
+        return context
+
+
+class PavaSystemView(TemplateView):
+    template_name = 'service-pava-system.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['service'] = Service.objects.filter(name='PAVA System').first()
+        context['service_breadcrumb_jsonld'] = _service_page_breadcrumb_jsonld(self.request, 'PAVA System')
+        return context
+
+
 class LocationView(TemplateView):
     # One parametrized view backing all 4 corridor-town landing pages (see
     # core/locations.py) rather than 4 near-duplicate view classes — the 4

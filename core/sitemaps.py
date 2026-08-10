@@ -21,6 +21,15 @@ PUBLIC_PAGES = {
     'consultation': {'changefreq': 'yearly', 'priority': 0.8},
     'brochure': {'changefreq': 'yearly', 'priority': 0.5},
     'blog': {'changefreq': 'weekly', 'priority': 0.7},
+    'service-fire-alarm-system': {'changefreq': 'monthly', 'priority': 0.6},
+    'service-gas-detection-system': {'changefreq': 'monthly', 'priority': 0.6},
+    'service-gas-suppression-system': {'changefreq': 'monthly', 'priority': 0.6},
+    'service-hvws-mvws-system': {'changefreq': 'monthly', 'priority': 0.6},
+    'service-fire-extinguishers': {'changefreq': 'monthly', 'priority': 0.6},
+    'service-safety-equipment': {'changefreq': 'monthly', 'priority': 0.6},
+    'service-fire-pump-house': {'changefreq': 'monthly', 'priority': 0.6},
+    'service-fire-hydrant-system': {'changefreq': 'monthly', 'priority': 0.6},
+    'service-pava-system': {'changefreq': 'monthly', 'priority': 0.6},
 }
 
 

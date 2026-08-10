@@ -10,6 +10,7 @@ from .pdf_utils import render_pdf_first_page_to_png
 
 MAX_LOGO_SIZE_BYTES = 5 * 1024 * 1024  # 5MB
 ACCEPTED_ICON_CONTENT_TYPES = {'image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'}
+RASTER_ONLY_CONTENT_TYPES = {'image/png', 'image/jpeg', 'image/webp'}
 SVG_CONTENT_TYPE = 'image/svg+xml'
 
 # Maps each accepted *raster* content-type to the Pillow-reported format(s) a
@@ -121,7 +122,7 @@ def validate_image_size(value, max_bytes=MAX_LOGO_SIZE_BYTES):
     return value
 
 
-def validate_image_size_and_type(value, max_bytes=MAX_LOGO_SIZE_BYTES):
+def validate_image_size_and_type(value, max_bytes=MAX_LOGO_SIZE_BYTES, allowed_types=ACCEPTED_ICON_CONTENT_TYPES):
     """Shared validation for image-backed fields that must also accept SVG
     uploads, since DRF's ModelSerializer-inferred ImageField validates via
     Pillow, which can't open SVG (a vector/XML format, not a raster one).
@@ -133,12 +134,17 @@ def validate_image_size_and_type(value, max_bytes=MAX_LOGO_SIZE_BYTES):
     about its Content-Type (e.g. real HTML/script served as
     image/svg+xml, or a JPEG relabeled as image/png) is rejected either by
     the wrong-branch check failing or by the format-family cross-check
-    inside _raster_bytes_are_valid."""
+    inside _raster_bytes_are_valid.
+
+    allowed_types narrows this for fields that render as photos rather than
+    vector icons (see RASTER_ONLY_CONTENT_TYPES) — SVG stays accepted
+    everywhere else by default."""
     if value.size > max_bytes:
         raise serializers.ValidationError(f'Image is too large (max {max_bytes // (1024 * 1024)}MB).')
     content_type = getattr(value, 'content_type', None)
-    if content_type not in ACCEPTED_ICON_CONTENT_TYPES:
-        raise serializers.ValidationError('Unsupported image type. Use PNG, JPEG, WebP or SVG.')
+    if content_type not in allowed_types:
+        formats = 'PNG, JPEG or WebP' if SVG_CONTENT_TYPE not in allowed_types else 'PNG, JPEG, WebP or SVG'
+        raise serializers.ValidationError(f'Unsupported image type. Use {formats}.')
 
     if content_type == SVG_CONTENT_TYPE:
         value.seek(0)
@@ -228,11 +234,10 @@ class ClientLogoSerializer(serializers.ModelSerializer):
 
 class ServiceSerializer(serializers.ModelSerializer):
     # Declared explicitly as FileField (not the ModelSerializer-inferred
-    # ImageField) because DRF's ImageField validates uploads by opening them
-    # with Pillow, which can't open SVG (a vector/XML format, not a raster
-    # one) — it would reject every SVG icon even though these are exactly
-    # the kind of icon used site-wide. validate_icon() below does the actual
-    # type/size checking instead.
+    # ImageField) to reuse validate_image_size_and_type()'s raster
+    # format cross-check below. Raster-only (see RASTER_ONLY_CONTENT_TYPES,
+    # unlike most other icon/logo fields) — this now renders as a photo on
+    # both the public Services cards and the Admin Hub, not a vector icon.
     icon = serializers.FileField()
 
     class Meta:
@@ -250,7 +255,7 @@ class ServiceSerializer(serializers.ModelSerializer):
         return value
 
     def validate_icon(self, value):
-        return validate_image_size_and_type(value)
+        return validate_image_size_and_type(value, allowed_types=RASTER_ONLY_CONTENT_TYPES)
 
 
 class CertificationSerializer(serializers.ModelSerializer):

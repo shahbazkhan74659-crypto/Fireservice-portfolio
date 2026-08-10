@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Gas Detection System Installation in Silvassa | Iconic Techno Service{% endblock %}
+{% block meta_description %}Toxic and combustible gas detection system design, installation and AMC &mdash; fixed detectors, alarms and shutdown interfaces in Silvassa &amp; Dadra &amp; Nagar Haveli.{% endblock %}
+
+{% block extra_head %}
+  <script type="application/ld+json">{{ service_breadcrumb_jsonld|safe }}</script>
+{% endblock %}
+
+{% block content %}
+
+  <!-- ===== Intro ===== -->
+  <section class="section services-intro">
+    <div class="services-intro__bg services-intro__bg--gas-detection-system"></div>
+    <div class="services-intro__overlay"></div>
+    <div class="container section__head services-intro__content">
+      <a href="{% url 'services' %}" class="eyebrow">Services</a>
+      <h1>Gas Detection System</h1>
+      <p class="section__sub">Our gas detection solutions help identify hazardous and combustible gases and provide early warning to protect personnel, equipment, and facilities.</p>
+    </div>
+  </section>
+
+  <!-- ===== Detail ===== -->
+  <section class="section">
+    <div class="container service-detail">
+      <div>
+        <div class="service-detail__media-card">
+          <img class="service-detail__media" src="{% static 'image/service-gas-detection-system-detail.jpg' %}" alt="Gas detection system control unit with fixed gas detectors and audible/visual alarms">
+        </div>
+        <div class="service-detail__included">
+          <h2>What's Included</h2>
+          <ul class="check-list">
+            <li>Gas detection system engineering</li>
+            <li>Toxic and combustible gas detection</li>
+            <li>Fixed gas detectors</li>
+            <li>Gas detection control panels</li>
+            <li>Audible and visual alarms</li>
+            <li>Emergency shutdown interfaces</li>
+            <li>Gas detection system integration</li>
+            <li>Testing and calibration support</li>
+          </ul>
+        </div>
+      </div>
+      <div class="service-detail__body">
+        <p>A gas detection system is a network of fixed gas detectors placed around hazardous or process areas that continuously monitor the air for toxic or combustible gas concentrations &mdash; triggering audible and visual alarms, and where needed an automatic emergency shutdown, the moment a leak crosses a safe threshold.</p>
+        <p>A gas leak doesn't announce itself the way smoke or heat does &mdash; by the time it's visible or smelled, concentrations can already be in a dangerous or explosive range, which is exactly why continuous monitoring matters more than periodic manual checks in any area that handles hazardous gases.</p>
+        <p>We engineer the detector layout around your facility's specific gas hazards, supply and install fixed detectors and control panels, wire in audible and visual alarms, and integrate emergency shutdown interfaces with your process equipment where a leak needs to trigger an automatic isolation, not just a warning.</p>
+        <p>Detector placement depends on the gas being monitored, not a generic layout &mdash; a gas heavier than air needs detectors near floor level, one lighter than air needs them near the ceiling, and getting this wrong leaves exactly the zone most likely to accumulate gas unmonitored.</p>
+        <p>Gas sensors drift out of calibration over time, and a detector quietly reading normal air as normal is indistinguishable from one that's simply stopped working accurately. Regular calibration and testing is what tells the difference before it matters &mdash; something we cover on a fixed AMC schedule, not on an as-noticed basis.</p>
+      </div>
+    </div>
+  </section>
+
+  {% include "includes/survey-cta.html" with cta_eyebrow="Get Started" cta_heading="Handling Hazardous or Combustible Gases?" cta_lead="Get a free, no-obligation site survey and see what a gas detection system looks like for your facility." cta_button_text="Contact Us" cta_button_href="/contact/" %}
+
+{% endblock %}

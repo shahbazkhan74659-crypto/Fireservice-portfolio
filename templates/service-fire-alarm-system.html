@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Fire Alarm System Installation in Silvassa | Iconic Techno Service{% endblock %}
+{% block meta_description %}Design, installation, testing and AMC for fire alarm systems in Silvassa and Dadra &amp; Nagar Haveli. ISO-certified. Get a free site survey.{% endblock %}
+
+{% block extra_head %}
+  <script type="application/ld+json">{{ service_breadcrumb_jsonld|safe }}</script>
+{% endblock %}
+
+{% block content %}
+
+  <!-- ===== Intro ===== -->
+  <section class="section services-intro">
+    <div class="services-intro__bg services-intro__bg--fire-alarm-system"></div>
+    <div class="services-intro__overlay"></div>
+    <div class="container section__head services-intro__content">
+      <a href="{% url 'services' %}" class="eyebrow">Services</a>
+      <h1>Fire Alarm System</h1>
+      <p class="section__sub">We provide complete fire alarm solutions designed to detect fire at an early stage and initiate timely evacuation and emergency response.</p>
+    </div>
+  </section>
+
+  <!-- ===== Detail ===== -->
+  <section class="section">
+    <div class="container service-detail">
+      <div>
+        <div class="service-detail__media-card">
+          <img class="service-detail__media" src="{% static 'image/service-fire-alarm-system-detail.jpg' %}" alt="Fire alarm system architecture — control panels, notification appliances and remote connectivity">
+        </div>
+        <div class="service-detail__included">
+          <h2>What's Included</h2>
+          <ul class="check-list">
+            <li>Site survey and fire alarm zone design</li>
+            <li>Supply and installation of panels, detectors, call points and sounders</li>
+            <li>Evacuation and emergency response signaling</li>
+            <li>System testing and commissioning</li>
+            <li>Ongoing Annual Maintenance Contract (AMC)</li>
+            <li>Compliance documentation support for Fire NOC applications</li>
+          </ul>
+        </div>
+      </div>
+      <div class="service-detail__body">
+        <p>A fire alarm system is a network of smoke detectors, heat detectors and manual call points wired to a centralized fire alarm panel &mdash; addressable or conventional depending on your facility's size &mdash; that sounds an alarm and triggers your facility's evacuation and emergency response procedures the moment smoke, heat or flame is detected anywhere on the premises.</p>
+        <p>Detection is only half the job &mdash; an alarm that sounds without cueing staff and occupants into a clear evacuation response still costs critical time. A correctly designed fire alarm system is also a standard requirement when applying for a Fire NOC in Silvassa and Dadra &amp; Nagar Haveli.</p>
+        <p>We design the alarm zone layout around your facility, supply and install the panel, detectors, call points and sounders, commission the system, and keep it running through an Annual Maintenance Contract (AMC) &mdash; all backed by our ISO 9001:2015 and ISO 45001:2018 certified processes.</p>
+        <p>Addressable panels pinpoint the exact device that triggered an alarm &mdash; critical in larger facilities where a conventional zone-only panel would only narrow the search down to an entire wing or floor, slowing the emergency response down at exactly the point it needs to be fastest. We help you decide which type fits your facility's size and layout instead of defaulting to whichever is easiest to install.</p>
+        <p>Once commissioned, a fire alarm system is only as reliable as its upkeep &mdash; battery backups fail, detector heads collect dust, and wiring faults can go unnoticed for months without regular testing. Our AMC visits catch these issues before they turn into a system that doesn't sound, and doesn't trigger the emergency response, when it's actually needed.</p>
+      </div>
+    </div>
+  </section>
+
+  {% include "includes/survey-cta.html" with cta_eyebrow="Get Started" cta_heading="Need a Fire Alarm System?" cta_lead="Get a free, no-obligation site survey and see what a compliant fire alarm system looks like for your facility." cta_button_text="Contact Us" cta_button_href="/contact/" %}
+
+{% endblock %}

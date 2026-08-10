@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}HVWS / MVWS Water Spray Systems | Iconic Techno Service{% endblock %}
+{% block meta_description %}High- and medium-velocity water spray systems for transformers, turbines and high-hazard areas in Silvassa &amp; DNH. Design, installation and AMC.{% endblock %}
+
+{% block extra_head %}
+  <script type="application/ld+json">{{ service_breadcrumb_jsonld|safe }}</script>
+{% endblock %}
+
+{% block content %}
+
+  <!-- ===== Intro ===== -->
+  <section class="section services-intro">
+    <div class="services-intro__bg services-intro__bg--hvws-mvws-system"></div>
+    <div class="services-intro__overlay"></div>
+    <div class="container section__head services-intro__content">
+      <a href="{% url 'services' %}" class="eyebrow">Services</a>
+      <h1>HVWS / MVWS System</h1>
+      <p class="section__sub">We provide engineering solutions for High Velocity Water Spray (HVWS) and Medium Velocity Water Spray (MVWS) fire protection systems for high-risk equipment and process areas.</p>
+    </div>
+  </section>
+
+  <!-- ===== Detail ===== -->
+  <section class="section">
+    <div class="container service-detail">
+      <div>
+        <div class="service-detail__media-card">
+          <img class="service-detail__media" src="{% static 'image/service-hvws-mvws-system-detail.jpg' %}" alt="Medium velocity water spray deluge system installed on a transformer">
+        </div>
+        <div class="service-detail__included">
+          <h2>What's Included</h2>
+          <ul class="check-list">
+            <li>Hazard area survey and nozzle layout design</li>
+            <li>Supply and installation of piping, nozzles and deluge valves</li>
+            <li>Integration with heat/flame detection</li>
+            <li>Commissioning and flow testing</li>
+            <li>AMC and periodic testing</li>
+          </ul>
+        </div>
+      </div>
+      <div class="service-detail__body">
+        <p>HVWS (High Velocity Water Spray) and MVWS (Medium Velocity Water Spray) are engineering solutions that deliver a precisely engineered water spray pattern to cool and extinguish fires around high-risk equipment and process areas &mdash; transformers, turbines, oil-filled equipment and process plant.</p>
+        <p>These hazard areas can't rely on hand-held extinguishers alone &mdash; they need a fixed, automatic system that reacts the moment heat is detected, without waiting for a person to respond.</p>
+        <p>We assess the hazard area, design the nozzle and piping layout around the equipment's geometry, integrate the system with heat or flame detection, and size the pump house that feeds it (see our <a href="{% url 'service-fire-pump-house' %}" class="inline-link">Fire Pump House</a> service) before installing, commissioning and flow-testing the complete system.</p>
+        <p>Nozzle placement has to account for the equipment's actual geometry, not just its footprint &mdash; a transformer's bushings and radiator banks each need their own coverage, and a gap in the spray pattern is a gap in protection exactly where oil-filled equipment is most likely to ignite.</p>
+        <p>Because these systems protect equipment that's expensive and slow to replace, we flow-test the complete system after installation rather than relying on design calculations alone, confirming the actual spray pattern matches what was engineered on paper.</p>
+      </div>
+    </div>
+  </section>
+
+  {% include "includes/survey-cta.html" with cta_eyebrow="Get Started" cta_heading="Protecting a High-Hazard Area?" cta_lead="Get a free, no-obligation site survey and see what a water spray system looks like for your facility." cta_button_text="Contact Us" cta_button_href="/contact/" %}
+
+{% endblock %}

@@ -14,7 +14,7 @@ export default function ServiceManager() {
       <div className="grid grid--services" aria-hidden="true">
         {Array.from({ length: 4 }).map((_, i) => (
           <div className="card" key={i}>
-            <Skeleton style={{ width: 52, height: 52, borderRadius: 12, marginBottom: 18 }} />
+            <Skeleton style={{ margin: '-30px -24px 20px', aspectRatio: '16/9', borderRadius: 0 }} />
             <Skeleton className="skeleton-text" style={{ width: '70%', height: 20, marginBottom: 12 }} />
             <Skeleton className="skeleton-text" style={{ width: '100%' }} />
             <Skeleton className="skeleton-text" style={{ width: '85%' }} />

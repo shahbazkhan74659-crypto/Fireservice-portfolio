@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Fire Pump House Design &amp; Installation | Iconic Techno Service{% endblock %}
+{% block meta_description %}Fire pump house design, installation, testing and AMC &mdash; the hydraulic backbone of your facility's fire fighting network in Silvassa &amp; DNH.{% endblock %}
+
+{% block extra_head %}
+  <script type="application/ld+json">{{ service_breadcrumb_jsonld|safe }}</script>
+{% endblock %}
+
+{% block content %}
+
+  <!-- ===== Intro ===== -->
+  <section class="section services-intro">
+    <div class="services-intro__bg services-intro__bg--fire-pump-house"></div>
+    <div class="services-intro__overlay"></div>
+    <div class="container section__head services-intro__content">
+      <a href="{% url 'services' %}" class="eyebrow">Services</a>
+      <h1>Fire Pump House</h1>
+      <p class="section__sub">We provide engineering and project support for complete fire pump house systems to ensure dependable water supply for firefighting applications.</p>
+    </div>
+  </section>
+
+  <!-- ===== Detail ===== -->
+  <section class="section">
+    <div class="container service-detail">
+      <div>
+        <div class="service-detail__media-card">
+          <img class="service-detail__media" src="{% static 'image/service-fire-pump-house-detail.jpg' %}" alt="Fire pump house interior — electric fire pumps, control panels and header piping">
+        </div>
+        <div class="service-detail__included">
+          <h2>What's Included</h2>
+          <ul class="check-list">
+            <li>Hydraulic demand calculation and pump selection</li>
+            <li>Supply and installation of pump sets and pump house piping</li>
+            <li>Commissioning and flow/pressure testing</li>
+            <li>Routine diesel pump auto-start and jockey pump testing</li>
+            <li>AMC for the full pump house</li>
+          </ul>
+        </div>
+      </div>
+      <div class="service-detail__body">
+        <p>The fire pump house supplies pressurized, dependable water to a facility's entire fire fighting network &mdash; hydrants, sprinklers, hose reels and water spray systems &mdash; built around electric, diesel and jockey pump sets, along with the associated water storage tank.</p>
+        <p>Every other water-based fire protection system in a facility depends on the pump house being correctly sized and reliably maintained. It's foundational infrastructure, not an optional add-on.</p>
+        <p>Our engineering and project support covers the full scope: we calculate your facility's hydraulic flow and pressure demand, select and install the right pump sets and piping, commission the system, and run routine testing &mdash; including diesel pump auto-start checks &mdash; under AMC.</p>
+        <p>The diesel pump exists specifically as backup for when mains power fails during a fire &mdash; exactly the scenario it needs to work in &mdash; which is why its auto-start sequence needs to be tested on a schedule, not assumed to work because it worked at commissioning.</p>
+        <p>An undersized pump set will still turn on and produce pressure, just not enough of it once multiple hydrants or sprinkler heads open at once &mdash; a shortfall that usually only becomes visible during an actual fire unless the system is sized and flow-tested correctly up front.</p>
+      </div>
+    </div>
+  </section>
+
+  {% include "includes/survey-cta.html" with cta_eyebrow="Get Started" cta_heading="Need a Fire Pump House?" cta_lead="Get a free, no-obligation site survey and see what your facility's fire fighting network needs." cta_button_text="Contact Us" cta_button_href="/contact/" %}
+
+{% endblock %}

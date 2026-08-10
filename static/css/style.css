@@ -330,7 +330,8 @@ a.whatsapp-icon:hover{color:#1ebe5b;}
 .about__pic--br{bottom:-24px;right:-24px;}
 .about__media .map{margin-top:40px;}
 .check-list li{position:relative;padding-left:28px;margin-bottom:10px;color:var(--ink-600);}
-.section--dark .check-list li{color:#c7cad0;}
+.section--dark .check-list li,
+.fire-risk .check-list li{color:#c7cad0;}
 .check-list li::before{
   content:'';position:absolute;left:0;top:6px;width:16px;height:16px;border-radius:50%;
   background:var(--red-600);
@@ -369,14 +370,32 @@ a.whatsapp-icon:hover{color:#1ebe5b;}
 }
 .services-cards__content{position:relative;z-index:2;}
 
+/* Same pattern as .mission-vision/.services-cards — bg slideshow behind the
+   Services page's Fire Risk Assessment section. */
+.fire-risk{position:relative;overflow:hidden;}
+.fire-risk__overlay{
+  position:absolute;inset:0;
+  /* Darker than .mission-vision__overlay/.services-cards__overlay's shared
+     .6/.78/.94 gradient — this section's slide photos are busier (people,
+     vehicles) right behind the paragraph text, which wasn't legible at the
+     lighter opacity. */
+  background:linear-gradient(180deg, rgba(16,18,21,.82) 0%, rgba(16,18,21,.9) 55%, rgba(16,18,21,.96) 100%);
+}
+.fire-risk__content{position:relative;z-index:2;}
+.fire-risk__content .section__sub{color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7);}
+
 /* ============ Services grid ============ */
 .grid{display:grid;gap:26px;}
-.grid--services{grid-template-columns:repeat(4,1fr);}
+.grid--services{grid-template-columns:repeat(3,1fr);gap:32px;}
 .grid--mission{grid-template-columns:repeat(2,1fr);}
 .card{
   background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:30px 24px;
   transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
 }
+/* Public Services cards are rendered as <a> so the whole card is clickable
+   (Admin Hub's version of .card stays a <div>, unaffected) — resets anchor
+   defaults so it still looks/behaves exactly like the div-based .card. */
+.card-link{display:block;color:inherit;text-decoration:none;}
 .card:hover{transform:translateY(-6px);box-shadow:var(--shadow-md);border-color:transparent;}
 /* Black cards matching .grid--services .card exactly — same gradient-wipe
    hover, just with a check-list (not present on Services cards) also
@@ -410,7 +429,7 @@ a.whatsapp-icon:hover{color:#1ebe5b;}
 /* Services grid only (not Mission & Vision, which also reuses .card) —
    black card body with white text; .card__icon is left untouched so the
    red-gradient icon boxes stay exactly as they were. */
-.grid--services .card{background:#000;border-color:#000;position:relative;overflow:hidden;z-index:0;}
+.grid--services .card{background:#000;border-color:#000;position:relative;overflow:hidden;z-index:0;padding:24px 20px;}
 /* Same bottom-to-top gradient wipe as .why's hover effect — pseudo-element
    grown via scaleY from the bottom edge, sitting behind the card's own
    content via negative z-index inside the card's stacking context. */
@@ -421,10 +440,29 @@ a.whatsapp-icon:hover{color:#1ebe5b;}
   transition:transform .25s ease;
 }
 .grid--services .card:hover::before{transform:scaleY(1);}
-.grid--services .card h3{color:#fff;transition:color .25s ease;}
 .grid--services .card p{color:#fff;transition:color .25s ease;}
-.grid--services .card:hover h3{color:#000;}
 .grid--services .card:hover p{color:#000;}
+/* Bleeds past .grid--services .card's own 24px/20px padding to sit flush
+   with the card edges — .grid--services .card already has overflow:hidden
+   (above), so the negative margin gets clipped to the card's own
+   border-radius for free. Only rendered when the service has an icon image;
+   cards without one keep the old text-only layout. */
+.card__thumb{position:relative;margin:-24px -20px 18px;aspect-ratio:16/10;}
+.card__thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+/* Ribbon tag between the photo and the card's own heading. Bleeds past
+   .card's left padding with a negative margin (same bleed trick as
+   .card__thumb above) so the left edge sits flush against .card's true
+   border and reads as tucked behind/emerging from the card rather than a
+   floating rectangle — .card's own overflow:hidden clips it clean. The
+   right edge is cut into a V notch (two points) instead of a flat edge via
+   clip-path, giving it a physical ribbon-tail look. */
+.card__phase{
+  display:inline-block;margin:-4px 0 16px -20px;
+  background:var(--red-600);color:#fff;font-weight:800;font-size:.78rem;
+  padding:7px 26px 7px 16px;letter-spacing:.03em;
+  clip-path:polygon(0 0, 100% 0, calc(100% - 13px) 50%, 100% 100%, 0 100%);
+  box-shadow:var(--shadow-md);
+}
 
 /* ============ Process ============ */
 .process{display:grid;grid-template-columns:repeat(4,1fr);gap:26px;position:relative;}
@@ -481,6 +519,7 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
 .phase__card{
   flex:1;position:relative;background:#000;border-radius:var(--radius);padding:20px 22px;
   overflow:hidden;z-index:0;
+  transition:transform .2s ease, box-shadow .2s ease;
 }
 .phase__card::before{
   content:'';position:absolute;inset:0;z-index:-1;
@@ -491,6 +530,7 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
 .phase__card:hover::before{transform:scaleY(1);}
 .phase__card h4{color:var(--amber-500);font-size:.95rem;margin:0 0 6px;transition:color .25s ease;}
 .phase__card p{color:#fff;font-size:.86rem;margin:0;transition:color .25s ease;}
+.phase__card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);}
 .phase__card:hover h4{color:#000;}
 .phase__card:hover p{color:#000;}
 
@@ -510,7 +550,7 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
 .why{
   position:relative;padding:26px;border-radius:var(--radius);background:rgba(255,255,255,.04);
   border:1px solid rgba(255,255,255,.08);overflow:hidden;z-index:0;
-  transition:border-color .35s ease;
+  transition:border-color .35s ease, transform .2s ease, box-shadow .2s ease;
 }
 /* Hover wipe: a red-to-amber gradient grows in from the bottom edge up to
    the top, sitting behind the card's own content (negative z-index inside
@@ -523,7 +563,7 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
   transition:transform .25s ease;
 }
 .why:hover::before{transform:scaleY(1);}
-.why:hover{border-color:rgba(245,165,36,.4);}
+.why:hover{border-color:rgba(245,165,36,.4);transform:translateY(-4px);box-shadow:var(--shadow-md);}
 .why__icon{
   font-family:var(--ff-body);font-weight:800;font-size:1.1rem;color:var(--amber-500);
   width:44px;height:44px;border-radius:50%;border:2px solid var(--amber-500);
@@ -554,6 +594,20 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
 /* ============ Services intro backdrop ============ */
 .services-intro{position:relative;overflow:hidden;min-height:382px;display:flex;align-items:center;}
 .services-intro__bg{position:absolute;inset:0;z-index:0;background:url(../image/services-intro-bg.jpg) center/cover no-repeat;}
+/* Same .services-intro banner as the main Services page, minus a real photo
+   — used on the 8 fixed service pages (templates/service-*.html) until each
+   gets its own background photo; swap this class for a real
+   background:url(...) per page once photos exist. */
+.services-intro__bg--placeholder{background:linear-gradient(135deg, var(--dark), var(--ink-800));}
+.services-intro__bg--fire-alarm-system{background:url(../image/service-fire-detection-system-bg.png) center/cover no-repeat;}
+.services-intro__bg--gas-detection-system{background:url(../image/service-co2-gas-flooding-bg.png) center/cover no-repeat;}
+.services-intro__bg--gas-suppression-system{background:url(../image/service-cctv-pa-system-bg.png) center/cover no-repeat;}
+.services-intro__bg--hvws-mvws-system{background:url(../image/service-hvws-mvws-system-bg.png) center/cover no-repeat;}
+.services-intro__bg--fire-extinguishers{background:url(../image/service-fire-extinguishers-bg.png) center/cover no-repeat;}
+.services-intro__bg--safety-equipment{background:url(../image/service-safety-equipment-bg.png) center/cover no-repeat;}
+.services-intro__bg--fire-pump-house{background:url(../image/service-fire-pump-house-bg.png) center/cover no-repeat;}
+.services-intro__bg--pava-system{background:url(../image/service-electrical-works-bg.png) center/cover no-repeat;}
+.services-intro__bg--fire-hydrant-system{background:url(../image/service-fire-hydrant-system-bg.png) center/cover no-repeat;}
 .services-intro__overlay{position:absolute;inset:0;z-index:0;background:linear-gradient(180deg, rgba(16,18,21,.6) 0%, rgba(16,18,21,.78) 55%, rgba(16,18,21,.94) 100%);}
 .services-intro__content{position:relative;z-index:1;}
 .services-intro__content .eyebrow{color:var(--amber-500);}
@@ -703,6 +757,57 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
 .blog-post__image{width:100%;height:auto;border-radius:var(--radius);box-shadow:var(--shadow-md);margin-bottom:30px;}
 .blog-body{color:var(--ink-800);font-size:1rem;line-height:1.75;}
 .blog-body p{margin:0 0 1.3em;}
+
+/* ============ Service detail (9 fixed service pages) ============ */
+.service-detail{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start;}
+.service-detail__media{border-radius:var(--radius);}
+/* Not-yet-supplied pages use a plain <div> placeholder — needs its own fixed
+   aspect-ratio since there's no image to size it. */
+div.service-detail__media{
+  aspect-ratio:4/3;border:2px dashed var(--line);background:var(--tint);
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  color:var(--ink-600);font-size:.85rem;padding:20px;
+}
+/* Real photos size to their own natural aspect ratio instead of a fixed
+   box — these are arbitrary uploaded photos (e.g. a wide collage) and a
+   forced 4:3 box either cropped them (object-fit:cover) or left visible
+   letterbox bands around them (object-fit:contain). Full width, natural
+   height shows the whole image with no leftover space either way. */
+img.service-detail__media{width:100%;height:auto;display:block;}
+/* Frames a real detail photo in the same black-card language as the
+   /services/ cards (.grid--services .card) — bg #000, var(--radius),
+   var(--shadow-md) — minus the link/hover-wipe behavior, since this is a
+   static content photo, not a clickable card. */
+.service-detail__media-card{
+  position:relative;background:#000;border-radius:var(--radius);padding:6px;box-shadow:var(--shadow-md);
+}
+.service-detail__media-card .service-detail__media{border-radius:calc(var(--radius) - 3px);}
+/* Small corner inset photo, bottom-right this time — same shadow/rounded
+   language as the main card, no animation (unlike the earlier top-left
+   floating badge on Fire Alarm System, which was removed). */
+.service-detail__media-badge{
+  position:absolute;bottom:-24px;right:-24px;
+  border:2px solid #fff;border-radius:var(--radius);box-shadow:var(--shadow-md);
+  width:170px;aspect-ratio:4/3;overflow:hidden;
+}
+.service-detail__media-badge img{width:100%;height:100%;object-fit:cover;border-radius:var(--radius);display:block;}
+@media (max-width:480px){
+  .service-detail__media-badge{bottom:-16px;right:-12px;width:120px;}
+}
+.service-detail__included{margin-top:28px;}
+.service-detail__included h2{margin-bottom:16px;}
+.service-detail__body{color:var(--ink-800);font-size:1rem;line-height:1.75;font-weight:600;}
+.service-detail__body p{margin:0 0 1.3em;}
+.service-detail__body p:last-child{margin-bottom:0;}
+.service-detail__body p:first-of-type::first-letter{
+  font-family:var(--ff-display);font-weight:700;color:var(--ink-900);
+  font-size:3.8rem;line-height:.78;float:left;padding-right:10px;
+}
+.service-detail__included .check-list li{font-weight:600;}
+@media (max-width:860px){
+  .service-detail{grid-template-columns:1fr;gap:0;}
+  .service-detail__media{margin-bottom:24px;}
+}
 
 .lead-tabs{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px;}
 .lead-tab{
