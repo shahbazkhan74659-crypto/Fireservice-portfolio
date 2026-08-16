@@ -5,7 +5,7 @@ from django.utils.text import slugify
 from PIL import Image, UnidentifiedImageError
 from rest_framework import serializers
 
-from .models import BlogPost, Brand, Brochure, Certification, ClientLogo, FireRiskAssessmentItem, HeroSlide, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting
+from .models import BlogPost, Brochure, Certification, ClientLogo, FireRiskAssessmentItem, HeroSlide, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting
 from .pdf_utils import render_pdf_first_page_to_png
 
 MAX_LOGO_SIZE_BYTES = 5 * 1024 * 1024  # 5MB
@@ -97,7 +97,7 @@ def _raster_bytes_are_valid(file_obj, content_type):
 
 def validate_entity_name(value):
     """Shared name validation used by every image-backed content model's
-    serializer (Brand, ClientLogo, Product, Service, Certification) —
+    serializer (ClientLogo, Product, Service, Certification) —
     strips whitespace and requires at least 2 characters."""
     value = value.strip()
     if len(value) < 2:
@@ -361,24 +361,6 @@ class FireRiskAssessmentItemSerializer(serializers.ModelSerializer):
         if len(value) < 2:
             raise serializers.ValidationError('Text is required.')
         return value
-
-
-class BrandSerializer(serializers.ModelSerializer):
-    # Declared explicitly as FileField (not the ModelSerializer-inferred
-    # ImageField) so SVG uploads (allowed by the frontend schema) aren't
-    # rejected by Pillow — see validate_image_size_and_type() above.
-    image = serializers.FileField()
-
-    class Meta:
-        model = Brand
-        fields = ['id', 'name', 'image', 'order']
-        read_only_fields = ['order']  # server-assigned on create — see perform_create
-
-    def validate_name(self, value):
-        return validate_entity_name(value)
-
-    def validate_image(self, value):
-        return validate_image_size_and_type(value)
 
 
 class ProductSerializer(serializers.ModelSerializer):

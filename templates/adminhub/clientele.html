@@ -4,23 +4,11 @@
 {% block title %}Clientele | Admin Hub | Iconic Techno Service{% endblock %}
 
 {% block extra_head %}
-  {% vite_asset 'src/islands/admin-brands/main.tsx' %}
   {% vite_asset 'src/islands/admin-client-logos/main.tsx' %}
 {% endblock %}
 
 {% block content %}
 {% include "includes/clientele-intro.html" with no_bg=True %}
-<section class="section">
-  <div class="container">
-    <div class="section__head">
-      <p class="eyebrow">Available Brands</p>
-      <h2>Brands We Work With</h2>
-    </div>
-    <div id="admin-brands-root">
-      <noscript>Please enable JavaScript to manage brands.</noscript>
-    </div>
-  </div>
-</section>
 <section class="section">
   <div class="container">
     <div class="section__head">

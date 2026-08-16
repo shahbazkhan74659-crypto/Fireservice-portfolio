@@ -2,7 +2,6 @@ import pytest
 from rest_framework import serializers as drf_serializers
 
 from website.serializers import (
-    BrandSerializer,
     CertificationSerializer,
     ClientLogoSerializer,
     validate_entity_name,
@@ -33,7 +32,7 @@ class TestValidateImageSize:
 
 class TestValidateImageSizeAndType:
     """validate_image_size_and_type() is the real security boundary for every
-    Admin Hub image/icon upload (Brand/ClientLogo/Product/ProcessPhase/Service
+    Admin Hub image/icon upload (ClientLogo/Product/ProcessPhase/Service
     icons) — it never trusts the client-supplied Content-Type on its own,
     decoding raster bytes with Pillow and parsing SVG as XML instead."""
 
@@ -80,25 +79,21 @@ class TestValidateImageSizeAndType:
 
 
 @pytest.mark.django_db
-class TestBrandAndClientLogoAcceptSvg:
-    """Regression check: CLAUDE.md's history notes flagged Brand/ClientLogo's
+class TestClientLogoAcceptsSvg:
+    """Regression check: CLAUDE.md's history notes flagged ClientLogo's
     SVG-upload validation as a known-unfixed 'Pillow can't open SVG' bug.
-    Reading the current serializers shows both already declare
+    Reading the current serializer shows it already declares
     `image = serializers.FileField()` explicitly (bypassing DRF's
-    Pillow-backed ImageField) and route through validate_image_size_and_type()
+    Pillow-backed ImageField) and routes through validate_image_size_and_type()
     — so this should pass now. If it starts failing, either the fix
     regressed or it was never real; either way, update CLAUDE.md to match."""
-
-    def test_brand_accepts_a_safe_svg_upload(self, safe_svg_upload):
-        s = BrandSerializer(data={'name': 'Acme', 'image': safe_svg_upload})
-        assert s.is_valid(), s.errors
 
     def test_client_logo_accepts_a_safe_svg_upload(self, safe_svg_upload):
         s = ClientLogoSerializer(data={'name': 'Acme', 'image': safe_svg_upload})
         assert s.is_valid(), s.errors
 
-    def test_brand_rejects_a_malicious_svg_upload(self, malicious_svg_script_upload):
-        s = BrandSerializer(data={'name': 'Acme', 'image': malicious_svg_script_upload})
+    def test_client_logo_rejects_a_malicious_svg_upload(self, malicious_svg_script_upload):
+        s = ClientLogoSerializer(data={'name': 'Acme', 'image': malicious_svg_script_upload})
         assert not s.is_valid()
         assert 'image' in s.errors
 

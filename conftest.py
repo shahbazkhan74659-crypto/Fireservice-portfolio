@@ -34,8 +34,10 @@ def _media_root_seed(tmp_path_factory, django_db_setup):
     session-scoped instantiate-on-first-use gives no guarantee this copy
     runs after those files exist, causing a real FileNotFoundError race.
 
-    Seeded ClientLogo/Brand/Product/Certification/ProcessPhase rows (from
-    website/migrations/0004,0006,0008,0012,0014) reference real image files
+    Seeded ClientLogo/Product/Certification/ProcessPhase rows (from
+    website/migrations/0004,0008,0012,0014 — 0006 also writes files here but
+    its seeded Brand rows no longer exist as of 0054_delete_brand) reference
+    real image files
     that live under the real project MEDIA_ROOT. `.url` never touches disk
     (string concatenation only), but `.width`/`.height` open the file via
     Pillow and need a real file to exist under whatever MEDIA_ROOT is active

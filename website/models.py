@@ -11,7 +11,7 @@ def register_file_cleanup_signals(model, field_name='image', with_replace=True):
     row (post_delete) or replaced image (pre_save) leaves an orphaned file
     in media/.
 
-    Used by ClientLogo/Brand/Product (field_name='image') and Service
+    Used by ClientLogo/Product (field_name='image') and Service
     (field_name='icon') with `with_replace=True` (they all support Edit, so
     a "replace" case needs guarding); Certification passes
     `with_replace=False` since it has no Edit, so there's no replace case —
@@ -77,21 +77,6 @@ class ClientLogo(models.Model):
 register_file_cleanup_signals(ClientLogo)
 
 
-class Brand(models.Model):
-    name = models.CharField(max_length=120)
-    image = models.ImageField(upload_to='brands/')
-    order = models.PositiveIntegerField(default=0)
-
-    class Meta:
-        ordering = ['order', 'id']
-
-    def __str__(self):
-        return self.name
-
-
-register_file_cleanup_signals(Brand)
-
-
 class Service(models.Model):
     name = models.CharField(max_length=120)
     description = models.TextField()
@@ -125,7 +110,7 @@ register_file_cleanup_signals(Product)
 
 class ProcessPhase(models.Model):
     # `name` doubles as the image's alt text on the Process page (same
-    # convention as Product/Brand/ClientLogo's `name`), not a phase title —
+    # convention as Product/ClientLogo's `name`), not a phase title —
     # `title`/`tagline` hold the visible h3/subtitle copy. The Process page
     # loops over this model entirely (see process.html), so every phase's
     # full content — image, title, tagline and both explanation cards —

@@ -8,8 +8,8 @@ const PYTHON = process.platform === 'win32'
 
 // Runs once after the whole suite (even on failure) — removes the
 // throwaway e2e_admin account and every marker-tagged row the specs
-// created (leads, the test Brand), so repeat runs never accumulate junk
-// in the real dev database this suite runs against.
+// created (leads, the test Client Logo), so repeat runs never accumulate
+// junk in the real dev database this suite runs against.
 export default async function globalTeardown() {
   execFileSync(PYTHON, ['manage.py', 'e2e_data', 'teardown'], {
     cwd: REPO_ROOT,

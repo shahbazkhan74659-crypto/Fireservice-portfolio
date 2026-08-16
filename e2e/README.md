@@ -58,9 +58,9 @@ npm run report      # open the HTML report from the last run
   error, and a full login → logout → re-gated cycle.
 - `admin-nav-mobile.spec.ts` — the Admin Hub drawer: logo above the links,
   username + Log Out pinned to the bottom, and logging out from there.
-- `admin-crud.spec.ts` — add then delete a Brand through the real Add/Delete
-  modals (Client Logos/Products share the identical pattern, so this one
-  model stands in for all of them).
+- `admin-crud.spec.ts` — add then delete a Client Logo through the real
+  Add/Delete modals (Products/Services etc. share the identical pattern, so
+  this one model stands in for all of them).
 
 This is a "minimal e2e suite" per the project's stated test strategy in
 CLAUDE.md — a handful of full, real user flows, not exhaustive per-page or

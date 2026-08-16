@@ -38,10 +38,9 @@ from leads.serializers import (
     ContactMessageSerializer,
     SurveyRequestSerializer,
 )
-from website.models import BlogPost, Brand, Brochure, Certification, ClientLogo, FireRiskAssessmentItem, HeroSlide, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting
+from website.models import BlogPost, Brochure, Certification, ClientLogo, FireRiskAssessmentItem, HeroSlide, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting
 from website.serializers import (
     BlogPostSerializer,
-    BrandSerializer,
     BrochureSerializer,
     CertificationSerializer,
     ClientLogoSerializer,
@@ -678,25 +677,6 @@ class ClientLogoListCreateView(ListCreateAPIView):
 class ClientLogoDetailView(RetrieveUpdateDestroyAPIView):
     queryset = ClientLogo.objects.all()
     serializer_class = ClientLogoSerializer
-    parser_classes = [MultiPartParser, FormParser]
-    permission_classes = [IsAdminUser]
-
-
-class BrandListCreateView(ListCreateAPIView):
-    queryset = Brand.objects.all()
-    serializer_class = BrandSerializer
-    parser_classes = [MultiPartParser, FormParser]  # uploads arrive as multipart, not JSON
-    permission_classes = [IsAdminUser]
-
-    def perform_create(self, serializer):
-        with transaction.atomic():
-            next_order = (Brand.objects.select_for_update().aggregate(Max('order'))['order__max'] or 0) + 1
-            serializer.save(order=next_order)
-
-
-class BrandDetailView(RetrieveUpdateDestroyAPIView):
-    queryset = Brand.objects.all()
-    serializer_class = BrandSerializer
     parser_classes = [MultiPartParser, FormParser]
     permission_classes = [IsAdminUser]
 

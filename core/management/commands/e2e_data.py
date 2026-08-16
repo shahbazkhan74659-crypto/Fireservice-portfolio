@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 
 from leads.models import ConsultationRequest, ContactMessage, SurveyRequest
-from website.models import Brand
+from website.models import ClientLogo
 
 # Fixed, well-known credentials for the Playwright suite's global setup/
 # teardown (e2e/global-setup.ts, e2e/global-teardown.ts) — not a secret,
@@ -44,7 +44,7 @@ class Command(BaseCommand):
         for model in (SurveyRequest, ContactMessage, ConsultationRequest):
             n, _ = model.objects.filter(name=E2E_MARKER).delete()
             deleted += n
-        n, _ = Brand.objects.filter(name__startswith=E2E_MARKER).delete()
+        n, _ = ClientLogo.objects.filter(name__startswith=E2E_MARKER).delete()
         deleted += n
         self.stdout.write(self.style.SUCCESS(
             f'e2e_data: removed {E2E_USERNAME} and {deleted} marker-tagged row(s)'

@@ -12,7 +12,7 @@ interface UseCrudListResult<T> {
 
 /**
  * Shared fetch-on-mount + local add/update/remove state management used by
- * every Admin Hub "Manager" component (Brands, Client Logos, Products,
+ * every Admin Hub "Manager" component (Client Logos, Products,
  * Services, Fire Risk Assessment Items, Mission & Vision, Certifications).
  * Each Manager still owns its own loading-skeleton/grid/table markup and
  * error copy — this hook only centralizes the data-fetching and list

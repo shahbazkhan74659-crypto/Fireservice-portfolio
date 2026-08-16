@@ -73,8 +73,9 @@ class TestBlogViews:
         # Membership, not exact-list equality — 0037_seed_blog_posts.py
         # data-migrates 10 real published posts into every freshly-migrated
         # database, test databases included, same reason
-        # TestBrandOrderAutoIncrement above doesn't assert order==1: a
-        # brand-new environment never actually starts at an empty table.
+        # TestClientLogoOrderAutoIncrement (core/tests/test_api_views.py)
+        # doesn't assert order==1: a brand-new environment never actually
+        # starts at an empty table.
         from website.models import BlogPost
 
         published = BlogPost.objects.create(
@@ -220,26 +221,26 @@ class TestAdminHubHomeDashboardContext:
         assert res.context['years_experience'] == 42
 
     def test_content_completeness_counts_only_populated_types(self, admin_client, make_png_upload):
-        from website.models import Brand, Certification
+        from website.models import Certification, ClientLogo
 
         # Every CONTENT_MODELS type ships with a data-seed migration (see
         # website/migrations/0002.../0014...), so a fresh database already
-        # has all 7 populated — emptying one type first is the only way to
+        # has all 6 populated — emptying one type first is the only way to
         # exercise the "goes from unpopulated to populated" transition.
         Certification.objects.all().delete()
 
         res_before = admin_client.get(reverse('adminhub-home'))
-        assert res_before.context['content_types_populated'] == 6
+        assert res_before.context['content_types_populated'] == 5
 
-        Brand.objects.create(name='Second Brand Row', image=make_png_upload())
-        res_still_six = admin_client.get(reverse('adminhub-home'))
-        assert res_still_six.context['content_types_populated'] == 6  # Brand was already populated
+        ClientLogo.objects.create(name='Second Client Logo Row', image=make_png_upload())
+        res_still_five = admin_client.get(reverse('adminhub-home'))
+        assert res_still_five.context['content_types_populated'] == 5  # ClientLogo was already populated
 
         Certification.objects.create(
             name='Test Cert', description='Desc', meta='Meta', image=make_png_upload(),
         )
         res_after = admin_client.get(reverse('adminhub-home'))
-        assert res_after.context['content_types_populated'] == 7
+        assert res_after.context['content_types_populated'] == 6
 
     def test_resolved_leads_excluded_from_meters_total_and_recent_activity(self, admin_client):
         # The Dashboard is meant to reflect open (unresolved) leads only —

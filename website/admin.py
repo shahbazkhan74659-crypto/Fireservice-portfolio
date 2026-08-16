@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import BlogPost, Brand, Brochure, Certification, ClientLogo, FireRiskAssessmentItem, HeroSlide, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting
+from .models import BlogPost, Brochure, Certification, ClientLogo, FireRiskAssessmentItem, HeroSlide, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting
 from .pdf_utils import render_pdf_first_page_to_png
 
 
@@ -21,12 +21,6 @@ class MissionVisionItemAdmin(admin.ModelAdmin):
 
 @admin.register(ClientLogo)
 class ClientLogoAdmin(admin.ModelAdmin):
-    list_display = ('name', 'order')
-    ordering = ('order', 'id')
-
-
-@admin.register(Brand)
-class BrandAdmin(admin.ModelAdmin):
     list_display = ('name', 'order')
     ordering = ('order', 'id')
 

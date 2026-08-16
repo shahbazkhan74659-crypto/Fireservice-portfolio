@@ -495,11 +495,11 @@ class TestAdminHubChangeEmailRevertView:
         assert staff_user.email == reverted_email
 
 
-class TestBrandListCreateViewPermissions:
-    """Brand stands in for every IsAdminUser-protected content endpoint —
+class TestClientLogoListCreateViewPermissions:
+    """ClientLogo stands in for every IsAdminUser-protected content endpoint —
     they all share the same permission_classes = [IsAdminUser] pattern."""
 
-    url = '/api/admin-hub/brands/'
+    url = '/api/admin-hub/client-logos/'
 
     def test_anonymous_rejected(self, client):
         res = client.get(self.url)
@@ -515,21 +515,22 @@ class TestBrandListCreateViewPermissions:
         assert res.status_code == 200
 
 
-class TestBrandOrderAutoIncrement:
+class TestClientLogoOrderAutoIncrement:
     """perform_create()'s select_for_update()+aggregate(Max('order')) pattern
-    is duplicated across seven endpoints (Brand/ClientLogo/Service/Product/
-    ProcessPhase/Certification/FireRiskAssessmentItem) — Brand is the
+    is duplicated across six endpoints (ClientLogo/Service/Product/
+    ProcessPhase/Certification/FireRiskAssessmentItem) — ClientLogo is the
     representative."""
 
-    url = '/api/admin-hub/brands/'
+    url = '/api/admin-hub/client-logos/'
 
     def test_order_increments_on_successive_creates(self, admin_client, make_png_upload):
-        from website.models import Brand
+        from website.models import ClientLogo
 
-        # Not 1/2: 0006_seed_brands.py data-migrates 5 real Brand rows into
-        # every freshly-migrated database, test databases included — so a
-        # brand-new environment never actually starts at an empty table.
-        baseline = Brand.objects.count()
+        # Not 1/2: 0004_seed_client_logos.py data-migrates real ClientLogo
+        # rows into every freshly-migrated database, test databases included
+        # — so a brand-new environment never actually starts at an empty
+        # table.
+        baseline = ClientLogo.objects.count()
 
         res1 = admin_client.post(self.url, {'name': 'First', 'image': make_png_upload('a.png')})
         res2 = admin_client.post(self.url, {'name': 'Second', 'image': make_png_upload('b.png')})

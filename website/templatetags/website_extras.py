@@ -4,7 +4,7 @@ from django import template
 from django.urls import reverse
 
 from core.context_processors import BUSINESS_NAME
-from website.models import Brand, Certification, ClientLogo, HeroSlide, Product, ProcessPhase, Service, SiteSetting
+from website.models import Certification, ClientLogo, HeroSlide, Product, ProcessPhase, Service, SiteSetting
 
 register = template.Library()
 
@@ -37,11 +37,6 @@ def service_page_url(service_name):
 @register.simple_tag
 def get_client_logos():
     return ClientLogo.objects.all()
-
-
-@register.simple_tag
-def get_brands():
-    return Brand.objects.all()
 
 
 @register.simple_tag

@@ -246,21 +246,18 @@ a.whatsapp-icon:hover{color:#1ebe5b;}
 .hero-brand__tagline{
   text-transform:uppercase;letter-spacing:.1em;font-size:.9rem;font-weight:700;color:var(--amber-500);
 }
-.hero__content{position:relative;z-index:2;padding:24px 24px 120px;max-width:760px;}
+.hero__content{position:relative;z-index:2;padding:24px 24px 120px;max-width:950px;}
 .eyebrow{
   display:inline-block;text-transform:uppercase;letter-spacing:.12em;font-size:.78rem;font-weight:700;
   color:var(--red-600);margin-bottom:14px;
 }
 .eyebrow--light{color:var(--amber-500);}
-.hero h1{font-size:clamp(2.1rem,5vw,3.4rem);color:#fff;}
-/* Same treatment as .hero-brand__tagline below the company name — a small
-   uppercase amber line, here below the h1 instead. */
-.hero__subtagline{
+.hero h1{font-size:clamp(2.1rem,5vw,3.4rem);color:#fff;text-align:center;}
+.hero__lead{
   text-transform:uppercase;letter-spacing:.1em;font-size:.9rem;font-weight:700;color:var(--amber-500);
-  margin:8px 0 20px;
+  max-width:720px;margin-left:auto;margin-right:auto;text-align:center;
 }
-.hero__lead{font-size:1.1rem;color:#e7e5e2;max-width:600px;}
-.hero__cta{display:flex;gap:16px;flex-wrap:wrap;margin-top:28px;}
+.hero__cta{display:flex;gap:16px;flex-wrap:wrap;margin-top:28px;justify-content:center;}
 /* Hidden on desktop (its own Free Consultation button already lives in the
    header) — shown only at the 600px breakpoint below, the same one that
    turns .hero__cta into a column, so this slots in as a natural third
@@ -595,12 +592,12 @@ img.phase__image{object-fit:cover;display:block;box-shadow:var(--shadow-md);}
 .services-intro{position:relative;overflow:hidden;min-height:382px;display:flex;align-items:center;}
 .services-intro__bg{position:absolute;inset:0;z-index:0;background:url(../image/services-intro-bg.jpg) center/cover no-repeat;}
 /* Same .services-intro banner as the main Services page; the placeholder
-   gradient below is unused now that every fixed service page
-   (templates/service-*.html) has a real background photo class. */
+   gradient below is a fallback for any service page without its own photo
+   class yet. */
 .services-intro__bg--placeholder{background:linear-gradient(135deg, var(--dark), var(--ink-800));}
 .services-intro__bg--fire-alarm-system{background:url(../image/service-fire-detection-system-bg.png) center/cover no-repeat;}
-.services-intro__bg--gas-detection-system{background:url(../image/service-co2-gas-flooding-bg.png) center/cover no-repeat;}
-.services-intro__bg--gas-suppression-system{background:url(../image/service-cctv-pa-system-bg.png) center/cover no-repeat;}
+.services-intro__bg--gas-detection-system{background:url(../image/service-gas-detection-system-bg.png) center/cover no-repeat;}
+.services-intro__bg--gas-suppression-system{background:url(../image/service-co2-gas-flooding-bg.png) center/cover no-repeat;}
 .services-intro__bg--hvws-mvws-system{background:url(../image/service-hvws-mvws-system-bg.png) center/cover no-repeat;}
 .services-intro__bg--fire-extinguishers{background:url(../image/service-fire-extinguishers-bg.png) center/cover no-repeat;}
 .services-intro__bg--safety-equipment{background:url(../image/service-safety-equipment-bg.png) center/cover no-repeat;}

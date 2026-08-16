@@ -20,7 +20,6 @@ from leads.models import ConsultationRequest, ContactMessage, SurveyRequest
 from leads.services import RESOLVED_LEAD_RETENTION_DAYS, purge_resolved_leads
 from website.models import (
     BlogPost,
-    Brand,
     Brochure,
     Certification,
     ClientLogo,
@@ -40,7 +39,7 @@ LEAD_MODELS = (
 
 CONTENT_MODELS = (
     MissionVisionItem, Service, FireRiskAssessmentItem,
-    Product, ClientLogo, Brand, Certification,
+    Product, ClientLogo, Certification,
 )
 
 TREND_DAYS = 30

@@ -1,6 +1,6 @@
 import pytest
 
-from website.models import Brand, Certification, SiteSetting
+from website.models import Certification, ClientLogo, SiteSetting
 
 pytestmark = pytest.mark.django_db
 
@@ -31,45 +31,45 @@ class TestSiteSettingSingleton:
 class TestFileCleanupSignals:
     """register_file_cleanup_signals() (website/models.py) is real, easy-to-
     get-wrong logic — without it, deleted/replaced rows leave orphaned files
-    in media/ forever. Brand stands in for every model that uses it
-    (ClientLogo, Product, ProcessPhase, Service, Certification all wire it up
-    the same way)."""
+    in media/ forever. ClientLogo stands in for every model that uses it
+    (Product, ProcessPhase, Service, Certification all wire it up the same
+    way)."""
 
     def test_deleting_a_row_deletes_its_image_file(self, png_upload):
-        brand = Brand.objects.create(name='Test Brand', image=png_upload)
-        storage = brand.image.storage
-        path = brand.image.name
+        logo = ClientLogo.objects.create(name='Test Client Logo', image=png_upload)
+        storage = logo.image.storage
+        path = logo.image.name
 
         assert storage.exists(path)
-        brand.delete()
+        logo.delete()
         assert not storage.exists(path)
 
     def test_replacing_the_image_deletes_the_old_file(self, make_png_upload):
-        brand = Brand.objects.create(name='Test Brand', image=make_png_upload('first.png'))
-        storage = brand.image.storage
-        old_path = brand.image.name
+        logo = ClientLogo.objects.create(name='Test Client Logo', image=make_png_upload('first.png'))
+        storage = logo.image.storage
+        old_path = logo.image.name
 
-        brand.image = make_png_upload('second.png')
-        brand.save()
+        logo.image = make_png_upload('second.png')
+        logo.save()
 
         assert not storage.exists(old_path)
-        assert storage.exists(brand.image.name)
+        assert storage.exists(logo.image.name)
 
     def test_saving_without_changing_the_image_does_not_delete_it(self, png_upload):
-        brand = Brand.objects.create(name='Test Brand', image=png_upload)
-        path = brand.image.name
+        logo = ClientLogo.objects.create(name='Test Client Logo', image=png_upload)
+        path = logo.image.name
 
-        brand.name = 'Renamed Brand'
-        brand.save()
+        logo.name = 'Renamed Client Logo'
+        logo.save()
 
-        assert brand.image.storage.exists(path)
+        assert logo.image.storage.exists(path)
 
     def test_creating_a_new_row_does_not_touch_any_existing_file(self, make_png_upload):
         # Regression guard for the on_replace signal's `if not instance.pk`
         # early-return — without it, a brand-new (unsaved) instance would
         # crash trying to look itself up by a pk it doesn't have yet.
-        brand = Brand.objects.create(name='Only Brand', image=make_png_upload())
-        assert brand.image.storage.exists(brand.image.name)
+        logo = ClientLogo.objects.create(name='Only Client Logo', image=make_png_upload())
+        assert logo.image.storage.exists(logo.image.name)
 
     def test_deleting_a_certification_deletes_both_its_image_and_pdf_files(self, png_upload, pdf_upload):
         # Certification is the only model with two file-backed fields, each
