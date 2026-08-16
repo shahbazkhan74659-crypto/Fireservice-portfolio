@@ -26,6 +26,22 @@ SERVICE_PAGE_URL_NAMES = {
 
 
 @register.filter
+def attachment_url(url):
+    """The HTML `download` attribute is silently ignored by browsers for
+    cross-origin links unless the response itself sends a
+    Content-Disposition: attachment header — which is exactly what happens
+    in production, where media lives on Cloudinary (a different origin from
+    the site), so the Brochure page's Download button just opened the PDF
+    instead of saving it. Cloudinary honors an `fl_attachment` delivery
+    flag that makes it send that header itself. Local dev serves media
+    same-origin (no res.cloudinary.com host), where `download` already
+    works unaided, so this leaves those URLs untouched."""
+    if 'res.cloudinary.com' in url and '/upload/' in url:
+        return url.replace('/upload/', '/upload/fl_attachment/', 1)
+    return url
+
+
+@register.filter
 def service_page_url(service_name):
     """Falls back to the Services list page itself for any name without a
     dedicated page yet (e.g. a new Service added via the Admin Hub CRUD

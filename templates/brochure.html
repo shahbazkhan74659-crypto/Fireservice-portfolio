@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load website_extras %}
 
 {% block title %}Brochure | Iconic Techno Service{% endblock %}
 {% block meta_description %}View or download the Iconic Techno Service company brochure — products, services and capabilities.{% endblock %}
@@ -23,7 +24,7 @@
       </a>
 
       <div class="brochure-download">
-        <a href="{{ brochure.pdf.url }}" download class="btn btn--primary btn--lg">Download Brochure</a>
+        <a href="{{ brochure.pdf.url|attachment_url }}" download class="btn btn--primary btn--lg">Download Brochure</a>
       </div>
     </div>
   </section>
