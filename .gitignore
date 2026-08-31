@@ -5,6 +5,9 @@
 agent-seo-manager-memory.md
 .claude/agents/agent-seo-*.md
 
+# Oracle Cloud signup notes — contains personal bank/address details, local-only
+essentials.md
+
 # Python / Django
 venv/
 __pycache__/

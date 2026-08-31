@@ -1,0 +1,9 @@
+# Copy to /etc/cron.d/its-db-backup (root:root, mode 644):
+#   sudo cp deploy/oracle/its-db-backup.cron /etc/cron.d/its-db-backup
+#   sudo chmod 644 /etc/cron.d/its-db-backup
+#
+# PATH must include pipx's install location so `oci` resolves — cron does
+# not source the login shell's PATH the way an interactive SSH session does.
+PATH=/home/ubuntu/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+0 2 * * * ubuntu /home/ubuntu/FireService/deploy/oracle/backup-db.sh >> /var/log/its-db-backup.log 2>&1
