@@ -10,13 +10,21 @@ authoritative until this is proven stable — nothing here touches Render.
    (`VM.Standard.E2.1.Micro`, Ubuntu 24.04, reserved public IP, security list rules for
    80/443), create the `its-db-backups` Object Storage bucket, and add an API key to the
    `deploy-admins` IAM user for backup uploads.
-2. `scp` the API key files from step 1 to the VM (not scripted — they're secrets):
-   `~/.oci/config` and whatever key path it references.
+2. `scp` two sets of secrets to the VM (not scripted — provision.sh checks for them and
+   errors with instructions if either is missing):
+   - The Oracle API key from step 1: `~/.oci/config` and whatever key path it references.
+   - A GitHub deploy key's **private** half, to `~/.ssh/github_deploy_key` (mode `600`).
+     `FireService` is a private repo, so `provision.sh` clones over SSH using this key —
+     generate a dedicated keypair (`ssh-keygen -t ed25519 -f deploy_key -N ""`), register
+     the **public** half as a read-only deploy key on the repo (Settings → Deploy keys, or
+     `gh repo deploy-key add deploy_key.pub --title "<vm-name>" --repo
+     shahbazkhan74659-crypto/FireService`), then scp the private half over.
 3. SSH in with `~/.ssh/oracle_its_vm` and run `provision.sh` (this repo's copy, or `curl`
    it — either way, read it before running it, standard practice for any setup script).
    It installs everything, creates the Postgres role/DB, clones the repo, and seeds `.env`
    from `.env.oracle.example` — then stops and prints the generated DB password plus the
-   remaining manual steps (below).
+   remaining manual steps (below). Safe to re-run if it fails partway through (e.g. a
+   missing secret from step 2) — the apt/swapfile/Postgres/clone steps are all idempotent.
 4. Fill in the real secrets in `~/FireService/.env` (SECRET_KEY, ALLOWED_HOSTS,
    CSRF_TRUSTED_ORIGINS, DJANGO_SUPERUSER_*, SENDGRID_API_KEY).
 5. Run `deploy.sh` — builds the frontend, runs migrations/`ensure_admin`, and (once the

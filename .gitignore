@@ -31,3 +31,8 @@ e2e/playwright-report/
 # OS
 .DS_Store
 Thumbs.db
+
+# Others
+.oci_config.txt
+x/
+.oracle_vm_secrets.txt

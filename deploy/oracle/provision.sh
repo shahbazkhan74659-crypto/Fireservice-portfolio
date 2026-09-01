@@ -10,7 +10,13 @@
 # comments) and the Postgres password it prints below, then run deploy.sh.
 set -euo pipefail
 
-REPO_URL="https://github.com/shahbazkhan74659-crypto/FireService.git"
+# FireService is a private repo — cloning over plain HTTPS fails non-interactively
+# ("could not read Username for 'https://github.com'"). Use a read-only GitHub
+# deploy key instead: generate one, register its public half at
+# https://github.com/shahbazkhan74659-crypto/FireService/settings/keys (or via
+# `gh repo deploy-key add`), then scp the PRIVATE half to this VM at
+# ~/.ssh/github_deploy_key before running this script (chmod 600 it).
+REPO_URL="git@github.com:shahbazkhan74659-crypto/FireService.git"
 APP_DIR="$HOME/FireService"
 DB_NAME="fireservice"
 DB_USER="fireservice_app"
@@ -62,11 +68,26 @@ sudo ufw allow 443/tcp
 sudo ufw --force enable
 
 echo "==> Creating Postgres role + database"
+# Idempotent: safe to re-run this script if an earlier step failed partway
+# through (e.g. the git clone below) without needing to hand-fix Postgres first.
 DB_PASSWORD="$(openssl rand -base64 24 | tr -dc 'A-Za-z0-9' | cut -c1-24)"
+# NOTE: psql's `:'var'` substitution does not apply inside a $$-quoted PL/pgSQL
+# body (psql's lexer treats it as one opaque token), so bash-level substitution
+# is used instead — safe here since DB_USER is a fixed literal and DB_PASSWORD
+# is alphanumeric-only (no quotes/specials to worry about).
 sudo -u postgres psql -v ON_ERROR_STOP=1 <<SQL
-CREATE ROLE ${DB_USER} WITH LOGIN PASSWORD '${DB_PASSWORD}';
-CREATE DATABASE ${DB_NAME} OWNER ${DB_USER};
+DO \$\$
+BEGIN
+   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '${DB_USER}') THEN
+      CREATE ROLE ${DB_USER} WITH LOGIN PASSWORD '${DB_PASSWORD}';
+   ELSE
+      ALTER ROLE ${DB_USER} WITH LOGIN PASSWORD '${DB_PASSWORD}';
+   END IF;
+END
+\$\$;
 SQL
+sudo -u postgres psql -v ON_ERROR_STOP=1 -tAc "SELECT 1 FROM pg_database WHERE datname = '${DB_NAME}'" | grep -q 1 || \
+    sudo -u postgres psql -v ON_ERROR_STOP=1 -c "CREATE DATABASE ${DB_NAME} OWNER ${DB_USER};"
 
 # Tune down defaults for the 1GB-RAM shape. Debian/Ubuntu's postgresql.conf
 # includes conf.d/*.conf by default — drop a small override file instead of
@@ -81,8 +102,28 @@ maintenance_work_mem = 32MB
 CONF
 sudo systemctl restart postgresql
 
+echo "==> Configuring SSH for the GitHub deploy key"
+mkdir -p ~/.ssh && chmod 700 ~/.ssh
+if [ ! -f ~/.ssh/github_deploy_key ]; then
+    echo "ERROR: ~/.ssh/github_deploy_key not found." >&2
+    echo "scp the deploy key's PRIVATE half here first (see REPO_URL comment above), then re-run." >&2
+    exit 1
+fi
+chmod 600 ~/.ssh/github_deploy_key
+ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts 2>/dev/null
+grep -q "^Host github.com" ~/.ssh/config 2>/dev/null || cat >> ~/.ssh/config <<'SSHCONF'
+Host github.com
+    IdentityFile ~/.ssh/github_deploy_key
+    IdentitiesOnly yes
+SSHCONF
+chmod 600 ~/.ssh/config
+
 echo "==> Cloning the repo"
-git clone "$REPO_URL" "$APP_DIR"
+if [ -d "$APP_DIR/.git" ]; then
+    echo "    $APP_DIR already exists, skipping clone"
+else
+    git clone "$REPO_URL" "$APP_DIR"
+fi
 cd "$APP_DIR"
 
 echo "==> Creating venv and installing Python dependencies"

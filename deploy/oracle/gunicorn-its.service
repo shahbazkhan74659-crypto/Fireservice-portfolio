@@ -7,10 +7,17 @@ User=ubuntu
 Group=www-data
 WorkingDirectory=/home/ubuntu/FireService
 Environment=DJANGO_SETTINGS_MODULE=fireservice.settings.oracle
+# /run/ itself is root-owned — RuntimeDirectory has systemd create
+# /run/gunicorn-its/ (owned by User/Group above) before startup, so the
+# ubuntu user can actually create the socket file inside it. Binding
+# straight to /run/gunicorn-its.sock as a non-root user fails with
+# EACCES since ubuntu has no write permission on /run/ itself.
+RuntimeDirectory=gunicorn-its
+RuntimeDirectoryMode=0750
 ExecStart=/home/ubuntu/FireService/venv/bin/gunicorn \
     --workers 2 \
     --umask 0007 \
-    --bind unix:/run/gunicorn-its.sock \
+    --bind unix:/run/gunicorn-its/gunicorn.sock \
     fireservice.wsgi:application
 Restart=always
 RestartSec=3
