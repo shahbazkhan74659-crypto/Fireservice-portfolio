@@ -9,6 +9,7 @@
 # (it only copies the .env.oracle.example template — see that file's
 # comments) and the Postgres password it prints below, then run deploy.sh.
 set -euo pipefail
+export DEBIAN_FRONTEND=noninteractive
 
 # FireService is a private repo — cloning over plain HTTPS fails non-interactively
 # ("could not read Username for 'https://github.com'"). Use a read-only GitHub
@@ -67,6 +68,28 @@ sudo ufw allow 80/tcp
 sudo ufw allow 443/tcp
 sudo ufw --force enable
 
+# Oracle's platform Ubuntu image ships a pre-baked iptables INPUT chain, separate
+# from and evaluated *before* ufw's own chains, that only allows inbound SSH and
+# REJECTs everything else outright — `ufw status` and the OCI Console Security
+# List both report 80/443 as allowed, but neither of those layers is the one
+# actually deciding. Insert explicit ACCEPT rules ahead of that REJECT, and
+# persist them so they survive a reboot. Idempotent: skips a port that's
+# already got an ACCEPT rule.
+echo "==> Inserting iptables ACCEPT rules for 80/443 ahead of Oracle's default REJECT"
+for PORT in 80 443; do
+    if ! sudo iptables -C INPUT -p tcp -m state --state NEW --dport "$PORT" -j ACCEPT 2>/dev/null; then
+        REJECT_LINE="$(sudo iptables -L INPUT -n --line-numbers | awk '/REJECT/{print $1; exit}')"
+        if [ -n "$REJECT_LINE" ]; then
+            sudo iptables -I INPUT "$REJECT_LINE" -p tcp -m state --state NEW --dport "$PORT" -j ACCEPT
+        else
+            sudo iptables -A INPUT -p tcp -m state --state NEW --dport "$PORT" -j ACCEPT
+        fi
+    fi
+done
+sudo apt-get install -y iptables-persistent
+sudo netfilter-persistent save
+sudo systemctl enable netfilter-persistent
+
 echo "==> Creating Postgres role + database"
 # Idempotent: safe to re-run this script if an earlier step failed partway
 # through (e.g. the git clone below) without needing to hand-fix Postgres first.
@@ -118,6 +141,13 @@ Host github.com
 SSHCONF
 chmod 600 ~/.ssh/config
 
+# $HOME (/home/ubuntu) defaults to 750 — nginx (running as www-data) can't even
+# traverse into it to reach staticfiles/media below, regardless of those
+# subdirectories' own permissions. Execute-only for "other" allows traversal to
+# a named path without enabling directory listing. Idempotent.
+echo "==> Allowing nginx (www-data) to traverse \$HOME to reach static/media"
+chmod o+x "$HOME"
+
 echo "==> Cloning the repo"
 if [ -d "$APP_DIR/.git" ]; then
     echo "    $APP_DIR already exists, skipping clone"
@@ -159,7 +189,7 @@ Provisioning done. Before running deploy.sh:
 3. Run deploy/oracle/deploy.sh to build the frontend, migrate, and
    start the app for the first time.
 
-4. Copy deploy/oracle/gunicorn.service to
+4. Copy deploy/oracle/gunicorn-its.service to
    /etc/systemd/system/gunicorn-its.service, then:
        sudo systemctl daemon-reload
        sudo systemctl enable --now gunicorn-its
