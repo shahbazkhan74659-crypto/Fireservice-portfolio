@@ -1373,7 +1373,7 @@ img.service-detail__media{width:100%;height:auto;display:block;}
      from the shared .btn classes. */
   .nav .nav__brochure-link{
     display:flex;align-items:center;justify-content:center;gap:8px;
-    margin-top:6px;padding:10px 22px;border-radius:999px;
+    margin-top:auto;padding:10px 22px;border-radius:999px;
     border:2px solid var(--red-600);color:var(--red-600);
     font-weight:600;font-size:.95rem;
   }
@@ -1502,6 +1502,7 @@ img.service-detail__media{width:100%;height:auto;display:block;}
   .hero-brand__tagline{font-size:.75rem;}
   .hero__cta{flex-direction:column;}
   .hero__cta-mobile-only{display:inline-flex;}
+  .hero h1{text-align:left;}
   .footer__grid{grid-template-columns:1fr;}
   .footer__services-grid{grid-template-columns:1fr;}
   .cc-meter{width:84px;height:84px;}
