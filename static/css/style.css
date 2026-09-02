@@ -385,6 +385,7 @@ a.whatsapp-icon:hover{color:#1ebe5b;}
 .grid{display:grid;gap:26px;}
 .grid--services{grid-template-columns:repeat(3,1fr);gap:32px;}
 .grid--mission{grid-template-columns:repeat(2,1fr);}
+.grid--testimonials{grid-template-columns:repeat(3,1fr);}
 .card{
   background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:30px 24px;
   transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
@@ -428,6 +429,10 @@ a.whatsapp-icon:hover{color:#1ebe5b;}
 .card .logo-card__admin-actions{margin-top:16px;}
 .card h3{font-size:1.05rem;}
 .card p{color:var(--ink-600);font-size:.92rem;margin:0;}
+.testimonial-card__stars{color:var(--amber-500);letter-spacing:2px;margin:0 0 12px;font-size:1rem;}
+.testimonial-card__quote{color:var(--ink-800);font-style:italic;margin:0 0 16px;}
+.testimonial-card__name{font-weight:700;margin:0;}
+.testimonial-card__company{color:var(--ink-600);font-size:.85rem;margin:2px 0 0;}
 /* Services grid only (not Mission & Vision, which also reuses .card) —
    black card body with white text; .card__icon is left untouched so the
    red-gradient icon boxes stay exactly as they were. */
@@ -1444,6 +1449,7 @@ img.service-detail__media{width:100%;height:auto;display:block;}
 }
 @media (max-width:1024px){
   .grid--services{grid-template-columns:repeat(2,1fr);}
+  .grid--testimonials{grid-template-columns:repeat(2,1fr);}
   .process{grid-template-columns:repeat(2,1fr);}
   .grid--why{grid-template-columns:repeat(2,1fr);}
   .logo-grid{grid-template-columns:repeat(3,1fr);}
@@ -1483,7 +1489,7 @@ img.service-detail__media{width:100%;height:auto;display:block;}
      photo's corner. */
   .about__badge{top:-48px;left:-16px;padding:18px 22px;}
   .about__badge strong{font-size:1.8rem;}
-  .grid--services,.grid--why,.grid--mission,.cert-grid,.blog-grid{grid-template-columns:1fr;}
+  .grid--services,.grid--why,.grid--mission,.grid--testimonials,.cert-grid,.blog-grid{grid-template-columns:1fr;}
   .product-grid{grid-template-columns:repeat(2,1fr);}
   .phase{grid-template-columns:52px 1fr;gap:16px;}
   .phase__marker{width:52px;height:52px;}

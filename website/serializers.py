@@ -5,7 +5,7 @@ from django.utils.text import slugify
 from PIL import Image, UnidentifiedImageError
 from rest_framework import serializers
 
-from .models import BlogPost, Brochure, Certification, ClientLogo, FireRiskAssessmentItem, HeroSlide, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting
+from .models import BlogPost, Brochure, Certification, ClientLogo, FireRiskAssessmentItem, HeroSlide, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting, Testimonial
 from .pdf_utils import render_pdf_first_page_to_png
 
 MAX_LOGO_SIZE_BYTES = 5 * 1024 * 1024  # 5MB
@@ -364,6 +364,30 @@ class FireRiskAssessmentItemSerializer(serializers.ModelSerializer):
         if len(value) < 2:
             raise serializers.ValidationError('Text is required.')
         return value
+
+
+class TestimonialSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Testimonial
+        fields = ['id', 'name', 'company', 'quote', 'rating', 'order']
+        read_only_fields = ['order']  # server-assigned on create — see perform_create
+        # min_value/max_value for `rating` are inferred automatically from the
+        # model field's own MinValueValidator/MaxValueValidator(1, 5).
+
+    def validate_name(self, value):
+        value = value.strip()
+        if len(value) < 2:
+            raise serializers.ValidationError('Name is required.')
+        return value
+
+    def validate_quote(self, value):
+        value = value.strip()
+        if len(value) < 10:
+            raise serializers.ValidationError('Quote must be at least 10 characters.')
+        return value
+
+    def validate_company(self, value):
+        return value.strip()
 
 
 class ProductSerializer(serializers.ModelSerializer):

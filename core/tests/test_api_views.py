@@ -517,9 +517,9 @@ class TestClientLogoListCreateViewPermissions:
 
 class TestClientLogoOrderAutoIncrement:
     """perform_create()'s select_for_update()+aggregate(Max('order')) pattern
-    is duplicated across six endpoints (ClientLogo/Service/Product/
-    ProcessPhase/Certification/FireRiskAssessmentItem) — ClientLogo is the
-    representative."""
+    is duplicated across seven endpoints (ClientLogo/Service/Product/
+    ProcessPhase/Certification/FireRiskAssessmentItem/Testimonial) —
+    ClientLogo is the representative."""
 
     url = '/api/admin-hub/client-logos/'
 

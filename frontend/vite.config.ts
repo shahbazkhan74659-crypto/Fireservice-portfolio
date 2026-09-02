@@ -37,6 +37,7 @@ export default defineConfig({
         'admin-site-settings': resolve(__dirname, 'src/islands/admin-site-settings/main.tsx'),
         'admin-hero-slideshow': resolve(__dirname, 'src/islands/admin-hero-slideshow/main.tsx'),
         'admin-brochure': resolve(__dirname, 'src/islands/admin-brochure/main.tsx'),
+        'admin-testimonials': resolve(__dirname, 'src/islands/admin-testimonials/main.tsx'),
       },
     },
   },

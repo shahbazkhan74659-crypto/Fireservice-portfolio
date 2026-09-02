@@ -42,6 +42,15 @@ def attachment_url(url):
 
 
 @register.filter
+def stars(rating):
+    """Renders a 1-5 Testimonial.rating as a fixed 5-character Unicode
+    string (e.g. "★★★★☆") — no star-icon asset exists in this codebase, and
+    a plain character avoids adding one just for this."""
+    rating = max(0, min(5, int(rating)))
+    return '★' * rating + '☆' * (5 - rating)
+
+
+@register.filter
 def service_page_url(service_name):
     """Falls back to the Services list page itself for any name without a
     dedicated page yet (e.g. a new Service added via the Admin Hub CRUD

@@ -39,7 +39,7 @@ from leads.serializers import (
     SurveyRequestSerializer,
 )
 from leads.services import record_lead_created_and_maybe_notify
-from website.models import BlogPost, Brochure, Certification, ClientLogo, FireRiskAssessmentItem, HeroSlide, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting
+from website.models import BlogPost, Brochure, Certification, ClientLogo, FireRiskAssessmentItem, HeroSlide, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting, Testimonial
 from website.serializers import (
     BlogPostSerializer,
     BrochureSerializer,
@@ -52,6 +52,7 @@ from website.serializers import (
     ProductSerializer,
     ServiceSerializer,
     SiteSettingSerializer,
+    TestimonialSerializer,
 )
 
 
@@ -806,6 +807,24 @@ class FireRiskAssessmentItemListCreateView(ListCreateAPIView):
 class FireRiskAssessmentItemDetailView(RetrieveUpdateDestroyAPIView):
     queryset = FireRiskAssessmentItem.objects.all()
     serializer_class = FireRiskAssessmentItemSerializer
+    permission_classes = [IsAdminUser]
+
+
+class TestimonialListCreateView(ListCreateAPIView):
+    # Plain text, no file upload — same reasoning as FireRiskAssessmentItem above.
+    queryset = Testimonial.objects.all()
+    serializer_class = TestimonialSerializer
+    permission_classes = [IsAdminUser]
+
+    def perform_create(self, serializer):
+        with transaction.atomic():
+            next_order = (Testimonial.objects.select_for_update().aggregate(Max('order'))['order__max'] or 0) + 1
+            serializer.save(order=next_order)
+
+
+class TestimonialDetailView(RetrieveUpdateDestroyAPIView):
+    queryset = Testimonial.objects.all()
+    serializer_class = TestimonialSerializer
     permission_classes = [IsAdminUser]
 
 

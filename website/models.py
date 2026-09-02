@@ -1,3 +1,4 @@
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models.signals import post_delete, pre_save
 from django.utils import timezone
@@ -261,6 +262,20 @@ class FireRiskAssessmentItem(models.Model):
 
     def __str__(self):
         return self.text
+
+
+class Testimonial(models.Model):
+    name = models.CharField(max_length=120)
+    company = models.CharField(max_length=120, blank=True)
+    quote = models.TextField(max_length=1000)
+    rating = models.PositiveSmallIntegerField(default=5, validators=[MinValueValidator(1), MaxValueValidator(5)])
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['order', 'id']
+
+    def __str__(self):
+        return f'{self.name} ({self.rating}★)'
 
 
 class BlogPost(models.Model):

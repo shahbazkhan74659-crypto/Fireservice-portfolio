@@ -1,0 +1,22 @@
+{% load website_extras %}
+<!-- ===== Testimonials ===== -->
+{% if testimonials %}
+<section class="section section--tint">
+  <div class="container">
+    <div class="section__head">
+      <p class="eyebrow">What Our Clients Say</p>
+      <h2>Testimonials</h2>
+    </div>
+    <div class="grid grid--testimonials">
+      {% for item in testimonials %}
+      <article class="card testimonial-card">
+        <p class="testimonial-card__stars" aria-label="{{ item.rating }} out of 5 stars">{{ item.rating|stars }}</p>
+        <p class="testimonial-card__quote">&ldquo;{{ item.quote }}&rdquo;</p>
+        <p class="testimonial-card__name">{{ item.name }}</p>
+        {% if item.company %}<p class="testimonial-card__company">{{ item.company }}</p>{% endif %}
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}

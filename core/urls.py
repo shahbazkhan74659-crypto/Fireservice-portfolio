@@ -35,6 +35,8 @@ from core.api_views import (
     ServiceListCreateView,
     SiteSettingDetailView,
     SurveyRequestCreateView,
+    TestimonialDetailView,
+    TestimonialListCreateView,
 )
 from core.sitemaps import BlogPostSitemap, LocationSitemap, StaticViewSitemap
 from core.views import (
@@ -129,6 +131,8 @@ urlpatterns = [
     path('api/admin-hub/services/<int:pk>/', ServiceDetailView.as_view(), name='api-adminhub-services-detail'),
     path('api/admin-hub/fire-risk-items/', FireRiskAssessmentItemListCreateView.as_view(), name='api-adminhub-fire-risk-items-list'),
     path('api/admin-hub/fire-risk-items/<int:pk>/', FireRiskAssessmentItemDetailView.as_view(), name='api-adminhub-fire-risk-items-detail'),
+    path('api/admin-hub/testimonials/', TestimonialListCreateView.as_view(), name='api-adminhub-testimonials-list'),
+    path('api/admin-hub/testimonials/<int:pk>/', TestimonialDetailView.as_view(), name='api-adminhub-testimonials-detail'),
     path('api/admin-hub/products/', ProductListCreateView.as_view(), name='api-adminhub-products-list'),
     path('api/admin-hub/products/<int:pk>/', ProductDetailView.as_view(), name='api-adminhub-products-detail'),
     path('api/admin-hub/process-phases/', ProcessPhaseListCreateView.as_view(), name='api-adminhub-process-phases-list'),
