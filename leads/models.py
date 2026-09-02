@@ -60,3 +60,37 @@ class ConsultationRequest(models.Model):
 
     def __str__(self):
         return f'{self.name} ({self.phone}) — {self.created_at:%Y-%m-%d}'
+
+
+class LeadNotificationCounter(models.Model):
+    """Singleton row (always pk=1, same idiom as website.models.SiteSetting)
+    tallying new-lead *creation* events since the last bundled admin
+    notification email fired — split per lead type so the email can report
+    a breakdown. Deliberately unrelated to resolved/resolved_at: this counts
+    creations only. See leads/services.py's
+    record_lead_created_and_maybe_notify() for the increment-and-maybe-fire
+    logic and website.models.SiteSetting.lead_notification_threshold for the
+    admin-configurable threshold."""
+    survey_count = models.PositiveIntegerField(default=0)
+    contact_count = models.PositiveIntegerField(default=0)
+    consultation_count = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        verbose_name = 'Lead Notification Counter'
+        verbose_name_plural = 'Lead Notification Counter'
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def load(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
+
+    @property
+    def total(self):
+        return self.survey_count + self.contact_count + self.consultation_count
+
+    def __str__(self):
+        return f'Lead Notification Counter ({self.total} pending)'

@@ -193,6 +193,13 @@ class SiteSetting(models.Model):
     # (Home hero, About Mission & Vision, Services cards) — read by site.js
     # via a data attribute rendered onto .hero__bg, not hardcoded per page.
     hero_slide_duration_seconds = models.PositiveIntegerField(default=5)
+    # Admin-configurable threshold for the bundled new-lead notification
+    # email (leads/services.py) — combined total across all 3 lead types,
+    # independent of resolved/resolved_at status. Edited via the same
+    # data-stat-editor / EditableStat mechanism as the stats above, just
+    # rendered in its own block on the Admin Home dashboard, not the
+    # public-marketing-stats row — see templates/adminhub/home.html.
+    lead_notification_threshold = models.PositiveIntegerField(default=25)
 
     class Meta:
         # Without this, Django's default CamelCase-to-words split renders as

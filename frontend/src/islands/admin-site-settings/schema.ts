@@ -6,6 +6,7 @@ export interface SiteSetting {
   installations: number
   emergency_support: number
   team_members: number
+  lead_notification_threshold: number
 }
 
 export type SiteSettingField = keyof SiteSetting
@@ -19,6 +20,7 @@ export const SITE_SETTING_FIELD_MAX: Record<SiteSettingField, number> = {
   installations: 999999,
   emergency_support: 999,
   team_members: 9999,
+  lead_notification_threshold: 1000,
 }
 
 export function editStatValueSchemaFor(field: SiteSettingField) {

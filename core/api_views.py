@@ -38,6 +38,7 @@ from leads.serializers import (
     ContactMessageSerializer,
     SurveyRequestSerializer,
 )
+from leads.services import record_lead_created_and_maybe_notify
 from website.models import BlogPost, Brochure, Certification, ClientLogo, FireRiskAssessmentItem, HeroSlide, MissionVisionItem, Product, ProcessPhase, Service, SiteSetting
 from website.serializers import (
     BlogPostSerializer,
@@ -61,17 +62,29 @@ class SurveyRequestCreateView(CreateAPIView):
     # No explicit throttle_classes needed — AnonRateThrottle ('10/min') already
     # applies via REST_FRAMEWORK.DEFAULT_THROTTLE_CLASSES.
 
+    def perform_create(self, serializer):
+        serializer.save()
+        record_lead_created_and_maybe_notify(SurveyRequest, request=self.request)
+
 
 class ContactMessageCreateView(CreateAPIView):
     queryset = ContactMessage.objects.all()
     serializer_class = ContactMessageSerializer
     permission_classes = [AllowAny]  # overrides the global IsAuthenticated default
 
+    def perform_create(self, serializer):
+        serializer.save()
+        record_lead_created_and_maybe_notify(ContactMessage, request=self.request)
+
 
 class ConsultationRequestCreateView(CreateAPIView):
     queryset = ConsultationRequest.objects.all()
     serializer_class = ConsultationRequestSerializer
     permission_classes = [AllowAny]  # overrides the global IsAuthenticated default
+
+    def perform_create(self, serializer):
+        serializer.save()
+        record_lead_created_and_maybe_notify(ConsultationRequest, request=self.request)
 
 
 class AdminHubLoginAPIView(View):

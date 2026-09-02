@@ -337,7 +337,7 @@ class SiteSettingSerializer(serializers.ModelSerializer):
         model = SiteSetting
         fields = [
             'years_experience', 'clients_served', 'installations', 'emergency_support', 'team_members',
-            'hero_slide_duration_seconds',
+            'hero_slide_duration_seconds', 'lead_notification_threshold',
         ]
         # No max_value set on the model fields, so cap them here.
         extra_kwargs = {
@@ -347,6 +347,9 @@ class SiteSettingSerializer(serializers.ModelSerializer):
             'emergency_support': {'max_value': 999},
             'team_members': {'max_value': 9999},
             'hero_slide_duration_seconds': {'min_value': 1, 'max_value': 60},
+            # min_value=1 specifically prevents a threshold of 0, which would
+            # fire the bundled notification email after literally every lead.
+            'lead_notification_threshold': {'min_value': 1, 'max_value': 1000},
         }
 
 

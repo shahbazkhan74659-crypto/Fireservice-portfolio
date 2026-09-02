@@ -496,6 +496,7 @@ class AdminHubHomeView(StaffRequiredMixin, TemplateView):
         context['emergency_support'] = site_setting.emergency_support
         context['team_members'] = site_setting.team_members
         context['hero_slide_duration'] = site_setting.hero_slide_duration_seconds
+        context['lead_notification_threshold'] = site_setting.lead_notification_threshold
         context['brochure'] = Brochure.load()
 
         populated_types = sum(1 for model in CONTENT_MODELS if model.objects.exists())
