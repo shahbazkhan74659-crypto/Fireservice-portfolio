@@ -82,7 +82,7 @@ Each card on `/services/` also carries a red ribbon tag (`.card__phase`) between
 - Testimonials content management (no model/CRUD/island at all — the only originally-planned Admin Hub content type still missing).
 - Per-user Admin Hub roles/permissions (still one shared login).
 - Lead-creation email/SMS notifications (SMTP exists for OTP delivery only).
-- `Service.icon` renders at 26×26px on the corridor location pages (`templates/location.html`, `.card__icon`) — now a shrunk-down full photo instead of a clean vector icon, since the field switched to raster-only photos this session (see Content models above). Looks cramped there; not yet given its own treatment.
+- ~~`Service.icon` rendering as a shrunk-down 26×26px icon on the corridor location pages~~ — fixed 2026-09-02: `.card__icon` is used exclusively by `templates/location.html` (confirmed via search — Mission & Vision and the redesigned `/services/` grid don't touch it), so its `img` rule was changed from `width/height:26px;object-fit:contain` to filling the full 64px badge with `object-fit:cover`, giving a proper cropped photo thumbnail instead of a tiny squished icon. No new assets needed.
 - ~~Fire Alarm System's `Service.icon` pointing at a stray test leftover~~ — resolved by the time of the 2026-09-02 real-data migration: the restored Neon data has it correctly set to `service-fire-detection-system-bg_a87ns8.png` (confirmed rendering on `/services/`, the Admin Hub, and its own detail page), so this must have been fixed via the Admin Hub on Render sometime before suspension and this note just never got updated.
 
 ## Deployment (Render)
