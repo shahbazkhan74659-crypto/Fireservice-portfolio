@@ -241,7 +241,16 @@ a.whatsapp-icon:hover{color:#1ebe5b;}
 .hero-brand{position:relative;z-index:2;padding:36px 0 16px;}
 .hero-brand__inner{display:flex;align-items:center;justify-content:center;gap:22px;}
 .hero-brand__logo .logo__img{height:76px;width:auto;display:block;}
-.hero-brand__text{display:flex;flex-direction:column;gap:6px;}
+/* text-align:center (not just the row-level justify-content:center on
+   .hero-brand__inner) matters specifically on mobile: at desktop widths the
+   name/tagline fit on one line each, so this box already hugs that line's
+   width and alignment is moot. On mobile they wrap (e.g. "Iconic Techno" /
+   "Service"), and a short wrapped line left-aligned within an otherwise-
+   centered box reads as visually off-center even though the box itself is
+   mathematically centered — confirmed by measuring the real layout
+   (leftGap/rightGap around .hero-brand__inner were already equal; the
+   asymmetry was purely the ragged left edge of wrapped text within it). */
+.hero-brand__text{display:flex;flex-direction:column;gap:6px;text-align:center;}
 .hero-brand__name{font-family:var(--ff-display);font-weight:700;font-size:2rem;color:#fff;line-height:1.1;}
 .hero-brand__tagline{
   text-transform:uppercase;letter-spacing:.1em;font-size:.9rem;font-weight:700;color:var(--amber-500);
@@ -1381,8 +1390,21 @@ img.service-detail__media{width:100%;height:auto;display:block;}
    unchanged from before. */
 @media (max-width:1150px){
   .nav{
-    position:fixed;top:0;right:0;height:100vh;width:260px;background:#fff;flex-direction:column;
+    position:fixed;top:0;right:0;width:260px;background:#fff;flex-direction:column;
     padding:20px 28px;gap:16px;margin-left:0;box-shadow:-8px 0 24px rgba(0,0,0,.12);
+    /* 100vh on mobile browsers is the LARGEST possible viewport (address bar
+       hidden) — while the address bar is actually visible (the normal state
+       right when the drawer opens), the real visible height is smaller,
+       pushing anything pinned via margin-top:auto (the Get Brochure link
+       below, and Admin Hub's Account Settings/Log Out footer) past the
+       bottom of the visible screen even though it's within the 100vh box —
+       no scrollbar appears because the box itself isn't overflowing, only
+       the on-screen rendering of it is. 100dvh tracks the real visible
+       viewport instead; 100vh above is kept as a fallback for browsers
+       without dvh support (pre-2023 Safari/Chrome), since an unsupported
+       value drops the whole declaration rather than falling back on its own. */
+    height:100vh;
+    height:100dvh;
     /* overflow-y:auto is a safety net, not the fix itself — the
        padding/gap values above are sized to fit all 8 links + logo row +
        Get Brochure button within real mobile viewport heights without
