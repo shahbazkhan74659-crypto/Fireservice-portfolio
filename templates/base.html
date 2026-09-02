@@ -1,4 +1,4 @@
-{% load static seo_extras %}<!DOCTYPE html>
+{% load static seo_extras django_vite %}<!DOCTYPE html>
 <html lang="en" class="no-js">
 <head>
 <meta charset="UTF-8">
@@ -45,6 +45,21 @@
      None default for the 'home' url name). -->
 <script type="application/ld+json">{{ local_business_jsonld|safe }}</script>
 {% if breadcrumb_jsonld %}<script type="application/ld+json">{{ breadcrumb_jsonld|safe }}</script>{% endif %}
+
+{% comment %}
+Loaded unconditionally here, not inside {% block extra_head %} — most pages
+override that block entirely without calling {{ block.super }}, so anything
+placed inside it wouldn't reliably load on every page. The feedback widget
+must be global (every public page), so it goes directly in <head> instead.
+Safe to also be called again by a page's own extra_head block (as several
+already do for their own islands): these render plain <script type="module">
+tags, and ES modules are deduplicated by the browser per URL, so duplicate
+tags execute once regardless. In production, vite_hmr_client/
+vite_react_refresh render as empty strings anyway.
+{% endcomment %}
+{% vite_hmr_client %}
+{% vite_react_refresh %}
+{% vite_asset 'src/islands/feedback-widget/main.tsx' %}
 
 {% block extra_head %}{% endblock %}
 </head>
@@ -153,6 +168,10 @@
 </footer>
 
 <button id="backToTop" class="back-to-top" aria-label="Back to top">&uarr;</button>
+
+<div id="feedback-widget-root">
+  <noscript>Please enable JavaScript to share your experience with us.</noscript>
+</div>
 
 <script src="{% static 'js/header-offset.js' %}"></script>
 <script src="{% static 'js/site.js' %}"></script>

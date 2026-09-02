@@ -270,6 +270,17 @@ class Testimonial(models.Model):
     quote = models.TextField(max_length=1000)
     rating = models.PositiveSmallIntegerField(default=5, validators=[MinValueValidator(1), MaxValueValidator(5)])
     order = models.PositiveIntegerField(default=0)
+    # default=True so admin-authored rows (added via the Admin Hub CRUD) go
+    # live immediately with no extra code — only the public submission
+    # endpoint (core.api_views.PublicTestimonialListCreateView) explicitly
+    # overrides this to False. Pending (False) rows are only reachable via
+    # the Admin Hub's Feedback moderation page until approved.
+    is_approved = models.BooleanField(default=True)
+    # Only meaningful for public submissions (the Admin Hub's Feedback
+    # moderation page shows this as "Received") — the 3 originally-seeded
+    # admin-authored rows and the earlier admin CRUD had no need for a
+    # timestamp until this feature added one.
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['order', 'id']

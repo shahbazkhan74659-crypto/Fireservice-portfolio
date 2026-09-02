@@ -38,6 +38,7 @@ export default defineConfig({
         'admin-hero-slideshow': resolve(__dirname, 'src/islands/admin-hero-slideshow/main.tsx'),
         'admin-brochure': resolve(__dirname, 'src/islands/admin-brochure/main.tsx'),
         'admin-testimonials': resolve(__dirname, 'src/islands/admin-testimonials/main.tsx'),
+        'feedback-widget': resolve(__dirname, 'src/islands/feedback-widget/main.tsx'),
       },
     },
   },

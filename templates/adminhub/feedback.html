@@ -1,0 +1,80 @@
+{% extends "adminhub/base.html" %}
+
+{% block title %}Feedback | Admin Hub | Iconic Techno Service{% endblock %}
+
+{% block content %}
+<section class="section leads-header">
+  <div class="container">
+    <p class="eyebrow">Admin Hub</p>
+    <h2>Feedback</h2>
+    <p class="section__sub">Testimonials submitted directly by visitors through the public site, awaiting approval before they go live.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="cert-table-wrap">
+      <table class="cert-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th class="cert-table__col--hide-mobile">Company</th>
+            <th class="cert-table__col--hide-mobile">Quote</th>
+            <th>Rating</th>
+            <th>Received</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for testimonial in pending_testimonials %}
+          <tr id="feedback-{{ testimonial.pk }}" class="lead-row">
+            <td class="cert-table__name">{{ testimonial.name }}</td>
+            <td class="cert-table__col--hide-mobile">{{ testimonial.company|default:"—" }}</td>
+            <td class="cert-table__desc cert-table__col--hide-mobile">{{ testimonial.quote|truncatechars:80 }}</td>
+            <td>{{ testimonial.rating }}★</td>
+            <td class="cert-table__meta">{{ testimonial.created_at|timesince }} ago</td>
+            <td class="cert-table__action">
+              <button type="button" class="btn btn--primary feedback-live-btn"
+                      data-approve-url="{% url 'adminhub-feedback-approve' testimonial.pk %}">Live</button>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" class="cert-table__desc">No feedback awaiting approval.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+{% comment %}
+Holds only the CSRF token — read directly by the approve fetch() call
+below, not submitted as a real form (no full-page navigation).
+{% endcomment %}
+<form id="feedbackApproveForm">{% csrf_token %}</form>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var token = document.querySelector('#feedbackApproveForm [name=csrfmiddlewaretoken]').value;
+
+  document.querySelectorAll('.feedback-live-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var url = btn.dataset.approveUrl;
+      var row = btn.closest('tr');
+      btn.disabled = true;
+      fetch(url, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': token },
+      }).then(function (res) {
+        if (!res.ok) throw new Error('Request failed');
+        row.remove();
+      }).catch(function () {
+        btn.disabled = false;
+      });
+    });
+  });
+});
+</script>
+{% endblock %}

@@ -103,7 +103,7 @@ class HomeView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['testimonials'] = Testimonial.objects.all()
+        context['testimonials'] = Testimonial.objects.filter(is_approved=True)
         return context
 
 
@@ -758,6 +758,31 @@ class AdminHubResolveLeadView(StaffRequiredMixin, View):
         lead.resolved_at = timezone.now()
         lead.save(update_fields=['resolved', 'resolved_at'])
         return JsonResponse({'resolved': True})
+
+
+class AdminHubFeedbackView(StaffRequiredMixin, TemplateView):
+    # Bare list view — no form/island, so no ensure_csrf_cookie needed (the
+    # approve action's {% csrf_token %} tag triggers the cookie itself),
+    # same reasoning as AdminHubLeadsView above.
+    template_name = 'adminhub/feedback.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['pending_testimonials'] = Testimonial.objects.filter(is_approved=False).order_by('-created_at')
+        return context
+
+
+class AdminHubApproveFeedbackView(StaffRequiredMixin, View):
+    """POST-only action from the Feedback page's Action column: approves one
+    pending public testimonial submission, making it live on the public site
+    and moving it into the regular Testimonials manager. Same
+    fetch-then-remove-the-row pattern as AdminHubResolveLeadView above."""
+
+    def post(self, request, pk):
+        testimonial = get_object_or_404(Testimonial, pk=pk)
+        testimonial.is_approved = True
+        testimonial.save(update_fields=['is_approved'])
+        return JsonResponse({'approved': True})
 
 
 @method_decorator(ensure_csrf_cookie, name='dispatch')

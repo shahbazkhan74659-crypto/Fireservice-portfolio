@@ -812,7 +812,10 @@ class FireRiskAssessmentItemDetailView(RetrieveUpdateDestroyAPIView):
 
 class TestimonialListCreateView(ListCreateAPIView):
     # Plain text, no file upload — same reasoning as FireRiskAssessmentItem above.
-    queryset = Testimonial.objects.all()
+    # Approved only — pending public submissions live exclusively in the
+    # Admin Hub's Feedback moderation queue (AdminHubFeedbackView) until
+    # approved, at which point they graduate into this list automatically.
+    queryset = Testimonial.objects.filter(is_approved=True)
     serializer_class = TestimonialSerializer
     permission_classes = [IsAdminUser]
 
@@ -823,9 +826,27 @@ class TestimonialListCreateView(ListCreateAPIView):
 
 
 class TestimonialDetailView(RetrieveUpdateDestroyAPIView):
-    queryset = Testimonial.objects.all()
+    queryset = Testimonial.objects.filter(is_approved=True)
     serializer_class = TestimonialSerializer
     permission_classes = [IsAdminUser]
+
+
+class PublicTestimonialListCreateView(ListCreateAPIView):
+    # Public feedback-widget endpoint (frontend/src/islands/feedback-widget/)
+    # — anonymous visitors can list approved testimonials and submit their
+    # own, which starts unapproved until an admin approves it from the
+    # Feedback moderation page. Reuses TestimonialSerializer unchanged: it
+    # never exposes `is_approved`, so a POST body can't set it.
+    serializer_class = TestimonialSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        return Testimonial.objects.filter(is_approved=True)
+
+    def perform_create(self, serializer):
+        with transaction.atomic():
+            next_order = (Testimonial.objects.select_for_update().aggregate(Max('order'))['order__max'] or 0) + 1
+            serializer.save(order=next_order, is_approved=False)
 
 
 class SiteSettingDetailView(RetrieveUpdateAPIView):

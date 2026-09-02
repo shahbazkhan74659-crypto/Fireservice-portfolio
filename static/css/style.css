@@ -976,6 +976,34 @@ img.service-detail__media{width:100%;height:auto;display:block;}
 .back-to-top.show{opacity:1;pointer-events:auto;}
 .back-to-top:hover{transform:translateY(-3px);}
 
+/* ============ Feedback widget ============ */
+/* Unlike .back-to-top, always visible (no scroll-gated .show class) —
+   per explicit "visible on every public page" requirement. Popup itself is
+   the shared Modal component (className="modal--feedback"), not custom
+   panel CSS — see frontend/src/islands/feedback-widget/. */
+.feedback-widget__toggle{
+  position:fixed;bottom:24px;left:24px;z-index:90;
+  background:var(--red-600);color:#fff;border:none;border-radius:999px;
+  padding:14px 22px;font-size:.9rem;font-weight:700;cursor:pointer;
+  box-shadow:var(--shadow-md);transition:transform .2s ease, background .2s ease;
+}
+.feedback-widget__toggle:hover{transform:translateY(-3px);background:var(--red-500);}
+.feedback-widget__list{max-height:220px;overflow-y:auto;margin-bottom:20px;border-bottom:1px solid var(--line);padding-bottom:4px;}
+.feedback-widget__item{padding:12px 0;border-top:1px solid var(--line);}
+.feedback-widget__item:first-child{border-top:none;}
+.feedback-widget__stars{color:var(--amber-500);letter-spacing:2px;margin:0 0 6px;font-size:.9rem;}
+.feedback-widget__quote{color:var(--ink-800);font-style:italic;margin:0 0 6px;font-size:.92rem;}
+.feedback-widget__name{font-weight:700;font-size:.85rem;margin:0;}
+.feedback-widget__form h4{margin:0 0 16px;}
+.feedback-widget__star-input{display:flex;gap:6px;}
+.feedback-widget__star-input button{
+  background:none;border:none;cursor:pointer;font-size:1.6rem;line-height:1;
+  color:var(--line);padding:0;
+}
+.feedback-widget__star-input button.is-filled{color:var(--amber-500);}
+.feedback-widget__star-input button:disabled{cursor:not-allowed;}
+.feedback-widget__success{text-align:center;padding:12px 0;}
+
 /* ============ Reveal animation ============ */
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease, transform .6s ease;}
 .reveal.in{opacity:1;transform:translateY(0);}
@@ -1327,6 +1355,7 @@ img.service-detail__media{width:100%;height:auto;display:block;}
 /* ---- Lead detail modal — deliberately larger than the standard confirm-dialog
    .modal, per the request for a "giant" pop-up presenting the full message ---- */
 .modal--lead{max-width:680px;padding:36px;}
+.modal--feedback{max-width:600px;}
 .lead-modal__type{margin:0 0 6px;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--red-600);}
 .lead-modal__fields{display:flex;flex-direction:column;gap:18px;margin-bottom:28px;}
 .lead-modal__field{border-bottom:1px solid var(--line);padding-bottom:16px;}
