@@ -87,12 +87,9 @@ class AdminHubLoginAPIView(View):
     this project has no other rate-limit infrastructure to extend). Either
     counter hitting LOCKOUT_THRESHOLD within LOCKOUT_WINDOW_SECONDS blocks
     further attempts against that IP/username with a 429 until the window
-    expires. Uses whatever CACHES backend is configured (the project has none
-    explicitly set, so this runs on Django's default local-memory cache) —
-    fine for this single-process dev/staging setup, but that cache is
-    per-process, so it would NOT enforce a shared lockout across multiple
-    worker processes/machines in a real multi-process production deployment;
-    a shared backend (e.g. Redis/memcached) would be needed for that.
+    expires. CACHES (base.py) uses Postgres's DatabaseCache specifically so
+    this lockout is shared across gunicorn's worker processes rather than
+    counted separately per worker.
     """
 
     LOCKOUT_THRESHOLD = 5

@@ -5,10 +5,9 @@ don't duplicate it a second and third time. AdminHubLoginAPIView itself is
 left untouched — it predates this module and already has test coverage
 against its own inline version.
 
-Same caveat applies here as it does there: this runs on Django's default
-per-process local-memory cache (no CACHES override anywhere in this project),
-so a lockout is not shared across multiple worker processes/machines in a
-real multi-process production deployment.
+Same backend applies here as it does there: CACHES (base.py) uses Postgres's
+DatabaseCache, so a lockout is shared across worker processes/machines
+rather than counted separately per process.
 """
 
 from django.core.cache import cache

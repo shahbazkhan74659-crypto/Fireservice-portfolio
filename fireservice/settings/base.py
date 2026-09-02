@@ -108,6 +108,21 @@ USE_I18N = True
 USE_TZ = True
 
 
+# Backs core/rate_limit.py's login-lockout counters (and AdminHubLoginAPIView's
+# own inline copy). Postgres-backed rather than the default local-memory
+# cache so lockouts are actually shared across gunicorn's worker processes —
+# a local-memory cache would let an attacker get N attempts per worker
+# instead of N total. No new service to run (unlike Redis/memcached) since
+# every environment (dev/prod/oracle) already has Postgres; the table itself
+# is created by core's 0001 migration via `createcachetable`.
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'django_cache',
+    }
+}
+
+
 # Static & media files
 
 STATIC_URL = 'static/'
