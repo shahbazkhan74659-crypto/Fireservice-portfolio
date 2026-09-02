@@ -1,12 +1,12 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import FeedbackWidget from './FeedbackWidget'
+import FeedbackForm from './FeedbackForm'
 
-const container = document.getElementById('feedback-widget-root')
+const container = document.getElementById('feedback-form-root')
 if (container) {
   createRoot(container).render(
     <StrictMode>
-      <FeedbackWidget />
+      <FeedbackForm />
     </StrictMode>,
   )
 }

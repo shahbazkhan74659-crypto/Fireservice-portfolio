@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load django_vite website_extras %}
+
+{% block title %}Share Your Experience | Iconic Techno Service{% endblock %}
+{% block meta_description %}Tell Iconic Techno Service what working with us was like. Your feedback is reviewed before it appears on our site.{% endblock %}
+
+{% block extra_head %}
+  {% vite_hmr_client %}
+  {% vite_react_refresh %}
+  {% vite_asset 'src/islands/feedback-form/main.tsx' %}
+{% endblock %}
+
+{% block content %}
+  <section class="section">
+    <div class="container section__head">
+      <p class="eyebrow">We'd Love to Hear From You</p>
+      <h1>Share Your Experience</h1>
+      <p class="section__sub">Tell us what working with us was like &mdash; your feedback is reviewed before it goes live.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container contact">
+      <div class="grid">
+        {% for item in testimonials %}
+        <article class="card testimonial-card">
+          <p class="testimonial-card__stars">{{ item.rating|stars }}</p>
+          <p class="testimonial-card__quote">&ldquo;{{ item.quote }}&rdquo;</p>
+          <p class="testimonial-card__name">{{ item.name }}</p>
+          {% if item.company %}<p class="testimonial-card__company">{{ item.company }}</p>{% endif %}
+        </article>
+        {% endfor %}
+      </div>
+      <div id="feedback-form-root">
+        <noscript>Please enable JavaScript to submit this form.</noscript>
+      </div>
+    </div>
+  </section>
+{% endblock %}

@@ -439,6 +439,16 @@ class ConsultationView(TemplateView):
 
 
 @method_decorator(ensure_csrf_cookie, name='dispatch')
+class FeedbackPageView(TemplateView):
+    template_name = 'feedback.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['testimonials'] = Testimonial.objects.filter(is_approved=True)
+        return context
+
+
+@method_decorator(ensure_csrf_cookie, name='dispatch')
 class AdminHubLoginView(TemplateView):
     template_name = 'adminhub/login.html'
 
