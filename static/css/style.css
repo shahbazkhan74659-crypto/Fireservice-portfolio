@@ -1405,15 +1405,11 @@ img.service-detail__media{width:100%;height:auto;display:block;}
        value drops the whole declaration rather than falling back on its own. */
     height:100vh;
     height:100dvh;
-    /* overflow-y:auto is a safety net, not the fix itself — the
-       padding/gap values above are sized to fit all 8 links + logo row +
-       Get Brochure button within real mobile viewport heights without
-       needing to scroll (body.nav-open locks page scroll while this is
-       open, so unlike before, there was no way to reach content that
-       overflowed height:100vh — it was genuinely unreachable, not just
-       hidden behind a scroll). This only activates on unusually short
-       viewports (e.g. landscape phones) as a fallback. */
-    overflow-y:auto;
+    /* Deliberately non-scrollable, not even as a fallback — the drawer is a
+       fixed sidebar, full stop. The padding/gap values above plus the
+       100dvh fix are relied on to fit all 8 links + logo row + Get
+       Brochure button within real mobile viewport heights on their own. */
+    overflow:hidden;
     transform:translateX(100%);transition:transform .25s ease;z-index:99;
   }
   .nav.open{transform:translateX(0);}
