@@ -821,7 +821,14 @@ img.service-detail__media{width:100%;height:auto;display:block;}
 .service-detail__included .check-list li{font-weight:600;}
 @media (max-width:860px){
   .service-detail{grid-template-columns:1fr;gap:0;}
-  .service-detail__media{margin-bottom:24px;}
+  /* Unwraps the media+checklist wrapper so its two children become direct
+     grid items alongside .service-detail__body, letting `order` put the
+     long explanation ahead of the checklist on mobile (desktop keeps them
+     grouped together in the left column via normal block flow). */
+  .service-detail__side{display:contents;}
+  .service-detail__media-card,.service-detail__media{order:1;margin-bottom:24px;}
+  .service-detail__body{order:2;}
+  .service-detail__included{order:3;}
 }
 
 .lead-tabs{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px;}
