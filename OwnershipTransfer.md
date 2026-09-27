@@ -77,6 +77,17 @@ Status legend: `[ ]` pending · `[x]` done
    - `~/.ssh/oracle_its_vm` + `.pub` (SSH key used to reach the VM)
    - `~/.ssh/github_deploy_key` (VM's read-only GitHub deploy key)
 
+9. `[ ]` **Connect the Docker-transferred codebase on the client's machine to
+   the client's GitHub account and repo.**
+   Once step 8 has landed the full working copy (code + secrets) on the
+   client's machine, point that local copy's git remote at the now
+   client-owned repo (post step 2 transfer) instead of the developer's old
+   remote — `git remote set-url origin <client's repo URL>` (or a fresh
+   `git clone` of the transferred repo, then copy the untracked/gitignored
+   files from the Docker-delivered copy into it). Confirm the client's
+   machine can pull/push against their own repo end to end before
+   considering the handoff complete.
+
 ## Notes / dependencies
 
 - Steps 3–5 should happen in that order — don't cancel the developer's own
